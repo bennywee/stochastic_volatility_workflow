@@ -24,7 +24,7 @@ save_fin_data <- function(dataframe, type, financial_series, start_date, end_dat
     path  <-  file.path("data", type, financial_series)
     
     if (!dir.exists(path)) {
-        dir.create(path)
+        dir.create(path, recursive = TRUE)
     }
 
     file_name <- fin_data_location(financial_series, type, start_date, end_date)
