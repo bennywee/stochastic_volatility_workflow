@@ -4,7 +4,7 @@ Master's research project: Developing a workflow for fitting classes of Stochast
 # How to run code
 
 ## Environment setup
-If using rstudio, open `stochastic_volatility_workflow.Rproj`. Then run `renv::restore()` to create the project libraries locally (the packages used in this project). Note, this may not work for `cmdstanr` since this was not downloaded from CRAN. Instructions to do this can be found in (this vignette)[https://mc-stan.org/cmdstanr/articles/cmdstanr.html#saving-fitted-model-objects-1].
+If using rstudio, open `stochastic_volatility_workflow.Rproj`. Then run `renv::restore()` to create the project libraries locally (the packages used in this project). Note, this may not work for `cmdstanr` since this was not downloaded from CRAN. Instructions to do this can be found in [this vignette](https://mc-stan.org/cmdstanr/articles/cmdstanr.html#saving-fitted-model-objects-1).
 
 ## Generate dataset
 Execute `create_data.r` to generate dataset. This will create a `data` directory with `raw` (S&P500 data downloaded from Yahoo finance) and `preprocessed` (with log prices and log returns). The `raw` subdirectory contains original and immutable datasets. `preprocessed` contains any additional variables and transformations. We will use dataset from `preprocessed` for modelling S&P500 returns. 
