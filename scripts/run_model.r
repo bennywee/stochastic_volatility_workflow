@@ -1,22 +1,27 @@
 library(cmdstanr)
 library(bayesplot)
 
+# Model descirption
+model_name  <- "sv_user_guide" 
+unique_identifier  <- "default_priors"
+dependent_variable  <- "yobs"
+
+# Data location
+data_loc <- "simulated"
+data_type  <-  "ksc"
+file_name  <- "phi_0.97779_sig_0.1585_beta_0.64733"
+
 # Stan User guide SV model
 # Compile stan model
-model_name  <- "sv_user_guide" 
-data_type  <-  "GSPC"
-file_name  <- "20100104_20230101"
-unique_identifier  <- "default_priors"
-
 file <- file.path("models", paste(model_name, ".stan", sep = ""))
 mod <- cmdstan_model(file)
 
 # Get data
-data <- read.csv(file.path("data", "preprocessed", data_type, paste(file_name, ".csv", sep = "")))
-log_returns  <-  data[complete.cases(data['log_return']), 'log_return']
+data <- read.csv(file.path("data", data_loc, data_type, paste(file_name, ".csv", sep = "")))
+returns  <-  data[complete.cases(data[dependent_variable]), dependent_variable]
 
 # Fit model
-data_list <- list(T = 3271, y = log_returns)
+data_list <- list(T = length(returns), y = returns)
 fit <- mod$sample(
   data = data_list, 
   seed = 123, 
