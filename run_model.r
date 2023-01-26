@@ -20,12 +20,12 @@ data_list <- list(T = 3271, y = log_returns)
 fit <- mod$sample(
   data = data_list, 
   seed = 123, 
-  chains = 2, 
-  parallel_chains = 2,
+  chains = 4, 
+  parallel_chains = 4,
   refresh = 500 # print update every 500 iters
 )
 
 # Save model
-fit_location  <- paste(model_name, "_", data_type, "_", file_name, "_", unique_identifier, sep = "")
+fit_location  <- paste(model_name, "_", data_type, "_", file_name, "_", unique_identifier, "_", format(Sys.time(), "%Y%m%d%H%M%S"), sep = "")
 dir.create(file.path("output", fit_location), recursive = TRUE)
 fit$save_object(file = file.path("output", fit_location, "fit.RDS"))
