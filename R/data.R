@@ -57,3 +57,32 @@ log_return <- function(data, column){
     log_returns <- log_price - lag_log_price
     return(log_returns)
 }
+
+gen.AR1 <- function(phi,mu,sig,T){
+  
+  # simulate AR(1) state vector 'h' having length 'T' 
+  # using equation (1) and subsequent equation for initial state
+  
+  h <- rep(0,T)
+  h[1] <- rnorm(1,mean=mu,sd=sig/sqrt(1-phi^2))
+  
+  for(i in 2:T){
+    h[i] <- rnorm(1,mean=(mu+phi*(h[(i-1)]-mu)),sd=sig)
+  }
+  return(h)
+}
+
+simulate_ksc <- function(T=1000,
+                         phi.true = 0.97779,
+                         sig.true = 0.15850,
+                         beta.true = 0.64733){
+    
+    mu.true  <-  log(beta.true^2)
+    htrue <- gen.AR1(phi.true,mu.true,sig.true,T)
+    yobs <- exp(htrue/2)*rnorm(T,0,1)
+
+    df  <- data.frame(cbind(yobs, htrue))
+    
+    return(df)
+
+}
