@@ -1,6 +1,7 @@
 data {
-  int<lower=0> T;   // # time points (equally spaced)
-  vector[T] y;      // mean corrected return at time t
+  int<lower=0> T;  // # time points (equally spaced)
+  vector[T] y;     // mean corrected return at time t
+  int<lower = 0, upper = 1> run_estimation;  // Flag for prior predictive checks
 }
 parameters {
   real mu;                     // mean log volatility
@@ -21,5 +22,15 @@ model {
   sigma ~ cauchy(0, 5);
   mu ~ cauchy(0, 10);
   h_std ~ std_normal();
-  y ~ normal(0, exp(h / 2));
+  if(run_estimation==1){
+    y ~ normal(0, exp(h / 2));
+  }
 }
+generated quantities{
+  vector[T] y_rep;
+
+  for (t in 1:T){
+    y_rep[t] = normal_rng(0, exp(h[t]/2));
+  }  
+}
+
