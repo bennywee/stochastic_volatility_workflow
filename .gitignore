@@ -1,3 +1,8 @@
+Icon?
+
+# Output directory
+output/*
+
 # History files
 .Rhistory
 .Rapp.history
@@ -39,4 +44,5 @@ vignettes/*.pdf
 .Renviron
 
 renv/Icon
-*/Icon
+*/Icon\r"
+"Icon\r"
