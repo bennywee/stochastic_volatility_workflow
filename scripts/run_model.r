@@ -29,11 +29,11 @@ if (run_estimation == 0){
 
 # Stan User guide SV model
 # Compile stan model
-file <- file.path("models", paste(model_name, ".stan", sep = ""))
+file <- here::here("models", paste(model_name, ".stan", sep = ""))
 mod <- cmdstan_model(file)
 
 # Get data
-data <- read.csv(file.path("data", data_loc, data_type, paste(file_name, ".csv", sep = "")))
+data <- read.csv(here::here("data", data_loc, data_type, paste(file_name, ".csv", sep = "")))
 returns  <-  data[complete.cases(data[dependent_variable]), dependent_variable]
 
 # Fit model
@@ -49,12 +49,12 @@ model_fit <- mod$sample(
 
 # Save model
 fit_location  <- paste(model_name, "_", data_type, "_", file_name, "_", unique_identifier, sep = "")# "_", format(Sys.time(), "%Y%m%d%H%M%S"), sep = "")
-path <- file.path("output", fit_location)
+path <- here::here("output", fit_location)
 if (!dir.exists(path)) {
         dir.create(path, recursive = TRUE)
     }
 
-model_fit$save_object(file = file.path("output", fit_location, paste(tolower(prefix),"fit.RDS", sep ="")))
+model_fit$save_object(file = here::here("output", fit_location, paste(tolower(prefix),"fit.RDS", sep ="")))
 model_fit$save_output_files(dir = path, basename = tolower(prefix))
 model_fit$save_data_file(dir = path)
 
@@ -83,7 +83,7 @@ ggplot(y_rep_df_sample, aes(x = time, y = y_t)) +
          subtitle = "10 blue MCMC draws, true value in black") +
     theme_minimal()
 
-ggsave(file.path("output", fit_location, paste(tolower(prefix),"_predictive_check.png", sep ="")), 
+ggsave(here::here("output", fit_location, paste(tolower(prefix),"_predictive_check.png", sep ="")), 
        bg="white",
        width = 8,
        height = 5,
