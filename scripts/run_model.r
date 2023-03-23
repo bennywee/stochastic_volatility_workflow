@@ -5,9 +5,9 @@ set.seed(321321)
 
 ############################ Parameters to set ############################
 # Model description
-model_name  <- "sv_user_guide" 
-unique_identifier  <- "default_priors"
-dependent_variable  <- "yobs"
+model_name  <- "sv_user_guide_reparameterised" 
+dependent_variable  <- "yobs"  #log squared returns
+unique_identifier  <- "default_priors_adapt_delta_0.9"
 
 # Data location
 data_loc <- "simulated"
@@ -43,7 +43,8 @@ model_fit <- mod$sample(
   seed = 123, 
   chains = 4, 
   parallel_chains = 4,
-  refresh = 500
+  refresh = 500,
+  adapt_delta = 0.9
 )
 
 # Save model
