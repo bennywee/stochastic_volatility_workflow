@@ -15,13 +15,13 @@ data_type  <-  "ksc"
 file_name  <- "phi_0.97779_sig_0.1585_beta_0.64733"
 ############################ Parameters to set ############################
 
-for (estimate in c(0,1)){
+for (estimate in c(1,0)){
 
-run_estimation <- estimate # Prior predictive check (0) or estimate full model (1)
+sample_prior <- estimate # Prior predictive check (0) or estimate full model (1)
 
-if (run_estimation == 0){
+if (sample_prior == 1){
   prefix <- "Prior"
-} else if(run_estimation == 1) {
+} else if(sample_prior == 0) {
   prefix <- "Posterior"
 } else {
   stop("Estimation mode not set")
@@ -37,7 +37,7 @@ data <- read.csv(here::here("data", data_loc, data_type, paste(file_name, ".csv"
 returns  <-  data[complete.cases(data[dependent_variable]), dependent_variable]
 
 # Fit model
-data_list <- list(T = length(returns), y = returns, run_estimation = run_estimation)
+data_list <- list(T = length(returns), y = returns, sample_prior = sample_prior)
 model_fit <- mod$sample(
   data = data_list, 
   seed = 123, 

@@ -1,7 +1,7 @@
 data {
   int<lower=0> T;   // # time points (equally spaced)
   vector[T] y;      // mean corrected return at time t
-  int<lower = 0, upper = 1> run_estimation;  // Flag for prior predictive checks
+  int<lower = 0, upper = 1> sample_prior;  // Flag for prior predictive checks
 }
 parameters {
   real mu;                     // mean log volatility
@@ -17,7 +17,7 @@ model {
   for (t in 2:T) {
     h[t] ~ normal(mu + phi * (h[t - 1] -  mu), sigma);
   }
-  if(run_estimation==1){
+  if(sample_prior==0){
     for (t in 1:T) {
       y[t] ~ normal(0, exp(h[t] / 2));
     }
