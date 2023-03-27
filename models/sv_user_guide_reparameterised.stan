@@ -28,9 +28,11 @@ model {
 }
 generated quantities{
   vector[T] y_rep;
+  vector[T] log_y_squared;
 
   for (t in 1:T){
     y_rep[t] = normal_rng(0, exp(h[t]/2));
+    log_y_squared[t] = log(y_rep[t] * y_rep[t]);
   }  
 }
 
