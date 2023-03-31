@@ -7,9 +7,9 @@ set.seed(321321)
 
 ############################ Parameters to set ############################
 # Model description
-model_name <- "sv_user_guide_reparameterised"
-dependent_variable <- "yobs" # log squared returns
-unique_identifier <- "default_priors_log_y_squared"
+model_name <- "sv_user_guide_reparameterised_ksc_priors"
+dependent_variable <- "yobs"
+unique_identifier <- ""
 
 # Data location
 data_loc <- "simulated"
@@ -31,7 +31,7 @@ for (prior in c(1, 0)) {
   # Stan User guide SV model
   # Compile stan model
   file <- here::here("models", paste(model_name, ".stan", sep = ""))
-  mod <- cmdstan_model(file)
+  mod <- cmdstan_model(file, include_paths = here::here("models"))
 
   # Get data
   data <- read.csv(here::here("data", data_loc, data_type, paste(file_name, ".csv", sep = "")))
@@ -63,13 +63,16 @@ for (prior in c(1, 0)) {
   # Predictive check
   y_rep_df_sample <- mcmc_output_df(model_obj = model_fit, variable = "y_rep", sample_n = 10)
   log_y_squared_avg <- average_over_draws(model_obj = model_fit, variable = "log_y_squared")
+  auto_corr <- mcmc_output_df(model_obj = model_fit, variable = "log_y_squared_autocorr", sample_n = NULL)
+  kurtosis <- mcmc_output_df(model_obj = model_fit, variable = "y_rep_kurtosis", sample_n = NULL)
+  skewness <- mcmc_output_df(model_obj = model_fit, variable = "y_rep_skewness", sample_n = NULL)
   true_returns_df <- returns_df(returns)
   true_log_sq_returns <- log_squared_returns(returns)
 
   plot_predictive_check(
     dataframe = y_rep_df_sample,
     x_axis = time,
-    y_axis = y_t,
+    y_axis = y_rep,
     groups = mcmc_draw,
     prior_post = prefix,
     save = TRUE,
@@ -77,18 +80,68 @@ for (prior in c(1, 0)) {
     true_data = true_returns_df
   )
 
-plot_log_y_sqd_hist(mcmc_data = log_y_squared_avg,
-                    true_data = true_log_sq_returns, 
-                    mcmc_x_axis = average, 
-                    true_x_axis = log_y_squared, 
-                    prior_post = prefix, 
-                    save = FALSE,
-                    path = fit_location) 
+  plot_log_y_sqd_hist(
+    mcmc_data = log_y_squared_avg,
+    true_data = true_log_sq_returns,
+    mcmc_x_axis = average,
+    true_x_axis = log_y_squared,
+    prior_post = prefix,
+    save = TRUE,
+    path = fit_location
+  )
 
-plot_log_y_sqd_kde(mcmc_data = log_y_squared_avg,
-                    true_data = true_log_sq_returns, 
-                    mcmc_x_axis = average, 
-                    true_x_axis = log_y_squared, 
-                    prior_post = prefix, 
-                    save = TRUE,
-                    path = fit_location) 
+  plot_log_y_sqd_kde(
+    mcmc_data = log_y_squared_avg,
+    true_data = true_log_sq_returns,
+    mcmc_x_axis = average,
+    true_x_axis = log_y_squared,
+    prior_post = prefix,
+    save = TRUE,
+    path = fit_location
+  )
+
+  plot_auto_corr(
+    data = auto_corr,
+    x_axis = log_y_squared_autocorr,
+    variable_name = "log(Y^2) autocorrelation",
+    prior_post = prefix,
+    save = TRUE,
+    path = fit_location
+  )
+
+  plot_hist(
+    data = auto_corr,
+    x_axis = log_y_squared_autocorr,
+    variable_name = "log(Y^2) autocorrelation",
+    prior_post = prefix,
+    save = TRUE,
+    path = fit_location
+  )
+
+  plot_hist(
+    data = auto_corr,
+    x_axis = log_y_squared_autocorr,
+    variable_name = "log(Y^2) autocorrelation",
+    prior_post = prefix,
+    save = TRUE,
+    path = fit_location
+  )
+
+  plot_hist(
+    data = kurtosis,
+    x_axis = y_rep_kurtosis,
+    variable_name = "y_t kurtosis",
+    prior_post = prefix,
+    save = TRUE,
+    path = fit_location
+  )
+
+  plot_hist(
+    data = skewness,
+    x_axis = y_rep_skewness,
+    variable_name = "y_t skewness",
+    prior_post = prefix,
+    save = TRUE,
+    path = fit_location
+  )
+}
