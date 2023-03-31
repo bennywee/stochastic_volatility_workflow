@@ -90,3 +90,30 @@ plot_log_y_sqd_kde <- function(mcmc_data, mcmc_x_axis, true_data, true_x_axis, p
         return(kde)
     }
 }
+
+# auto_corr = model_fit$draws(variable = "log_y_squared_autocorr", format = "matrix")
+
+plot_hist <- function(data, x_axis, variable_name, prior_post, save, path) {
+    hist <- ggplot(data, aes(x = {{ x_axis }})) +
+        geom_histogram(alpha = 0.3, fill = "blue") +
+        labs(
+            title = paste(prior_post, "distribution of", variable_name),
+        ) +
+        theme_minimal()
+
+    if (isTRUE(save)) {
+        ggsave(
+            here::here(
+                "output",
+                path, paste(tolower(prior_post), "_", tolower(variable_name), "_hist.png", sep = "")
+            ),
+            plot = hist,
+            bg = "white",
+            width = 8,
+            height = 5,
+            units = "in"
+        )
+    } else {
+        return(hist)
+    }
+}
