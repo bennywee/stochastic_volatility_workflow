@@ -100,7 +100,7 @@ for (prior in c(1, 0)) {
     path = fit_location
   )
 
-  plot_auto_corr(
+  plot_hist(
     data = auto_corr,
     x_axis = log_y_squared_autocorr,
     variable_name = "log(Y^2) autocorrelation",
