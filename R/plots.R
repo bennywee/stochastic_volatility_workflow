@@ -37,10 +37,10 @@ plot_predictive_check <- function(dataframe,
     }
 }
 
-plot_log_y_sqd_hist <- function(mcmc_data, mcmc_x_axis, true_data, true_x_axis, prior_post, save, path) {
+plot_log_y_sqd_hist <- function(mcmc_data, mcmc_x_axis, true_data, true_x_axis, prior_post, save, path, n_bins = 30) {
     hist <- ggplot(mcmc_data, aes(x = {{ mcmc_x_axis }})) +
-        geom_histogram(alpha = 0.3, fill = "blue") +
-        geom_histogram(data = true_data, aes(x = {{ true_x_axis }}), alpha = 0.5, fill = "red") +
+        geom_histogram(alpha = 0.3, fill = "blue", bins = n_bins) +
+        geom_histogram(data = true_data, aes(x = {{ true_x_axis }}), alpha = 0.5, fill = "red", bins = n_bins) +
         labs(
             title = paste(prior_post, " distribution of log(y*^2)"),
             subtitle = "Red is log(y^2) of data and blue is the average over MCMC samples"
@@ -93,9 +93,9 @@ plot_log_y_sqd_kde <- function(mcmc_data, mcmc_x_axis, true_data, true_x_axis, p
 
 # auto_corr = model_fit$draws(variable = "log_y_squared_autocorr", format = "matrix")
 
-plot_hist <- function(data, x_axis, variable_name, prior_post, save, path) {
+plot_hist <- function(data, x_axis, variable_name, prior_post, save, path, n_bins = 30) {
     hist <- ggplot(data, aes(x = {{ x_axis }})) +
-        geom_histogram(alpha = 0.3, fill = "blue") +
+        geom_histogram(alpha = 0.3, fill = "blue", bins = n_bins) +
         labs(
             title = paste(prior_post, "distribution of", variable_name),
         ) +
