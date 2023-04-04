@@ -89,6 +89,7 @@ plot_log_y_sqd_kde <- function(mcmc_data, mcmc_x_axis, true_data, true_x_axis, p
     } else {
         return(kde)
     }
+}
 
 plot_hist <- function(data, x_axis, variable_name, prior_post, save, path, n_bins = 30) {
     hist <- ggplot(data, aes(x = {{ x_axis }})) +
