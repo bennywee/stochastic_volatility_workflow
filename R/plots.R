@@ -89,9 +89,6 @@ plot_log_y_sqd_kde <- function(mcmc_data, mcmc_x_axis, true_data, true_x_axis, p
     } else {
         return(kde)
     }
-}
-
-# auto_corr = model_fit$draws(variable = "log_y_squared_autocorr", format = "matrix")
 
 plot_hist <- function(data, x_axis, variable_name, prior_post, save, path, n_bins = 30) {
     hist <- ggplot(data, aes(x = {{ x_axis }})) +
