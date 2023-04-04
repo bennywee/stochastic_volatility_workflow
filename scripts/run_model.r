@@ -17,6 +17,9 @@ data_type <- "ksc"
 file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
 ############################ Parameters to set ############################
 
+executables_path <- here::here("model_executables")
+if (!dir.exists(executables_path)) dir.create(executables_path)
+
 for (prior in c(1, 0)) {
   sample_prior <- prior # Prior predictive check (0) or estimate full model (1)
 
@@ -31,7 +34,7 @@ for (prior in c(1, 0)) {
   # Stan User guide SV model
   # Compile stan model
   file <- here::here("models", paste(model_name, ".stan", sep = ""))
-  mod <- cmdstan_model(file, include_paths = here::here("models"))
+  mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), dir = executables_path)
 
   # Get data
   data <- read.csv(here::here("data", data_loc, data_type, paste(file_name, ".csv", sep = "")))
