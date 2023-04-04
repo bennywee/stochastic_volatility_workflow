@@ -8,11 +8,12 @@ data {
 }
 parameters {
   real mu;                     // mean log volatility
-  real<lower=-1, upper=1> phi; // persistence of volatility
+  real<lower=0, upper=1> p;    // p parameter of beta 
   real<lower=0> sigma;         // white noise shock scale
   vector[T] h_std;  // std log volatility time t
 }
 transformed parameters {
+  real<lower=-1, upper=1> phi = 2*p-1; // persistence of volatility
   vector[T] h = h_std * sigma;  // now h ~ normal(0, sigma)
   h[1] /= sqrt(1 - phi * phi);  // rescale h[1]
   h += mu;
@@ -21,7 +22,7 @@ transformed parameters {
   }
 }
 model {
-  phi ~ uniform(-1, 1);
+  p ~ beta(20, 1.5);
   sigma ~ inv_gamma(5./2., (0.01*5.)/2.); // how to put a prior in sigma^2?
   mu ~ normal(0, 10);
   h_std ~ std_normal();
