@@ -56,13 +56,6 @@ true_log_sq_returns <- log_squared_returns(returns)
 
 # Model summary
 
-## Model code
-
-```{r}
-#| echo: false
-cat(model_fit$code(), sep = "\n")
-```
-
 ## Predictive checks
 
 ### y_t
@@ -176,3 +169,9 @@ plot_hist(
 
 ```
 
+# Model code
+
+```{r}
+#| echo: false
+cat(model_fit$code(), sep = "\n")
+```
