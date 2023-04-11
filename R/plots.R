@@ -11,7 +11,7 @@ plot_predictive_check <- function(dataframe,
     checking_plot <- ggplot(dataframe, aes(x = {{ x_axis }}, y = {{ y_axis }})) +
         geom_line(aes(group = {{ groups }}), alpha = 0.3, colour = "blue") +
         labs(
-            title = paste(prior_post, " Predictive Checks"),
+            title = paste(prior_post, "Predictive Checks"),
             subtitle = "10 blue MCMC draws, true value in black"
         ) +
         theme_minimal()
@@ -42,7 +42,7 @@ plot_log_y_sqd_hist <- function(mcmc_data, mcmc_x_axis, true_data, true_x_axis, 
         geom_histogram(alpha = 0.3, fill = "blue", bins = n_bins) +
         geom_histogram(data = true_data, aes(x = {{ true_x_axis }}), alpha = 0.5, fill = "red", bins = n_bins) +
         labs(
-            title = paste(prior_post, " distribution of log(y*^2)"),
+            title = paste(prior_post, "distribution of log(y*^2)"),
             subtitle = "Red is log(y^2) of data and blue is the average over MCMC samples"
         ) +
         theme_minimal()
@@ -69,7 +69,7 @@ plot_log_y_sqd_kde <- function(mcmc_data, mcmc_x_axis, true_data, true_x_axis, p
         geom_density(alpha = 0.1, colour = "blue") +
         geom_density(data = true_data, aes(x = {{ true_x_axis }}), colour = "red") +
         labs(
-            title = paste(prior_post, " KDE of log(y*^2)"),
+            title = paste(prior_post, "KDE of log(y*^2)"),
             subtitle = "Red is log(y^2) of data and blue is the average over MCMC samples"
         ) +
         theme_minimal()
