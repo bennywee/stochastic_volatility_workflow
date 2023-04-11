@@ -101,16 +101,6 @@ plot_hist(
   save = FALSE,
   path = fit_location
 )
-
-plot_hist(
-  data = auto_corr,
-  x_axis = log_y_squared_autocorr,
-  variable_name = "log(Y^2) autocorrelation",
-  prior_post = pp_flag,
-  save = FALSE,
-  path = fit_location
-)
-
 plot_hist(
   data = kurtosis,
   x_axis = y_rep_kurtosis,
