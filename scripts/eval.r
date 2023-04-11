@@ -7,7 +7,7 @@ source(here::here("R", "model_eval.R"))
 
 ############################ Parameters to set ############################
 
-model_name <- "sv_user_guide_reparameterised_ksc_priors_ksc_phi_0.97779_sig_0.1585_beta_0.64733_"
+model_name <- "sv_user_guide_reparameterised_ksc_priors_ksc_phi_0.97779_sig_0.1585_beta_0.64733_beta_0.5_0.5"
 pp_flag <- "posterior" # prior = no likelihood estimation, posterior = likelihood estimation
 
 
@@ -85,51 +85,69 @@ plot_log_y_sqd_kde(
 )
 
 plot_hist(
-    data = auto_corr,
-    x_axis = log_y_squared_autocorr,
-    variable_name = "log(Y^2) autocorrelation",
-    prior_post = pp_flag,
-    save = FALSE,
-    path = fit_location
-  )
+  data = auto_corr,
+  x_axis = log_y_squared_autocorr,
+  variable_name = "log(Y^2) autocorrelation",
+  prior_post = pp_flag,
+  save = FALSE,
+  path = fit_location
+)
 
-  plot_hist(
-    data = auto_corr,
-    x_axis = log_y_squared_autocorr,
-    variable_name = "log(Y^2) autocorrelation",
-    prior_post = pp_flag,
-    save = FALSE,
-    path = fit_location
-  )
+plot_hist(
+  data = auto_corr,
+  x_axis = log_y_squared_autocorr,
+  variable_name = "log(Y^2) autocorrelation",
+  prior_post = pp_flag,
+  save = FALSE,
+  path = fit_location
+)
 
-  plot_hist(
-    data = auto_corr,
-    x_axis = log_y_squared_autocorr,
-    variable_name = "log(Y^2) autocorrelation",
-    prior_post = pp_flag,
-    save = FALSE,
-    path = fit_location
-  )
+plot_hist(
+  data = auto_corr,
+  x_axis = log_y_squared_autocorr,
+  variable_name = "log(Y^2) autocorrelation",
+  prior_post = pp_flag,
+  save = FALSE,
+  path = fit_location
+)
 
-  plot_hist(
-    data = kurtosis,
-    x_axis = y_rep_kurtosis,
-    variable_name = "y_t kurtosis",
-    prior_post = pp_flag,
-    save = FALSE,
-    path = fit_location
-  )
+plot_hist(
+  data = kurtosis,
+  x_axis = y_rep_kurtosis,
+  variable_name = "y_t kurtosis",
+  prior_post = pp_flag,
+  save = FALSE,
+  path = fit_location
+)
 
-  plot_hist(
-    data = skewness,
-    x_axis = y_rep_skewness,
-    variable_name = "y_t skewness",
-    prior_post = pp_flag,
-    save = FALSE,
-    path = fit_location
-  )
-}
+plot_hist(
+  data = skewness,
+  x_axis = y_rep_skewness,
+  variable_name = "y_t skewness",
+  prior_post = pp_flag,
+  save = FALSE,
+  path = fit_location
+)
 
+plot_hist(
+  data = mcmc_output_df(model_obj = model_fit, variable = "phi"),
+  x_axis = phi,
+  variable_name = "phi",
+  prior_post = pp_flag,
+  save = FALSE,
+  path = fit_location
+)
+
+plot_hist(
+  data = mcmc_output_df(model_obj = model_fit, variable = "p"),
+  x_axis = p,
+  variable_name = "p",
+  prior_post = pp_flag,
+  save = FALSE,
+  path = fit_location
+)
+
+mean(mcmc_output_df(model_obj = model_fit, variable = "p")$p)
 
 # # Generated quantities (predictive checks)
 # output_csv <- list.files(path = here::here("output", model_name), pattern = "*.csv", full.names = TRUE)
