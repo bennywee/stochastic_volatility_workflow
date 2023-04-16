@@ -8,15 +8,19 @@ format:
 
 ```{r}
 #| echo: false
+source(here::here("config.r"))
+
 ############################ Parameters to set ############################
-model_name <- "sv_user_guide_reparameterised_ksc_priors_ksc_phi_0.97779_sig_0.1585_beta_0.64733_"
+if (!(config)) {
+output_name <- "sv_user_guide_reparameterised_ksc_priors_ksc_phi_0.97779_sig_0.1585_beta_0.64733_"
 pp_flag <- "posterior" # prior = no likelihood estimation, posterior = likelihood estimation
 
 
 # Data location
 data_loc <- "simulated"
 data_type <- "ksc"
-file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
+data_file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
+}
 ############################ Parameters to set ############################
 ```
 
@@ -32,15 +36,15 @@ library(posterior)
 source(here::here("R", "plots.R"))
 source(here::here("R", "model_eval.R"))
 
-path <- here::here("output", model_name)
-rds_path <- list.files(path = here::here("output", model_name), full.names = TRUE, pattern = "*.RDS")
-csv_path <- list.files(path = here::here("output", model_name), full.names = TRUE, pattern = "*.csv")
+path <- here::here("output", output_name)
+rds_path <- list.files(path = here::here("output", output_name), full.names = TRUE, pattern = "*.RDS")
+csv_path <- list.files(path = here::here("output", output_name), full.names = TRUE, pattern = "*.csv")
 
 # Load model results
 model_fit <- readRDS(rds_path[grep(paste(pp_flag, "fit", sep = ""), rds_path)])
 
 # Load training data
-data <- read.csv(here::here("data", data_loc, data_type, paste(file_name, ".csv", sep = "")))
+data <- read.csv(here::here("data", data_loc, data_type, paste(data_file_name, ".csv", sep = "")))
 dependent_variable <- "yobs" # log squared returns
 returns <- data[complete.cases(data[dependent_variable]), dependent_variable]
 
@@ -59,6 +63,12 @@ model_fit$summary()
 ``` -->
 
 # Model summary
+
+```{r}
+#| echo: false
+#| output: 'asis'
+paste(pp_flag, output_name, sep = " ")
+```
 
 ## Predictive checks
 
@@ -178,4 +188,18 @@ plot_hist(
 ```{r}
 #| echo: false
 cat(model_fit$code(), sep = "\n")
+```
+
+# Model sampling time
+
+```{r}
+# Time to sample
+model_fit$time()
+```
+
+# Model console messages
+
+```{r}
+# Console messages
+model_fit$output()
 ```
