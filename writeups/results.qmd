@@ -54,6 +54,10 @@ true_returns_df <- returns_df(returns)
 true_log_sq_returns <- log_squared_returns(returns)
 ```
 
+<!-- ```{r}
+model_fit$summary()
+``` -->
+
 # Model summary
 
 ## Predictive checks
