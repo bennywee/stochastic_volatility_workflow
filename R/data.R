@@ -12,16 +12,16 @@ download_fin_data <- function(financial_series, start_date, end_date){
 }
 
 fin_data_location <- function(financial_series, type, start_date, end_date){
-    path  <-  file.path("data", type, financial_series)
+    path  <-  here::here("data", type, financial_series)
     start  <-  format(strptime(as.character(start_date), "%Y-%m-%d"), "%Y%m%d")
     end  <-  format(strptime(as.character(end_date), "%Y-%m-%d"), "%Y%m%d")
     date_string  <-  paste(start, "_", end, ".csv", sep = "")
-    file_name <-  file.path(path, date_string)
+    file_name <-  here::here(path, date_string)
     return(file_name)
 }
 
 save_fin_data <- function(dataframe, type, financial_series, start_date, end_date){
-    path  <-  file.path("data", type, financial_series)
+    path  <-  here::here("data", type, financial_series)
     
     if (!dir.exists(path)) {
         dir.create(path, recursive = TRUE)

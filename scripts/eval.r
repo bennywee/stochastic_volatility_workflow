@@ -8,15 +8,16 @@ pp_flag <- "posterior" # prior = no likelihood estimation, posterior = likelihoo
 
 ############################ Parameters to set ############################
 
-path <- file.path("output", model_name)
-rds_path  <- list.files(path = file.path("output", model_name), full.names = TRUE, pattern = "*.RDS")
-csv_path  <- list.files(path = file.path("output", model_name), full.names = TRUE, pattern = "*.csv")
+path <- here::here("output", model_name)
+rds_path  <- list.files(path = here::here("output", model_name), full.names = TRUE, pattern = "*.RDS")
+csv_path  <- list.files(path = here::here("output", model_name), full.names = TRUE, pattern = "*.csv")
 
 model_fit <- readRDS(rds_path[grep(paste(pp_flag,"fit",sep=""),rds_path)])
+model_fit$summary()
 launch_shinystan(model_fit)
 
 # Generated quantities (predictive checks)
-output_csv <- list.files(path = file.path("output", model_name), pattern = "*.csv", full.names = TRUE)
+output_csv <- list.files(path = here::here("output", model_name), pattern = "*.csv", full.names = TRUE)
 output <- read_cmdstan_csv(csv_path[grep(paste(pp_flag, "-", sep =""), csv_path)], variables = "y_rep", format = "matrix")
 
 # Evaluation
@@ -32,7 +33,7 @@ y_rep_df_sample  <- y_rep_df  %>%
   filter(mcmc_draw %in% sample(1:4000, 10))
 
 ggplot(y_rep_df_sample, aes(x = time, y = y_t)) +
-    geom_line(aes(group = mcmc_draw), alpha = 0.3, colour = "blue") +
+    geom_line(aes(color = mcmc_draw), alpha = 0.3, colour = "blue") +
     labs(title = paste(prefix, " Predictive Checks"),
          subtitle = "10 blue MCMC draws") +
     theme_minimal()
