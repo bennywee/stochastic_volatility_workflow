@@ -1,11 +1,18 @@
 config = TRUE
 
 # Create Yahoo Data
+stock_index <- "GSPC"
+start_date <- "2019-01-04"
+end_date <- "2023-02-01"
 
 # Create Simulated Data
+set.seed(323651)
+size <- 1000
+phi <- 0.97779
+sig <- 0.15850
+beta <- 0.64733
 
 # Model training
-
 ## Model metadata
 model_name <- "sv_user_guide_reparameterised_ksc_priors"
 unique_identifier <- "adapt_delta_0.9"
