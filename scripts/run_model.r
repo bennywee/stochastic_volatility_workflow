@@ -48,7 +48,7 @@ for (prior in c(1, 0)) {
     chains = 4,
     parallel_chains = 4,
     refresh = 500,
-    adapt_delta = 0.9
+    adapt_delta = 0.8
   )
 
   # Save model
@@ -148,3 +148,21 @@ for (prior in c(1, 0)) {
     path = fit_location
   )
 }
+
+# plot_hist(
+#     data = mcmc_output_df(model_obj = model_fit, variable = "phi"),
+#     x_axis = phi,
+#     variable_name = "phi",
+#     prior_post = 'prior',
+#     save = FALSE,
+#     path = fit_location
+#   )
+
+# plot_hist(
+#     data = mcmc_output_df(model_obj = model_fit, variable = "p"),
+#     x_axis = p,
+#     variable_name = "p",
+#     prior_post = 'prior',
+#     save = FALSE,
+#     path = fit_location
+#   )
