@@ -1,3 +1,6 @@
+functions {
+#include checking_functions.stan
+}
 data {
   int<lower=0> T;  // # time points (equally spaced)
   vector[T] y;     // mean corrected return at time t
@@ -28,9 +31,18 @@ model {
 }
 generated quantities{
   vector[T] y_rep;
+  vector[T] log_y_squared;
+  real y_rep_kurtosis;
+  real y_rep_skewness;
+  real log_y_squared_autocorr;
 
   for (t in 1:T){
     y_rep[t] = normal_rng(0, exp(h[t]/2));
+    log_y_squared[t] = log(y_rep[t] * y_rep[t]);
   }  
+
+  y_rep_kurtosis = kurtosis(y_rep, T);
+  y_rep_skewness = skewness(y_rep, T);
+  log_y_squared_autocorr = first_order_autocorr(log_y_squared, T);
 }
 

@@ -1,4 +1,9 @@
+notes.md
+data/
 Icon?
+.DS_Store
+model_executables/
+writeups/results_files/
 
 # Output directory
 output/*

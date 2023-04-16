@@ -1,13 +1,15 @@
-library(tidyverse)
-library(shinystan)
-library(posterior)
+---
+title: "Results"
+format:
+  html:
+    theme: flatly
+    toc: true
+---
 
-source(here::here("R", "plots.R"))
-source(here::here("R", "model_eval.R"))
-
+```{r}
+#| echo: false
 ############################ Parameters to set ############################
-
-model_name <- "sv_user_guide_reparameterised_ksc_priors_ksc_phi_0.97779_sig_0.1585_beta_0.64733_beta_0.5_0.5"
+model_name <- "sv_user_guide_reparameterised_ksc_priors_ksc_phi_0.97779_sig_0.1585_beta_0.64733_"
 pp_flag <- "posterior" # prior = no likelihood estimation, posterior = likelihood estimation
 
 
@@ -16,35 +18,33 @@ data_loc <- "simulated"
 data_type <- "ksc"
 file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
 ############################ Parameters to set ############################
+```
+
+```{r}
+#| echo: false
+#| warnings: false
+#| messages: false
+#| output: false
+library(tidyverse)
+library(shinystan)
+library(posterior)
+
+source(here::here("R", "plots.R"))
+source(here::here("R", "model_eval.R"))
 
 path <- here::here("output", model_name)
 rds_path <- list.files(path = here::here("output", model_name), full.names = TRUE, pattern = "*.RDS")
 csv_path <- list.files(path = here::here("output", model_name), full.names = TRUE, pattern = "*.csv")
 
+# Load model results
 model_fit <- readRDS(rds_path[grep(paste(pp_flag, "fit", sep = ""), rds_path)])
 
-# Shiny stan
-# launch_shinystan(model_fit)
-
-# Contains ess and rhats (new)
-model_fit$summary()
-
-# Old r hats
-# for (param in model_fit$metadata()$model_params) print(param)
-# str(model_fit$metadata())
-rhat_basic(extract_variable_matrix(model_fit$draws(), "mu"))
-
-# Old ESS
-ess_basic(extract_variable_matrix(model_fit$draws(), "mu"))
-
-# Std out
-model_fit$output()
-
-# Predictive checks
+# Load training data
 data <- read.csv(here::here("data", data_loc, data_type, paste(file_name, ".csv", sep = "")))
 dependent_variable <- "yobs" # log squared returns
 returns <- data[complete.cases(data[dependent_variable]), dependent_variable]
 
+# Data for predictive checks
 y_rep_df_sample <- mcmc_output_df(model_obj = model_fit, variable = "y_rep", sample_n = 10)
 log_y_squared_avg <- average_over_draws(model_obj = model_fit, variable = "log_y_squared")
 auto_corr <- mcmc_output_df(model_obj = model_fit, variable = "log_y_squared_autocorr", sample_n = NULL)
@@ -52,7 +52,19 @@ kurtosis <- mcmc_output_df(model_obj = model_fit, variable = "y_rep_kurtosis", s
 skewness <- mcmc_output_df(model_obj = model_fit, variable = "y_rep_skewness", sample_n = NULL)
 true_returns_df <- returns_df(returns)
 true_log_sq_returns <- log_squared_returns(returns)
+```
 
+<!-- ```{r}
+model_fit$summary()
+``` -->
+
+# Model summary
+
+## Predictive checks
+
+### y_t
+```{r}
+#| echo: false
 plot_predictive_check(
   dataframe = y_rep_df_sample,
   x_axis = time,
@@ -63,7 +75,11 @@ plot_predictive_check(
   path = NULL,
   true_data = true_returns_df
 )
+```
 
+### Distribution of log(y*^2)
+```{r}
+#| echo: false
 plot_log_y_sqd_hist(
   mcmc_data = log_y_squared_avg,
   true_data = true_log_sq_returns,
@@ -73,7 +89,10 @@ plot_log_y_sqd_hist(
   save = FALSE,
   path = fit_location
 )
+```
 
+```{r}
+#| echo: false
 plot_log_y_sqd_kde(
   mcmc_data = log_y_squared_avg,
   true_data = true_log_sq_returns,
@@ -83,7 +102,12 @@ plot_log_y_sqd_kde(
   save = FALSE,
   path = fit_location
 )
+```
 
+### Autocorrelation log(Y^2)
+
+```{r}
+#| echo: false
 plot_hist(
   data = auto_corr,
   x_axis = log_y_squared_autocorr,
@@ -92,15 +116,12 @@ plot_hist(
   save = FALSE,
   path = fit_location
 )
+```
 
-plot_hist(
-  data = auto_corr,
-  x_axis = log_y_squared_autocorr,
-  variable_name = "log(Y^2) autocorrelation",
-  prior_post = pp_flag,
-  save = FALSE,
-  path = fit_location
-)
+### Kurtosis y_t
+
+```{r}
+#| echo: false
 plot_hist(
   data = kurtosis,
   x_axis = y_rep_kurtosis,
@@ -109,7 +130,11 @@ plot_hist(
   save = FALSE,
   path = fit_location
 )
+```
 
+### Skewness y_t
+```{r}
+#| echo: false
 plot_hist(
   data = skewness,
   x_axis = y_rep_skewness,
@@ -118,7 +143,12 @@ plot_hist(
   save = FALSE,
   path = fit_location
 )
+```
 
+### Checking phi and p (beta prior)
+
+```{r}
+#| echo: false
 plot_hist(
   data = mcmc_output_df(model_obj = model_fit, variable = "phi"),
   x_axis = phi,
@@ -127,7 +157,11 @@ plot_hist(
   save = FALSE,
   path = fit_location
 )
+```
 
+
+```{r}
+#| echo: false
 plot_hist(
   data = mcmc_output_df(model_obj = model_fit, variable = "p"),
   x_axis = p,
@@ -137,68 +171,11 @@ plot_hist(
   path = fit_location
 )
 
-mean(mcmc_output_df(model_obj = model_fit, variable = "p")$p)
+```
 
-# # Generated quantities (predictive checks)
-# output_csv <- list.files(path = here::here("output", model_name), pattern = "*.csv", full.names = TRUE)
-# output <- read_cmdstan_csv(csv_path[grep(paste(pp_flag, "-", sep = ""), csv_path)], variables = "y_rep", format = "matrix")
+# Model code
 
-# # Evaluation
-# # Prepare generated data for predictive plots
-# y_rep_df <- output$post_warmup_draws %>%
-#   t() %>%
-#   as.data.frame() %>%
-#   mutate(time = 1:nrow(.)) %>%
-#   pivot_longer(!time, names_to = "mcmc_draw", values_to = "y_t")
-
-# # Predictive check
-# y_rep_df_sample <- y_rep_df %>%
-#   filter(mcmc_draw %in% sample(1:4000, 10))
-
-# ggplot(y_rep_df_sample, aes(x = time, y = y_t)) +
-#   geom_line(aes(color = mcmc_draw), alpha = 0.3, colour = "blue") +
-#   labs(
-#     title = paste(prefix, " Predictive Checks"),
-#     subtitle = "10 blue MCMC draws"
-#   ) +
-#   theme_minimal()
-
-# model_fit$code()
-# model_fit$diagnostic_summary()
-# cat(model_fit$code(), sep = "\n")
-
-# model_summ = model_fit$summary()
-
-# View(model_summ)
-
-
-# model_fit$draws()
-# model_fit$summary()
-
-# model_fit$draws()
-# as_draws_df(model_fit$draws())
-# cat(model_fit$code(), sep = '\n')
-
-
-
-# parallel::mclapply()
-# ?parallel
-# library(help = "parallel")
-
-# params = model_fit$metadata()$model_params
-# rhats_basic_df = function(model_draws, parameter) {
-#   return(rhat_basic(extract_variable_matrix(model_draws, parameter)))
-# }
-
-# lapply(params, rhats_basic_df(), model_draws= model_fit$draws())
-
-# lapply(params, function(p) rhat_basic(extract_variable_matrix(model_fit$draws(), p)))
-
-# parallel::mclapply(params, function(params) {
-#                  rhat_basic(extract_variable_matrix(model_fit$draws(), params))
-#          }, mc.cores = 6)
-
-# rhat_basic(extract_variable_matrix(model_fit$draws(), "mu"))
-
-
-# as_draws_rvars(example_draws("multi_normal"))
+```{r}
+#| echo: false
+cat(model_fit$code(), sep = "\n")
+```
