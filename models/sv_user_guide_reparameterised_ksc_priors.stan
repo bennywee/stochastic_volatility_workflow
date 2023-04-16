@@ -8,12 +8,12 @@ data {
 }
 parameters {
   real mu;                     // mean log volatility
-  real<lower=0, upper=1> p;    // p parameter of beta 
+  real<lower=0, upper=1> p;    // p parameter of beta. starts at 0.5
   real<lower=0> sigma;         // white noise shock scale
   vector[T] h_std;  // std log volatility time t
 }
 transformed parameters {
-  real<lower=-1, upper=1> phi = 2*p-1; // persistence of volatility
+  real<lower=-1, upper=1> phi = 2*p-1; // persistence of volatility. Initialising starting point of p is 0.5 which is causing problems
   vector[T] h = h_std * sigma;  // now h ~ normal(0, sigma)
   h[1] /= sqrt(1 - phi * phi);  // rescale h[1]
   h += mu;
