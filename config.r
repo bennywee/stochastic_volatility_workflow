@@ -14,14 +14,14 @@ beta <- 0.64733
 
 # Model training
 ## Model metadata
-model_name <- "sv_user_guide_reparameterised_ksc_priors"
-unique_identifier <- "adapt_delta_0.9"
-dependent_variable <- "yobs"
+model_name <- "sv_user_guide" # Name of the .stan file in the models directory
+unique_identifier <- "" # Suffix given for specific run of that stan script, needed to identify exact model output
 
 ## Data location
-data_loc <- "simulated"
-data_type <- "ksc"
-data_file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
+data_loc <- "simulated" # Either simulated or preprocessed data (don't use raw)
+data_type <- "ksc" # Type of data in the data location
+data_file_name <- "phi_0.97779_sig_0.1585_beta_0.64733" # Name of the data file
+dependent_variable <- "yobs" # Data column name for y variable
 
 ## Stan sampling
 seed <- 123
@@ -32,5 +32,5 @@ adapt_delta <- 0.9
 save_warmup <- TRUE
 
 # Evaluation
+pp_flag <- "posterior" # Evaluation script (scripts/eval.r). Posterior or prior samples
 output_name <- paste(model_name, data_type, data_file_name, unique_identifier, sep = "_")
-pp_flag <- "posterior"
