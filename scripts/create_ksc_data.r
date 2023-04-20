@@ -1,12 +1,14 @@
 # Load data functions
 source(here::here("R", "data.R"))
+source(here::here("config.r"))
 
 # Set parameters (mu is set within simulate_ksc function) and seed
-set.seed(323651)
-size <- 1000
-phi <- 0.97779
-sig <- 0.15850
-beta <- 0.64733
+if (!(config)) {
+    size <- 1000
+    phi <- 0.97779
+    sig <- 0.15850
+    beta <- 0.64733
+}
 
 # Set directory paths
 path <- here::here("data", "simulated", "ksc")

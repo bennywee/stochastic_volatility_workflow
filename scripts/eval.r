@@ -2,24 +2,27 @@ library(tidyverse)
 library(shinystan)
 library(posterior)
 
+source(here::here("config.r"))
 source(here::here("R", "plots.R"))
 source(here::here("R", "model_eval.R"))
 
 ############################ Parameters to set ############################
 
-model_name <- "sv_user_guide_reparameterised_ksc_priors_ksc_phi_0.97779_sig_0.1585_beta_0.64733_beta_0.5_0.5"
-pp_flag <- "posterior" # prior = no likelihood estimation, posterior = likelihood estimation
+if (!(config)) {
+  output_name <- "sv_user_guide_reparameterised_ksc_priors_ksc_phi_0.97779_sig_0.1585_beta_0.64733_adapt_delta_0.8"
+  pp_flag <- "posterior" # prior = no likelihood estimation, posterior = likelihood estimation
 
 
-# Data location
-data_loc <- "simulated"
-data_type <- "ksc"
-file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
+  # Data location
+  data_loc <- "simulated"
+  data_type <- "ksc"
+  data_file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
+}
 ############################ Parameters to set ############################
 
-path <- here::here("output", model_name)
-rds_path <- list.files(path = here::here("output", model_name), full.names = TRUE, pattern = "*.RDS")
-csv_path <- list.files(path = here::here("output", model_name), full.names = TRUE, pattern = "*.csv")
+path <- here::here("output", output_name)
+rds_path <- list.files(path = here::here("output", output_name), full.names = TRUE, pattern = "*.RDS")
+csv_path <- list.files(path = here::here("output", output_name), full.names = TRUE, pattern = "*.csv")
 
 model_fit <- readRDS(rds_path[grep(paste(pp_flag, "fit", sep = ""), rds_path)])
 
@@ -28,6 +31,24 @@ model_fit <- readRDS(rds_path[grep(paste(pp_flag, "fit", sep = ""), rds_path)])
 
 # Contains ess and rhats (new)
 model_fit$summary()
+
+# Warm up samples
+sample_variable <- "phi"
+model_fit$draws(variable = sample_variable,
+  inc_warmup = TRUE,
+  format = "draws_df") %>%
+  pivot_wider(id_cols = ".iteration",
+    names_from = ".chain",
+    values_from = sample_variable) %>% View # %>% filter(.iteration >= 1000)
+
+# Time to sample
+model_fit$time()
+
+# Console messages
+model_fit$output()
+
+# Diagnostic messages
+model_fit$diagnostic_summary()
 
 # Old r hats
 # for (param in model_fit$metadata()$model_params) print(param)
@@ -41,7 +62,7 @@ ess_basic(extract_variable_matrix(model_fit$draws(), "mu"))
 model_fit$output()
 
 # Predictive checks
-data <- read.csv(here::here("data", data_loc, data_type, paste(file_name, ".csv", sep = "")))
+data <- read.csv(here::here("data", data_loc, data_type, paste(data_file_name, ".csv", sep = "")))
 dependent_variable <- "yobs" # log squared returns
 returns <- data[complete.cases(data[dependent_variable]), dependent_variable]
 
@@ -140,7 +161,7 @@ plot_hist(
 mean(mcmc_output_df(model_obj = model_fit, variable = "p")$p)
 
 # # Generated quantities (predictive checks)
-# output_csv <- list.files(path = here::here("output", model_name), pattern = "*.csv", full.names = TRUE)
+# output_csv <- list.files(path = here::here("output", output_name), pattern = "*.csv", full.names = TRUE)
 # output <- read_cmdstan_csv(csv_path[grep(paste(pp_flag, "-", sep = ""), csv_path)], variables = "y_rep", format = "matrix")
 
 # # Evaluation

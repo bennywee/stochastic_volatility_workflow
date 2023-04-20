@@ -1,23 +1,36 @@
 library(tidyverse)
 library(cmdstanr)
+source(here::here("config.r"))
 source(here::here("R", "plots.R"))
 source(here::here("R", "model_eval.R"))
 
 set.seed(321321)
 
 ############################ Parameters to set ############################
-# Model description
-model_name <- "sv_user_guide_reparameterised_ksc_priors"
-dependent_variable <- "yobs"
-unique_identifier <- ""
 
-# Data location
-data_loc <- "simulated"
-data_type <- "ksc"
-file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
+if (!(config)) {
+  # Model description
+  model_name <- NULL
+  dependent_variable <- NULL
+  unique_identifier <- NULL
+
+  # Data location
+  data_loc <- NULL
+  data_type <- NULL
+  data_file_name <- NULL
+
+  # Stan paramaters
+  seed = 123
+  chains = 4
+  parallel_chains = 4
+  refresh = 500
+  adapt_delta = 0.8
+  save_warmup <- TRUE
+}
+
 ############################ Parameters to set ############################
 
-executables_path <- here::here("model_executables")
+executables_path <- here::here("models/executables")
 if (!dir.exists(executables_path)) dir.create(executables_path)
 
 for (prior in c(1, 0)) {
@@ -37,22 +50,23 @@ for (prior in c(1, 0)) {
   mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), dir = executables_path)
 
   # Get data
-  data <- read.csv(here::here("data", data_loc, data_type, paste(file_name, ".csv", sep = "")))
+  data <- read.csv(here::here("data", data_loc, data_type, paste(data_file_name, ".csv", sep = "")))
   returns <- data[complete.cases(data[dependent_variable]), dependent_variable]
 
   # Fit model
   data_list <- list(T = length(returns), y = returns, sample_prior = sample_prior)
   model_fit <- mod$sample(
     data = data_list,
-    seed = 123,
-    chains = 4,
-    parallel_chains = 4,
-    refresh = 500,
-    adapt_delta = 0.8
+    seed = seed,
+    chains = chains,
+    parallel_chains = parallel_chains,
+    refresh = refresh,
+    adapt_delta = adapt_delta,
+    save_warmup = save_warmup
   )
 
   # Save model
-  fit_location <- paste(model_name, "_", data_type, "_", file_name, "_", unique_identifier, sep = "") # "_", format(Sys.time(), "%Y%m%d%H%M%S"), sep = "")
+  fit_location <- paste(model_name, "_", data_type, "_", data_file_name, "_", unique_identifier, sep = "") # "_", format(Sys.time(), "%Y%m%d%H%M%S"), sep = "")
   path <- here::here("output", fit_location)
   if (!dir.exists(path)) {
     dir.create(path, recursive = TRUE)
@@ -147,22 +161,13 @@ for (prior in c(1, 0)) {
     save = TRUE,
     path = fit_location
   )
+
+  plot_hist(
+    data = mcmc_output_df(model_obj = model_fit, variable = "phi"),
+    x_axis = phi,
+    variable_name = "phi",
+    prior_post = 'prior',
+    save = TRUE,
+    path = fit_location
+  )
 }
-
-# plot_hist(
-#     data = mcmc_output_df(model_obj = model_fit, variable = "phi"),
-#     x_axis = phi,
-#     variable_name = "phi",
-#     prior_post = 'prior',
-#     save = FALSE,
-#     path = fit_location
-#   )
-
-# plot_hist(
-#     data = mcmc_output_df(model_obj = model_fit, variable = "p"),
-#     x_axis = p,
-#     variable_name = "p",
-#     prior_post = 'prior',
-#     save = FALSE,
-#     path = fit_location
-#   )
