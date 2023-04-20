@@ -30,7 +30,7 @@ if (!(config)) {
 
 ############################ Parameters to set ############################
 
-executables_path <- here::here("model_executables")
+executables_path <- here::here("models/executables")
 if (!dir.exists(executables_path)) dir.create(executables_path)
 
 for (prior in c(1, 0)) {
