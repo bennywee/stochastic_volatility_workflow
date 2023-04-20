@@ -33,18 +33,22 @@ model_fit <- readRDS(rds_path[grep(paste(pp_flag, "fit", sep = ""), rds_path)])
 model_fit$summary()
 
 # Warm up samples
-model_fit$draws(variable = "sigma",
+sample_variable <- "phi"
+model_fit$draws(variable = sample_variable,
   inc_warmup = TRUE,
   format = "draws_df") %>%
   pivot_wider(id_cols = ".iteration",
     names_from = ".chain",
-    values_from = "sigma") %>% View # %>% filter(.iteration >= 1000)
+    values_from = sample_variable) %>% View # %>% filter(.iteration >= 1000)
 
 # Time to sample
 model_fit$time()
 
 # Console messages
 model_fit$output()
+
+# Diagnostic messages
+model_fit$diagnostic_summary()
 
 # Old r hats
 # for (param in model_fit$metadata()$model_params) print(param)
