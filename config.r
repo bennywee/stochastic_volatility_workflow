@@ -28,7 +28,7 @@ seed <- 123
 chains <- 4
 parallel_chains <- 4
 refresh <- 500
-adapt_delta <- 0.95
+adapt_delta <- 0.9
 save_warmup <- TRUE
 
 # Evaluation
