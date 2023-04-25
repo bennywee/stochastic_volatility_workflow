@@ -1,4 +1,5 @@
 library(tidyverse)
+library(bayesplot)
 
 plot_predictive_check <- function(dataframe,
                                   x_axis,
@@ -113,5 +114,19 @@ plot_hist <- function(data, x_axis, variable_name, prior_post, save, path, n_bin
         )
     } else {
         return(hist)
+    }
+}
+
+pairs_plot <- function(array, np, parameters, save, path) {
+    scatter_plot <- mcmc_scatter(array, pars = parameters, np = np)
+    if (isTRUE(save)) {
+        ggsave(here::here(
+            "output",
+            path, paste("posterior_", parameters[1], "_", parameters[2], "_pairs_plot.png", sep = "")),
+        plot = scatter_plot
+        )
+    }
+    else {
+        return(scatter_plot)
     }
 }

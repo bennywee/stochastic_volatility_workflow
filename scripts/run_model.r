@@ -1,5 +1,6 @@
 library(tidyverse)
 library(cmdstanr)
+library(bayesplot)
 source(here::here("config.r"))
 source(here::here("R", "plots.R"))
 source(here::here("R", "model_eval.R"))
@@ -170,4 +171,50 @@ for (prior in c(1, 0)) {
     save = TRUE,
     path = fit_location
   )
+
+  if (prior == 0) {
+    draws_array = model_fit$draws(format = "draws_array")
+    np = nuts_params(model_fit)
+
+    pairs_plot(array = draws_array,
+      np = np,
+      parameters = c("mu", "sigma"),
+      save = TRUE,
+      path = fit_location)
+
+    pairs_plot(array = draws_array,
+      np = np,
+      parameters = c("mu", "phi"),
+      save = TRUE,
+      path = fit_location)
+
+    pairs_plot(array = draws_array,
+      np = np,
+      parameters = c("sigma", "phi"),
+      save = TRUE,
+      path = fit_location)
+
+
+    pairs_plot(array = draws_array,
+      np = np,
+      parameters = c("h[1]", "mu"),
+      save = TRUE,
+      path = fit_location)
+
+
+    pairs_plot(array = draws_array,
+      np = np,
+      parameters = c("h[1]", "sigma"),
+      save = TRUE,
+      path = fit_location)
+
+
+    pairs_plot(array = draws_array,
+      np = np,
+      parameters = c("h[1]", "phi"),
+      save = TRUE,
+      path = fit_location)
+
+
+  }
 }
