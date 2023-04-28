@@ -80,12 +80,20 @@ for (prior in c(1, 0)) {
   # Evaluation
   # Predictive check
   y_rep_df_sample <- mcmc_output_df(model_obj = model_fit, variable = "y_rep", sample_n = 10)
-  log_y_squared_avg <- average_over_draws(model_obj = model_fit, variable = "log_y_squared")
-  auto_corr <- mcmc_output_df(model_obj = model_fit, variable = "log_y_squared_autocorr", sample_n = NULL)
+  log_y_squared_avg <- average_over_draws(model_obj = model_fit, variable = "log_yrep_squared")
+  auto_corr_1 <- mcmc_output_df(model_obj = model_fit, variable = "log_yrep_squared_autocorr_1", sample_n = NULL)
+  auto_corr_2 <- mcmc_output_df(model_obj = model_fit, variable = "log_yrep_squared_autocorr_2", sample_n = NULL)
+  auto_corr_3 <- mcmc_output_df(model_obj = model_fit, variable = "log_yrep_squared_autocorr_3", sample_n = NULL)
   kurtosis <- mcmc_output_df(model_obj = model_fit, variable = "y_rep_kurtosis", sample_n = NULL)
   skewness <- mcmc_output_df(model_obj = model_fit, variable = "y_rep_skewness", sample_n = NULL)
+
   true_returns_df <- returns_df(returns)
   true_log_sq_returns <- log_squared_returns(returns)
+  true_auto_corr_1 <- as.numeric(mcmc_output_df(model_obj = model_fit, variable = "log_y_squared_autocorr_1", sample_n = NULL)[1, 3])
+  true_auto_corr_2 <- as.numeric(mcmc_output_df(model_obj = model_fit, variable = "log_y_squared_autocorr_2", sample_n = NULL)[1, 3])
+  true_auto_corr_3 <- as.numeric(mcmc_output_df(model_obj = model_fit, variable = "log_y_squared_autocorr_3", sample_n = NULL)[1, 3])
+  true_kurtosis <- as.numeric(mcmc_output_df(model_obj = model_fit, variable = "y_kurtosis", sample_n = NULL)[1, 3])
+  true_skewness <- as.numeric(mcmc_output_df(model_obj = model_fit, variable = "y_skewness", sample_n = NULL)[1, 3])
 
   plot_predictive_check(
     dataframe = y_rep_df_sample,
@@ -105,7 +113,8 @@ for (prior in c(1, 0)) {
     true_x_axis = log_y_squared,
     prior_post = prefix,
     save = TRUE,
-    path = fit_location
+    path = fit_location,
+    n_bins = 60
   )
 
   plot_log_y_sqd_kde(
@@ -119,30 +128,36 @@ for (prior in c(1, 0)) {
   )
 
   plot_hist(
-    data = auto_corr,
-    x_axis = log_y_squared_autocorr,
-    variable_name = "log(Y^2) autocorrelation",
+    data = auto_corr_1,
+    x_axis = log_yrep_squared_autocorr_1,
+    variable_name = "log(Y^2) autocorrelation order 1",
     prior_post = prefix,
     save = TRUE,
-    path = fit_location
+    path = fit_location,
+    n_bins = 60,
+    true_data = true_auto_corr_1
   )
 
   plot_hist(
-    data = auto_corr,
-    x_axis = log_y_squared_autocorr,
-    variable_name = "log(Y^2) autocorrelation",
+    data = auto_corr_2,
+    x_axis = log_yrep_squared_autocorr_2,
+    variable_name = "log(Y^2) autocorrelation order 2",
     prior_post = prefix,
     save = TRUE,
-    path = fit_location
+    path = fit_location,
+    n_bins = 60,
+    true_data = true_auto_corr_2
   )
 
   plot_hist(
-    data = auto_corr,
-    x_axis = log_y_squared_autocorr,
-    variable_name = "log(Y^2) autocorrelation",
+    data = auto_corr_3,
+    x_axis = log_yrep_squared_autocorr_3,
+    variable_name = "log(Y^2) autocorrelation order 3",
     prior_post = prefix,
     save = TRUE,
-    path = fit_location
+    path = fit_location,
+    n_bins = 60,
+    true_data = true_auto_corr_3
   )
 
   plot_hist(
@@ -151,7 +166,9 @@ for (prior in c(1, 0)) {
     variable_name = "y_t kurtosis",
     prior_post = prefix,
     save = TRUE,
-    path = fit_location
+    path = fit_location,
+    n_bins = 60,
+    true_data = true_kurtosis
   )
 
   plot_hist(
@@ -160,7 +177,9 @@ for (prior in c(1, 0)) {
     variable_name = "y_t skewness",
     prior_post = prefix,
     save = TRUE,
-    path = fit_location
+    path = fit_location,
+    n_bins = 60,
+    true_data = true_skewness
   )
 
   plot_hist(
@@ -169,7 +188,8 @@ for (prior in c(1, 0)) {
     variable_name = "phi",
     prior_post = 'prior',
     save = TRUE,
-    path = fit_location
+    path = fit_location,
+    n_bins = 60
   )
 
   if (prior == 0) {

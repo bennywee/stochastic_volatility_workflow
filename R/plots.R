@@ -92,13 +92,17 @@ plot_log_y_sqd_kde <- function(mcmc_data, mcmc_x_axis, true_data, true_x_axis, p
     }
 }
 
-plot_hist <- function(data, x_axis, variable_name, prior_post, save, path, n_bins = 30) {
+plot_hist <- function(data, x_axis, variable_name, prior_post, save, path, n_bins = 30, true_data = NULL) {
     hist <- ggplot(data, aes(x = {{ x_axis }})) +
         geom_histogram(alpha = 0.3, fill = "blue", bins = n_bins) +
         labs(
             title = paste(prior_post, "distribution of", variable_name),
         ) +
         theme_minimal()
+
+    if (!is.null(true_data)) {
+        hist <- hist + geom_vline(xintercept = true_data)
+    }
 
     if (isTRUE(save)) {
         ggsave(
