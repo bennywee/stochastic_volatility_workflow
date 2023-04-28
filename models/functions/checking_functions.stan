@@ -24,3 +24,21 @@ real first_order_autocorr(vector x_t, int T) {
   
   return auto_cov / var_x_t;
 }
+
+real second_order_autocorr(vector x_t, int T) {
+  real auto_cov;
+  real var_x_t;
+  auto_cov = 1./(T-2.) * dot_product((x_t[1:T-2] - mean(x_t)), (x_t[3:T] - mean(x_t)));
+  var_x_t = 1.0/T * sum((x_t - mean(x_t))^2);
+  
+  return auto_cov / var_x_t;
+}
+
+real third_order_autocorr(vector x_t, int T) {
+  real auto_cov;
+  real var_x_t;
+  auto_cov = 1./(T-3.) * dot_product((x_t[1:T-3] - mean(x_t)), (x_t[4:T] - mean(x_t)));
+  var_x_t = 1.0/T * sum((x_t - mean(x_t))^2);
+  
+  return auto_cov / var_x_t;
+}
