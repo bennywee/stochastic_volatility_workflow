@@ -5,8 +5,6 @@ source(here::here("config.r"))
 source(here::here("R", "plots.R"))
 source(here::here("R", "model_eval.R"))
 
-set.seed(321321)
-
 ############################ Parameters to set ############################
 
 if (!(config)) {
