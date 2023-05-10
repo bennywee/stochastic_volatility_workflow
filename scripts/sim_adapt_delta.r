@@ -1,9 +1,10 @@
 library(cmdstanr)
 library(posterior)
+library(parallel)
 
 source(here::here("configs/adapt_delta_sim.r"))
-
 executables_path <- here::here("models/executables")
+
 if (!dir.exists(executables_path)) dir.create(executables_path)
 
 # Stan User guide SV model
@@ -19,9 +20,9 @@ returns <- data[complete.cases(data[dependent_variable]), dependent_variable]
 data_list <- list(T = length(returns), y = returns, sample_prior = sample_prior, gen_quantities = gen_quantities)
 # adapt_delta_list <- seq(0.94, 0.96, 0.001)
 adapt_delta_list <- seq(0.94, 0.96, 0.01)
+# adapt_delta = 0.95
 
 sample_model <- function(adapt_delta){
-
 
 model_fit <- mod$sample(
     data = data_list,
@@ -63,5 +64,7 @@ if (!dir.exists(path)) {
   dir.create(path, recursive = TRUE)
 }
 
-saveRDS(results, file = here::here("output", paste("adapt_delta", adapt_delta, "fit.RDS", sep ="_")))
+saveRDS(results, file = here::here("output", paste("adapt_delta", adapt_delta, rlang::hash(results), ".RDS", sep ="_")))
 }
+
+mclapply(adapt_delta_list, sample_model, mc.cores = 12)
