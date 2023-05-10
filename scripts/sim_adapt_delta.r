@@ -1,11 +1,7 @@
-library(tidyverse)
 library(cmdstanr)
-library(bayesplot)
 library(posterior)
 
 source(here::here("configs/adapt_delta_sim.r"))
-source(here::here("R", "plots.R"))
-source(here::here("R", "model_eval.R"))
 
 executables_path <- here::here("models/executables")
 if (!dir.exists(executables_path)) dir.create(executables_path)
@@ -23,6 +19,9 @@ returns <- data[complete.cases(data[dependent_variable]), dependent_variable]
 data_list <- list(T = length(returns), y = returns, sample_prior = sample_prior, gen_quantities = gen_quantities)
 # adapt_delta_list <- seq(0.94, 0.96, 0.001)
 adapt_delta_list <- seq(0.94, 0.96, 0.01)
+
+sample_model <- function(adapt_delta){
+
 
 model_fit <- mod$sample(
     data = data_list,
@@ -59,4 +58,10 @@ results[["chain2_summary"]] <- summarise_draws(subset_draws(model_fit$draws(vari
 results[["chain3_summary"]] <- summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 3))
 results[["chain4_summary"]] <- summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 4))
 
-saveRDS(results, file = "results.RDS")
+path <- here::here("output")
+if (!dir.exists(path)) {
+  dir.create(path, recursive = TRUE)
+}
+
+saveRDS(results, file = here::here("output", paste("adapt_delta", adapt_delta, "fit.RDS", sep ="_")))
+}

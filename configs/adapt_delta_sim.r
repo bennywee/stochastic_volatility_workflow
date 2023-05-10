@@ -5,6 +5,13 @@ stock_index <- "GSPC"
 start_date <- "2019-01-04"
 end_date <- "2023-02-01"
 
+# Create Simulated Data
+set.seed(323651)
+size <- 1000
+phi <- 0.97779
+sig <- 0.15850
+beta <- 0.64733
+
 # Model training
 ## Model metadata
 model_name <- "sv_user_guide_reparameterised_ksc_priors" # Name of the .stan file in the models directory
@@ -18,8 +25,8 @@ dependent_variable <- "yobs" # Data column name for y variable
 
 ## Stan sampling
 seed <- 123
-chains <- 1
-parallel_chains <- 1
+chains <- 4
+parallel_chains <- 4
 refresh <- 500
 save_warmup <- FALSE
 gen_quantities <- 0

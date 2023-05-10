@@ -1,6 +1,6 @@
 # Load data functions
 source(here::here("R", "data.R"))
-source(here::here("config.r"))
+source(here::here("configs/adapt_delta_sim.r"))
 
 # Set parameters (mu is set within simulate_ksc function) and seed
 if (!(config)) {
