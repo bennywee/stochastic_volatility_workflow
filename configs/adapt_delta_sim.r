@@ -1,4 +1,4 @@
-config = TRUE # TRUE if using config parameters. FALSE if setting parameters inside executable scripts
+config = FALSE # TRUE if using config parameters. FALSE if setting parameters inside executable scripts
 
 # Create Yahoo Data
 stock_index <- "GSPC"
@@ -6,7 +6,6 @@ start_date <- "2019-01-04"
 end_date <- "2023-02-01"
 
 # Create Simulated Data
-set.seed(323651)
 size <- 1000
 phi <- 0.97779
 sig <- 0.15850
@@ -26,7 +25,7 @@ dependent_variable <- "yobs" # Data column name for y variable
 ## Stan sampling
 seed <- 123
 chains <- 4
-parallel_chains <- 4
+parallel_chains <- 1
 refresh <- 500
 save_warmup <- FALSE
 gen_quantities <- 0
