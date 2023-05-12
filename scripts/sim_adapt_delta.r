@@ -2,12 +2,48 @@ library(cmdstanr)
 library(posterior)
 library(parallel)
 
-source(here::here("configs/adapt_delta_sim.r"))
-executables_path <- here::here("models/executables")
+# source(here::here("configs/adapt_delta_sim.r"))
+# Slurm ID
+slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
+ITE = as.numeric(slurm_arrayid)
+############################ Parameters to set ############################
 
+# Model training
+## Model metadata
+model_name <- "sv_user_guide_reparameterised_ksc_priors" 
+unique_identifier <- ""
+
+## Data location
+data_loc <- "simulated"
+data_type <- "ksc"
+data_file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
+dependent_variable <- "yobs"
+
+## Stan sampling
+set.seed(123)
+sample_vect <- sample.int(10000, 100)
+seed <- sample_vect[ITE]
+
+chains <- 4
+parallel_chains <- 1
+refresh <- 500
+save_warmup <- FALSE
+gen_quantities <- 0
+sample_prior <- 0
+# adapt_delta_list <- seq(0.94, 0.96, 0.001)
+# adapt_delta = 0.95
+adapt_delta_list <- seq(0.94, 0.96, 0.01)
+
+## Cores for parallelisation
+num_cores = 3
+
+############################ Parameters to set ############################
+
+# Set executables path
+executables_path <- here::here("models/executables")
 if (!dir.exists(executables_path)) dir.create(executables_path)
 
-# Stan User guide SV model
+# Stan User guide reparameterised SV model
 # Compile stan model
 file <- here::here("models", paste(model_name, ".stan", sep = ""))
 mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), dir = executables_path)
@@ -18,9 +54,6 @@ returns <- data[complete.cases(data[dependent_variable]), dependent_variable]
 
 # Fit model
 data_list <- list(T = length(returns), y = returns, sample_prior = sample_prior, gen_quantities = gen_quantities)
-# adapt_delta_list <- seq(0.94, 0.96, 0.001)
-adapt_delta_list <- seq(0.94, 0.96, 0.01)
-# adapt_delta = 0.95
 
 sample_model <- function(adapt_delta){
 
@@ -59,12 +92,23 @@ results[["chain2_summary"]] <- summarise_draws(subset_draws(model_fit$draws(vari
 results[["chain3_summary"]] <- summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 3))
 results[["chain4_summary"]] <- summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 4))
 
-path <- here::here("output")
+path <- here::here("simulation_output")
 if (!dir.exists(path)) {
   dir.create(path, recursive = TRUE)
 }
 
-saveRDS(results, file = here::here("output", paste("adapt_delta", adapt_delta, rlang::hash(results), ".RDS", sep ="_")))
+saveRDS(results, 
+        file = here::here("simulation_output", 
+                         paste("slurm_id",
+                               ITE,
+                               "adapt_delta", 
+                               adapt_delta, 
+                               ".RDS", 
+                               sep ="_")))
 }
 
-mclapply(adapt_delta_list, sample_model, mc.cores = 12)
+mclapply(adapt_delta_list, sample_model, mc.cores = num_cores)
+
+df = readRDS(here::here("simulation_output", "slurm_id_2_adapt_delta_0.94_.RDS"))
+df$divergences
+
