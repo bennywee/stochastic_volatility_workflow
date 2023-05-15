@@ -25,17 +25,14 @@ sample_vect <- sample.int(10000, 100)
 seed <- sample_vect[ITE]
 
 chains <- 4
-parallel_chains <- 1
+parallel_chains <- 4
 refresh <- 500
 save_warmup <- FALSE
 gen_quantities <- 0
 sample_prior <- 0
-# adapt_delta_list <- seq(0.94, 0.96, 0.001)
+adapt_delta_list <- seq(0.94, 0.96, 0.001)
 # adapt_delta = 0.95
-adapt_delta_list <- seq(0.94, 0.96, 0.01)
-
-## Cores for parallelisation
-num_cores = 3
+# adapt_delta_list <- seq(0.94, 0.96, 0.01)
 
 ############################ Parameters to set ############################
 
@@ -60,8 +57,8 @@ sample_model <- function(adapt_delta){
 model_fit <- mod$sample(
     data = data_list,
     seed = seed,
-    chains = chains,
-    parallel_chains = parallel_chains,
+    chains = num_cores,
+    parallel_chains = num_cores,
     refresh = refresh,
     adapt_delta = adapt_delta,
     save_warmup = save_warmup
@@ -107,8 +104,5 @@ saveRDS(results,
                                sep ="_")))
 }
 
-mclapply(adapt_delta_list, sample_model, mc.cores = num_cores)
 
-df = readRDS(here::here("simulation_output", "slurm_id_2_adapt_delta_0.94_.RDS"))
-df$divergences
-
+lapply(adapt_delta_list, sample_model)
