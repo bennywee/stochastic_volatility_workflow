@@ -57,8 +57,8 @@ sample_model <- function(adapt_delta){
 model_fit <- mod$sample(
     data = data_list,
     seed = seed,
-    chains = num_cores,
-    parallel_chains = num_cores,
+    chains = chains,
+    parallel_chains = parallel_chains,
     refresh = refresh,
     adapt_delta = adapt_delta,
     save_warmup = save_warmup
