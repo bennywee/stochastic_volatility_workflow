@@ -1,8 +1,11 @@
+figures/
+simulation_output/
+renv/
 notes.md
 data/
 Icon?
 .DS_Store
-model_executables/
+models/executables/
 writeups/results_files/
 
 # Output directory
