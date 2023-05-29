@@ -1,3 +1,5 @@
+simulation_output/
+*.out
 notes.md
 data/
 Icon?
