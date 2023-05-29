@@ -1,6 +1,7 @@
 figures/
 simulation_output/
 renv/
+*.out
 notes.md
 data/
 Icon?

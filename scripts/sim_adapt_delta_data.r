@@ -1,8 +1,8 @@
 library(cmdstanr)
 library(posterior)
 library(parallel)
+source(here::here("R", "data.R"))
 
-# source(here::here("configs/adapt_delta_sim.r"))
 # Slurm ID
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 ITE = as.numeric(slurm_arrayid)
@@ -23,6 +23,7 @@ dependent_variable <- "yobs"
 set.seed(123)
 sample_vect <- sample.int(10000, 100)
 seed <- sample_vect[ITE]
+set.seed(seed)
 
 chains <- 4
 parallel_chains <- 4
@@ -31,8 +32,6 @@ save_warmup <- FALSE
 gen_quantities <- 0
 sample_prior <- 0
 adapt_delta_list <- seq(0.90, 0.99, 0.005)
-# adapt_delta = 0.95
-# adapt_delta_list <- seq(0.94, 0.96, 0.01)
 
 ############################ Parameters to set ############################
 
@@ -46,7 +45,18 @@ file <- here::here("models", paste(model_name, ".stan", sep = ""))
 mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), dir = executables_path)
 
 # Get data
-data <- read.csv(here::here("data", data_loc, data_type, paste(data_file_name, ".csv", sep = "")))
+size <- 1000
+phi <- 0.97779
+sig <- 0.15850
+beta <- 0.64733
+
+data <- simulate_ksc(
+    T = size,
+    phi.true = phi,
+    sig.true = sig,
+    beta.true = beta
+)
+
 returns <- data[complete.cases(data[dependent_variable]), dependent_variable]
 
 # Fit model
@@ -82,12 +92,14 @@ params = c('mu',
 
 results = list()
 results[["adapt_delta"]] = adapt_delta
+results[["seed"]] = seed
 results[["divergences"]] = sum(model_fit$diagnostic_summary()$num_divergent)
 results[["model_summary"]] <- model_fit$summary(variables = params)
 results[["chain1_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 1)))
 results[["chain2_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 2)))
 results[["chain3_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 3)))
 results[["chain4_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 4)))
+results[['script']] <- readLines(here::here("scripts", "sim_adapt_delta_data.r"))
 
 path <- here::here("simulation_output")
 if (!dir.exists(path)) {
@@ -100,6 +112,7 @@ saveRDS(results,
                                ITE,
                                "adapt_delta", 
                                adapt_delta, 
+                               "seed_dataset_100",
                                ".RDS", 
                                sep ="_")))
 }

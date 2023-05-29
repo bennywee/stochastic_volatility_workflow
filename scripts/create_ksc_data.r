@@ -2,6 +2,8 @@
 source(here::here("R", "data.R"))
 source(here::here("configs/adapt_delta_sim.r"))
 
+set.seed(323651)
+
 # Set parameters (mu is set within simulate_ksc function) and seed
 if (!(config)) {
     size <- 1000
