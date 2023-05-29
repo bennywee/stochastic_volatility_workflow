@@ -6,3 +6,6 @@ ksc_data:
 
 yahoo_data:
 	Rscript -e 'renv::run("scripts/create_yahoo_data.r")'
+
+sync_sims:
+	rsync -auv -e ssh benjamiw@monarch.erc.monash.edu:~/zk28/benjamiw/stochastic_volatility_workflow/simulation_output .
