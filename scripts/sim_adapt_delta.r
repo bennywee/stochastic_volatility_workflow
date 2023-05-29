@@ -30,7 +30,7 @@ refresh <- 500
 save_warmup <- FALSE
 gen_quantities <- 0
 sample_prior <- 0
-adapt_delta_list <- seq(0.94, 0.96, 0.001)
+adapt_delta_list <- seq(0.90, 0.99, 0.005)
 # adapt_delta = 0.95
 # adapt_delta_list <- seq(0.94, 0.96, 0.01)
 
@@ -84,10 +84,10 @@ results = list()
 results[["adapt_delta"]] = adapt_delta
 results[["divergences"]] = sum(model_fit$diagnostic_summary()$num_divergent)
 results[["model_summary"]] <- model_fit$summary(variables = params)
-results[["chain1_summary"]] <- summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 1))
-results[["chain2_summary"]] <- summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 2))
-results[["chain3_summary"]] <- summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 3))
-results[["chain4_summary"]] <- summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 4))
+results[["chain1_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 1)))
+results[["chain2_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 2)))
+results[["chain3_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 3)))
+results[["chain4_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 4)))
 
 path <- here::here("simulation_output")
 if (!dir.exists(path)) {
