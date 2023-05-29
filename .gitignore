@@ -1,3 +1,8 @@
+Sim_SV.R
+.Rprofile
+*.html
+.python-version
+renv.lock
 figures/
 simulation_output/
 renv/
