@@ -59,8 +59,6 @@ results[["chain1_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(
 results[["chain2_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 2)))
 results[["chain3_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 3)))
 results[["chain4_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 4)))
-results[["model_code"]] <- model_fit$code()
-results[['config']] <- readLines(here::here("configs", "adapt_delta_sim.r"))
 
 path <- here::here("simulation_output")
 if (!dir.exists(path)) {
@@ -68,7 +66,9 @@ if (!dir.exists(path)) {
 }
 
 saveRDS(results, 
-        file = here::here("simulation_output", 
+        file = here::here("simulation_output",
+                          simulation_name,
+                          "output",
                          paste("slurm_id",
                                ITE,
                                "adapt_delta", 

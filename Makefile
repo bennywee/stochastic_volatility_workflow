@@ -9,3 +9,8 @@ yahoo_data:
 
 sync_sims:
 	rsync -auv -e ssh benjamiw@monarch.erc.monash.edu:~/zk28/benjamiw/stochastic_volatility_workflow/simulation_output .
+
+run_sim:
+	/bin/bash -c "module load  R/4.0.5"
+	R --vanilla < scripts/_simulation_metadata.r
+	sbatch job.sh

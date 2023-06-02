@@ -1,6 +1,8 @@
-config = TRUE # TRUE if using config parameters. FALSE if setting parameters inside executable scripts
-
-simulate_data = TRUE
+simulate_data <- FALSE
+simulation_name <- "adapt_delta_0.9_0.99_0.005_sigsqd_prior_single_dataset"
+simulation_description = "
+Running simulation again with corrected prior on sigma^2 using new datasets for each seed
+"
 
 # Create Simulated Data (if simulate data is TRUE)
 size <- 1000
