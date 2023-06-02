@@ -16,7 +16,6 @@ dependent_variable <- "yobs" # Data column name for y variable
 
 # Model metadata
 model_name <- "sv_user_guide_reparameterised_ksc_priors" # Name of the .stan file in the models directory
-unique_identifier <- "" # Suffix given for specific run of that stan script, needed to identify exact model output
 
 ## Stan parameters
 chains <- 4
@@ -26,3 +25,20 @@ save_warmup <- FALSE
 gen_quantities <- 0
 sample_prior <- 0
 adapt_delta_list <- seq(0.90, 0.99, 0.005)
+
+## Model parameters to track
+params = c('mu',
+    'phi',
+    'sigma',
+    'h[1]',
+    'h[100]',
+    'h[200]',
+    'h[300]',
+    'h[400]',
+    'h[500]',
+    'h[600]',
+    'h[700]',
+    'h[800]',
+    'h[900]',
+    'h[1000]'
+)
