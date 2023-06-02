@@ -51,22 +51,6 @@ model_fit <- mod$sample(
     save_warmup = save_warmup
 )
 
-params = c('mu',
-    'phi',
-    'sigma',
-    'h[1]',
-    'h[100]',
-    'h[200]',
-    'h[300]',
-    'h[400]',
-    'h[500]',
-    'h[600]',
-    'h[700]',
-    'h[800]',
-    'h[900]',
-    'h[1000]'
-)
-
 results = list()
 results[["adapt_delta"]] = adapt_delta
 results[["divergences"]] = sum(model_fit$diagnostic_summary()$num_divergent)
@@ -75,6 +59,7 @@ results[["chain1_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(
 results[["chain2_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 2)))
 results[["chain3_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 3)))
 results[["chain4_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 4)))
+results[["model_code"]] <- model_fit$code()
 results[['config']] <- readLines(here::here("configs", "adapt_delta_sim.r"))
 
 path <- here::here("simulation_output")
