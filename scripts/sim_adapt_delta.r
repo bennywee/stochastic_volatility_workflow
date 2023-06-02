@@ -1,40 +1,17 @@
 library(cmdstanr)
 library(posterior)
 library(parallel)
+source(here::here("R", "data.R"))
+source(here::here("configs", "adapt_delta_sim.r"))
 
-# source(here::here("configs/adapt_delta_sim.r"))
 # Slurm ID
 slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
 ITE = as.numeric(slurm_arrayid)
-############################ Parameters to set ############################
 
-# Model training
-## Model metadata
-model_name <- "sv_user_guide_reparameterised_ksc_priors" 
-unique_identifier <- ""
-
-## Data location
-data_loc <- "simulated"
-data_type <- "ksc"
-data_file_name <- "phi_0.97779_sig_0.1585_beta_0.64733"
-dependent_variable <- "yobs"
-
-## Stan sampling
+## Stan sampling seeds
 set.seed(123)
 sample_vect <- sample.int(10000, 100)
 seed <- sample_vect[ITE]
-
-chains <- 4
-parallel_chains <- 4
-refresh <- 500
-save_warmup <- FALSE
-gen_quantities <- 0
-sample_prior <- 0
-adapt_delta_list <- seq(0.90, 0.99, 0.005)
-# adapt_delta = 0.95
-# adapt_delta_list <- seq(0.94, 0.96, 0.01)
-
-############################ Parameters to set ############################
 
 # Set executables path
 executables_path <- here::here("models/executables")
@@ -46,7 +23,17 @@ file <- here::here("models", paste(model_name, ".stan", sep = ""))
 mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), dir = executables_path)
 
 # Get data
+if (simulate_data){
+data <- simulate_ksc(
+    T = size,
+    phi.true = phi,
+    sig.true = sig,
+    beta.true = beta
+)
+} else {
 data <- read.csv(here::here("data", data_loc, data_type, paste(data_file_name, ".csv", sep = "")))
+}
+
 returns <- data[complete.cases(data[dependent_variable]), dependent_variable]
 
 # Fit model
@@ -88,6 +75,7 @@ results[["chain1_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(
 results[["chain2_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 2)))
 results[["chain3_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 3)))
 results[["chain4_summary"]] <- try(summarise_draws(subset_draws(model_fit$draws(variables = params), chain = 4)))
+results[['config']] <- readLines(here::here("configs", "adapt_delta_sim.r"))
 
 path <- here::here("simulation_output")
 if (!dir.exists(path)) {
