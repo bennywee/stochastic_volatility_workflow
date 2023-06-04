@@ -24,6 +24,7 @@ mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), di
 
 # Get data
 if (simulate_data){
+set.seed(seed)
 data <- simulate_ksc(
     T = size,
     phi.true = phi,
@@ -79,3 +80,4 @@ saveRDS(results,
 
 
 lapply(adapt_delta_list, sample_model)
+
