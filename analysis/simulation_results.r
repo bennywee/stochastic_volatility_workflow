@@ -1,7 +1,8 @@
+library(dplyr)
 library(ggplot2)
 source(here::here("R", "simulations.R"))
 
-path <- "simulation_output/adapt_delta_0.9_0.99_0.005_sigsqd_prior_single_dataset"
+path <- "simulation_output/adapt_delta_0.94_0.96_0.001"
 
 rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
 divergence_list <- lapply(paste("output", rds_list, sep="/"), get_divergence)
