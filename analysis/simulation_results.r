@@ -1,7 +1,7 @@
 library(ggplot2)
 source(here::here("R", "simulations.R"))
 
-path <- "simulation_output/adapt_delta_0.9_0.99_0.005_stan_user_guide_single_dataset"
+path <- "simulation_output/adapt_delta_0.9_0.99_0.005_sigsqd_prior_single_dataset"
 
 rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
 divergence_list <- lapply(paste("output", rds_list, sep="/"), get_divergence)
@@ -27,3 +27,10 @@ ggsave(here::here(path, "boxplot_log10.png"),
        width = 8, 
        height = 5, 
        unit= "in")
+
+df %>% 
+    group_by(adapt_delta, divergences) %>%
+    summarise(n = n()) %>%
+    ungroup() %>%
+    group_by(adapt_delta) %>%
+  mutate(prop = n / sum(n)) %>% filter(divergences == 0)
