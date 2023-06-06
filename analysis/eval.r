@@ -2,7 +2,7 @@ library(tidyverse)
 library(shinystan)
 library(posterior)
 
-source(here::here("config.r"))
+source(here::here("configs", "run_model.r"))
 source(here::here("R", "plots.R"))
 source(here::here("R", "model_eval.R"))
 
