@@ -116,3 +116,4 @@ We want to next understand how the inference from HMC compares with other MCMC m
 - Compare differences in samples of runs with/without divergences. WHat do the pair plots look like?
 - Use tourr to see if different projections and visualiastions can pinpoint the difficult parameters. 
 - Run "gold standard" MCMC (what about KSC MCMC methods?). Use QQ plots to check for any differences in posterior samples. 
+- SBC to understand coverage and prior choice
