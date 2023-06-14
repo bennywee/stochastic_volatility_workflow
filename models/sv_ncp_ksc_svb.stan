@@ -54,6 +54,6 @@ generated quantities{
        h[400] < h_sim[400],
        h[500] < h_sim[500],
        h[600] < h_sim[600],
-       h[1000] < h_sim[1000],
+       h[1000] < h_sim[1000]
     };
 }
