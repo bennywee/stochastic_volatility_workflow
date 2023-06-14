@@ -9,9 +9,9 @@ sv_fit <- sv_mod$sample(
     chains = 1,
     parallel_chains = 1,
     refresh = 500,
-    adapt_delta = 0.95,
+    adapt_delta = 0.99,
     save_warmup = FALSE,
-    num_samples = 999
+    iter_sampling = 999
 )
 
 ranks <- sv_fit$draws(variables = c('sim_ranks'), format = 'df') %>% select(-c(.chain, .iteration, .draw))
