@@ -45,7 +45,7 @@ model {
   y_sim ~ normal(0, exp(h / 2));
 }
 generated quantities{
-  array[4] int<lower=0, upper=1> sim_ranks
+  array[9] int<lower=0, upper=1> sim_ranks
     = {mu < mu_sim, 
        phi < phi_sim, 
        sigma < sigma_sim, 
