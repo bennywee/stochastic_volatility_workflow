@@ -1,5 +1,5 @@
 transformed data {
-  int<lower=0> T = 100;
+  int<lower=0> T = 1000;
   real p_sim = beta_rng(20, 1.5);
   real sigma_sim = inv_gamma_rng(5./2., (0.01*5.)/2.);
   real mu_sim = normal_rng(0, 10);
@@ -46,5 +46,14 @@ model {
 }
 generated quantities{
   array[4] int<lower=0, upper=1> sim_ranks
-    = {mu < mu_sim, phi < phi_sim, sigma < sigma_sim, h[1] < h_sim[1]};
+    = {mu < mu_sim, 
+       phi < phi_sim, 
+       sigma < sigma_sim, 
+       h[1] < h_sim[1],
+       h[100] < h_sim[100],
+       h[400] < h_sim[400],
+       h[500] < h_sim[500],
+       h[600] < h_sim[600],
+       h[1000] < h_sim[1000],
+    };
 }
