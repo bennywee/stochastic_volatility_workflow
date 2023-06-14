@@ -4,7 +4,7 @@ SBC with non centereed model and ksc priors
 "
 
 # Model metadata
-model_name <- "sv_user_guide_reparameterised_ksc_priors" # Name of the .stan file in the models directory
+model_name <- "sv_ncp_ksc_sbc" # Name of the .stan file in the models directory
 
 ## Stan parameters
 chains <- 1
