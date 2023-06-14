@@ -1,7 +1,7 @@
 library(cmdstanr)
 library(dplyr)
 
-sv_mod <- cmdstan_model(here::here("models", "sv_ncp_ksc_svb.stan"),
+sv_mod <- cmdstan_model(here::here("models", "sv_ncp_ksc_sbc.stan"),
     dir = here::here("models", "executables"))
 
 sv_fit <- sv_mod$sample(
