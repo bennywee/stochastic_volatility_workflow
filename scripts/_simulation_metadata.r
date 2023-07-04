@@ -2,9 +2,11 @@ args = commandArgs(trailingOnly = TRUE)
 source(here::here("configs", args[1]))
 
 path <- here::here("simulation_output", simulation_name, "output")
+std_out_path <- here::here("simulation_output", simulation_name, "std_out")
 
 if (!dir.exists(path)) {
   dir.create(path, recursive = TRUE)
+  dir.create(std_out_path, recursive = TRUE)
 }
 
 # Use writeLines to pretty print this text
