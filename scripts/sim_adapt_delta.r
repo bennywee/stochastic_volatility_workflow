@@ -24,7 +24,11 @@ mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), di
 
 # Get data
 if (simulate_data){
-set.seed(seed)
+  if(manual_seed){
+    set.seed(manual_seed)
+  } else {
+    set.seed(seed)
+  }
 data <- simulate_ksc(
     T = size,
     phi.true = phi,

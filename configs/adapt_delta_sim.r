@@ -1,7 +1,7 @@
 simulate_data <- FALSE
-simulation_name <- "adapt_delta_0.9_0.99_0.005_sigsqd_prior_single_dataset"
+simulation_name <- "adapt_delta_0.9_0.99_0.005_sigsqd_prior_single_dataset_r2"
 simulation_description = "
-Running simulation again with corrected prior on sigma^2 using new datasets for each seed
+Running simulation with KSC priors and single dataset (run: 2.0)
 "
 
 # Create Simulated Data (if simulate data is TRUE)
@@ -9,6 +9,7 @@ size <- 1000
 phi <- 0.97779
 sig <- 0.15850
 beta <- 0.64733
+manual_seed <- FALSE #323651
 
 ## Data location (if simulate data is FALSE)
 data_loc <- "simulated" # Either simulated or preprocessed data (don't use raw)
