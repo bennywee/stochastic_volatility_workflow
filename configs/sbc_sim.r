@@ -1,4 +1,4 @@
-simulation_name <- "sbc_ncp_ksc_priors_0.99_adapt_delta"
+simulation_name <- "sbc_ncp_ksc_priors_0.999_adapt_delta"
 simulation_description = "
 SBC with non centereed model and ksc priors
 "
@@ -10,7 +10,7 @@ model_name <- "sv_ncp_ksc_sbc" # Name of the .stan file in the models directory
 chains <- 1
 parallel_chains <- 1
 refresh <- 500
-adapt_delta <- 0.99
+adapt_delta <- 0.999
 save_warmup <- FALSE
 iter_sampling <- 999
 
