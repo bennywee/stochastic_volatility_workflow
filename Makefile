@@ -12,10 +12,10 @@ sync_sims:
 
 run_sim:
 	/bin/bash -c "module load  R/4.0.5"
-	R --vanilla < scripts/_simulation_metadata.r adapt_delta_sim.r
+	R --vanilla < scripts/_simulation_metadata.r --args adapt_delta_sim.r
 	sbatch jobs/adapt_delta.sh
 
 run_sbc:
 	/bin/bash -c "module load  R/4.0.5"
-	R --vanilla < scripts/_simulation_metadata.r sbc_sim.r
+	R --vanilla < scripts/_simulation_metadata.r --args sbc_sim.r
 	sbatch jobs/sbc.sh
