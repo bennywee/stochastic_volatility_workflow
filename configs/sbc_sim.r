@@ -1,7 +1,10 @@
-simulation_name <- "sbc_ncp_ksc_priors_0.999_adapt_delta"
+simulation_name <- "sbc_ncp_ksc_priors_0.999_adapt_delta_test_retry_function_r3"
 simulation_description = "
-SBC with non centereed model and ksc priors
+SBC with non centereed model and ksc priors (TEST: retry function and error handling) run: 3.0
 "
+
+# Retry attempts
+max_retries <- 5
 
 # Model metadata
 model_name <- "sv_ncp_ksc_sbc" # Name of the .stan file in the models directory

@@ -21,23 +21,47 @@ if (!dir.exists(executables_path)) dir.create(executables_path)
 file <- here::here("models", paste(model_name, ".stan", sep = ""))
 mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), dir = executables_path)
 
-sv_fit <- mod$sample(
-    seed = seed,
-    chains = chains,
-    parallel_chains = parallel_chains,
-    refresh = refresh,
-    adapt_delta = adapt_delta,
-    save_warmup = save_warmup,
-    iter_sampling = iter_sampling
-)
+attempts <- 1
 
-ranks <- sv_fit$draws(variables = c('sim_ranks'), format = 'df') %>%
-    select(-c(.chain, .iteration, .draw))
+while(attempts < max_retries){
+    sv_fit <- mod$sample(
+        seed = seed,
+        chains = chains,
+        parallel_chains = parallel_chains,
+        refresh = refresh,
+        adapt_delta = adapt_delta,
+        save_warmup = save_warmup,
+        iter_sampling = iter_sampling
+    )
+
+    ranks_stats <- function(model_fit){
+        sim_ranks <- model_fit$draws(variables = c('sim_ranks'), format = 'df') %>%
+            select(-c(.chain, .iteration, .draw))
+
+        return(sim_ranks)
+    }
+
+    ranks <- try(ranks_stats(model_fit = sv_fit), silent= FALSE)
+
+    if(!is(ranks, 'try-error')){
+        break
+    } else {
+        attempts <- attempts + 1
+    }
+}
+
+if(attempts == max_retries) stop(paste("Model failed to sample after", max_retries, "attempts"))
 
 names(ranks) <- params
 agg_ranks <- apply(ranks, 2, FUN = sum)
 
-saveRDS(agg_ranks,
+results <- list()
+results[["agg_ranks"]] <- agg_ranks
+results[["array_id"]] <- ITE
+results[["seed"]] <- seed
+results[["attempts"]] <- attempts
+
+saveRDS(results,
     file = here::here("simulation_output",
         simulation_name,
         "output",
