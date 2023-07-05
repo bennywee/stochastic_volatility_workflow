@@ -9,7 +9,7 @@ ITE = as.numeric(slurm_arrayid)
 
 ## Stan sampling seeds
 set.seed(123)
-sample_vect <- sample.int(10000, iter_sampling)
+sample_vect <- sample.int(10000)
 seed <- sample_vect[ITE]
 
 # Set executables path
