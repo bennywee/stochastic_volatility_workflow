@@ -22,10 +22,6 @@ transformed data {
   }
   
 }
-data {
-  int<lower=0> T;
-  vector[T] y;
-}
 parameters {
   real mu;                     // mean log volatility
   real<lower=0, upper=1> p;    // p parameter of beta. starts at 0.5
@@ -46,7 +42,7 @@ model {
   sigma ~ inv_gamma(5./2., (0.01*5.)/2.);
   mu ~ normal(0, 10);
   h_std ~ std_normal();
-  y ~ normal(0, exp(h / 2));
+  y_sim ~ normal(0, exp(h / 2));
 }
 generated quantities{
   array[9] int<lower=0, upper=1> sim_ranks
