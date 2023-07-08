@@ -5,10 +5,10 @@ transformed data {
   real mu_sim = cauchy_rng(0,10);
   vector[T] h_sim;
   
-  h_sim[1] ~ normal_rng(mu_sim, sigma_sim / sqrt(1 - phi_sim * phi_sim));
+  h_sim[1] = normal_rng(mu_sim, sigma_sim / sqrt(1 - phi_sim * phi_sim));
 
   for (t in 2:T) {
-    h_sim[t] ~ normal_rng(mu_sim + phi_sim * (h_sim[t - 1] -  mu_sim), sigma_sim);
+    h_sim[t] = normal_rng(mu_sim + phi_sim * (h_sim[t - 1] -  mu_sim), sigma_sim);
   }
 
   vector[T] y_sim;
