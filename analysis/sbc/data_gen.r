@@ -34,5 +34,3 @@ for (i in 1:n_iterations) {
     names(data) <- c("y_sim")
     write.csv(data, file = paste(data_path, paste(i, "csv", sep = "."), sep = "/"))
 }
-
-row.names(data) <- NULL
