@@ -28,17 +28,35 @@ model {
 }
 generated quantities{
   vector[T] y_rep;
+  vector[T] log_yrep_squared;
   vector[T] log_y_squared;
   real y_rep_kurtosis;
   real y_rep_skewness;
-  real log_y_squared_autocorr;
+  real log_yrep_squared_autocorr_1;
+  real log_yrep_squared_autocorr_2;
+  real log_yrep_squared_autocorr_3;
+  real y_kurtosis;
+  real y_skewness;
+  real log_y_squared_autocorr_1;
+  real log_y_squared_autocorr_2;
+  real log_y_squared_autocorr_3;
 
   for (t in 1:T){
     y_rep[t] = normal_rng(0, exp(h[t]/2));
-    log_y_squared[t] = log(y_rep[t] * y_rep[t]);
+    log_yrep_squared[t] = log(y_rep[t] * y_rep[t]);
+    log_y_squared[t] = log(y[t] * y[t]);
   }  
 
   y_rep_kurtosis = kurtosis(y_rep, T);
   y_rep_skewness = skewness(y_rep, T);
-  log_y_squared_autocorr = first_order_autocorr(log_y_squared, T);
+  log_yrep_squared_autocorr_1 = first_order_autocorr(log_yrep_squared, T);
+  log_yrep_squared_autocorr_2 = second_order_autocorr(log_yrep_squared, T);
+  log_yrep_squared_autocorr_3 = third_order_autocorr(log_yrep_squared, T);
+
+  y_kurtosis = kurtosis(y, T);
+  y_skewness = skewness(y, T);
+  log_y_squared_autocorr_1 = first_order_autocorr(log_y_squared, T);
+  log_y_squared_autocorr_2 = second_order_autocorr(log_y_squared, T);
+  log_y_squared_autocorr_3 = third_order_autocorr(log_y_squared, T);
+
 }
