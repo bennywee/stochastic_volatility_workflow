@@ -1,16 +1,13 @@
 library(cmdstanr)
 library(dplyr)
+library(future.apply)
+plan(multisession)
 
 source(here::here("configs", "sbc_sim.r"))
 
-# Slurm ID
-slurm_arrayid <- Sys.getenv('SLURM_ARRAY_TASK_ID')
-ITE = as.numeric(slurm_arrayid)
-
 ## Stan sampling seeds
 set.seed(123)
-sample_vect <- sample.int(10000)
-seed <- sample_vect[ITE]
+sample_vect <- sample.int(10000)[1:sim_iter] # Number of data files
 
 # Set executables path
 executables_path <- here::here("models/executables")
@@ -21,10 +18,16 @@ if (!dir.exists(executables_path)) dir.create(executables_path)
 file <- here::here("models", paste(model_name, ".stan", sep = ""))
 mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), dir = executables_path)
 
-attempts <- 1
+simulation <- function(seed) {
+    seed_index <- which(sample_vect == seed)
 
-while(attempts < max_retries){
+    # Load data
+    prior_params <- readRDS(here::here("data/simulated/sbc", data_location, paste(seed_index, "RDS", sep = ".")))
+    returns <- prior_params$data$y_sim
+    data_list <- list(T = length(returns), y_sim = returns)
+
     sv_fit <- mod$sample(
+        data = data_list,
         seed = seed,
         chains = chains,
         parallel_chains = parallel_chains,
@@ -34,38 +37,29 @@ while(attempts < max_retries){
         iter_sampling = iter_sampling
     )
 
-    ranks_stats <- function(model_fit){
-        sim_ranks <- model_fit$draws(variables = c('sim_ranks'), format = 'df') %>%
-            select(-c(.chain, .iteration, .draw))
-
-        return(sim_ranks)
+    draws <- sv_fit$draws(format = "df")
+    params <- draws[, !grepl("lp__|.chain|.iteration|.draw|y_sim|h_std", names(draws))]
+    
+    rank_stats <- function(parameter){
+        sum(params[[parameter]] < prior_params$parameters[[parameter]])
     }
 
-    ranks <- try(ranks_stats(model_fit = sv_fit), silent= FALSE)
+    agg_ranks = sapply(names(params), rank_stats,USE.NAMES = TRUE)    
+    
+    results <- list()
+    results[["agg_ranks"]] <- agg_ranks
+    results[["seed_index"]] <- seed_index
+    results[["seed"]] <- seed
+    results[["sv_fit"]] <- sv_fit
 
-    if(!is(ranks, 'try-error')){
-        break
-    } else {
-        attempts <- attempts + 1
-    }
+    saveRDS(results,
+        file = here::here("simulation_output",
+            simulation_name,
+            "output",
+            paste("seed_index",
+                seed_index,
+                ".RDS",
+                sep = "_")))
 }
 
-if(attempts == max_retries) stop(paste("Model failed to sample after", max_retries, "attempts"))
-
-names(ranks) <- params
-agg_ranks <- apply(ranks, 2, FUN = sum)
-
-results <- list()
-results[["agg_ranks"]] <- agg_ranks
-results[["array_id"]] <- ITE
-results[["seed"]] <- seed
-results[["attempts"]] <- attempts
-
-saveRDS(results,
-    file = here::here("simulation_output",
-        simulation_name,
-        "output",
-        paste("slurm_id",
-            ITE,
-            ".RDS",
-            sep = "_")))
+future_lapply(sample_vect, simulation, future.seed = NULL)
