@@ -1,7 +1,9 @@
 library(cmdstanr)
+source(here::here("R", "simulations.r"))
 
 T <- 1000
-n_iterations <- 999
+n_iterations <- 1000
+mcmc_iter <- 999
 model_name <- "sbc_data_gen_sv_ncp_ksc_priors"
 data_path <- here::here("data", "simulated", "sbc", model_name)
 seed <- 543
@@ -22,20 +24,14 @@ model_fit <- mod$sample(
     parallel_chains = 1,
     adapt_delta = 0.999,
     save_warmup = FALSE,
-    iter_sampling = n_iterations
+    iter_sampling = mcmc_iter
 )
 
-df <- model_fit$draws(variable = "y_sim", format = "df")
-df <- df[, !(names(df) %in% c(".chain", ".iteration", ".draw"))]
+sim_parameters <- model_fit$draws(format = "df")
+params <- sim_parameters[, !grepl("lp__|.chain|.iteration|.draw|y_sim|h_std", names(sim_parameters))]
+df <- sim_parameters[, grepl("y_sim", names(sim_parameters))]
 
-for (i in 1:n_iterations) {
-    data <- as.data.frame(t(df[i, ]))
-    row.names(data) <- 1:dim(data)[1]
-    names(data) <- c("y_sim")
-    write.csv(data, file = paste(data_path, paste(i, "csv", sep = "."), sep = "/"))
-}
-
-stan_code <- file
+lapply(1:n_iterations, write_sbc_data, sim_param = sim_parameters, sim_data = df)
 config_file <- readLines(here::here("scripts", "sbc_data_gen.r"))
-metadata <- list(stan = stan_code, config = config_file)
+metadata <- list(stan = file, config = config_file)
 saveRDS(metadata, file = here::here(here::here(data_path, "metadata.RDS")))
