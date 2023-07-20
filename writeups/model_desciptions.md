@@ -177,10 +177,12 @@ So what does this mean for our research question?
 
 We could:
 
-- Generate data from CP or NCP and do SBC with the CP model, NCP model and KSC model. See what the difference is in "calibration" diagnostics. We can provide a new set of diagnostics for testing the calibration of the mixture approxmiation model. In the paper they performed two sets of diagnostics:
+- Generate data from CP or NCP and do SBC with the CP, NCP and KSC models. See what the difference is in "calibration" diagnostics. We can provide a new set of diagnostics for testing the calibration of the mixture approxmiation model. In the paper they performed two sets of diagnostics:
 
 1) Simulated data from the SV model and compare to a GARCH model (which is another type volatility model) by fitting to the simulated data and performing likelihood ratio tests. Where the null is "SV model is correct". They used the posterior mean of the SV model to get the log likelihoods and a MLE estimate of GARCH
 
 2) Used bayes factors to compare performance of SV and GARCH on different currency data.
+
+**Note:** The sampling in KSC has many more iterations from their sampling algorithms (orders of 100k). I'm unsure how this will affect SBC. 
 
 - Generate data from KSC's mixture model and run SBC using the KSC model and an implementation of KSC in Stan. This would be comparing the difference between Stan and the KF + MH correction for sampling the model.
