@@ -142,7 +142,31 @@ The KSC model uses a Kalman filter with "forward filtering and backwards samplin
 1) Lienar
 2) Gaussian
 
-The SV model is not linear. So to deal with this we will transform the model. 
+The SV model is not linear. So to deal with this we will transform the model by squaring and taking the log of $y_t$.
+
+$$
+\begin{aligned}
+y_t^{*} &= log(y_t^2) \\ 
+&= log((\epsilon_t exp(h_t/2))^2) \\
+&=  log(exp(h_t)) + log(\epsilon_t^2) \\
+&= h_t + log(\epsilon_t^2)  \\
+&= h_t + z_t \\
+\end{aligned}
+$$
+
+Where $z_t = log(\epsilon_t^2)$ follows a log chi-squared distribution with mean -1.2704 and varaince 4.93. However, it is not simple to sample from this parameterisation of the model. KSC use a gaussian mixture model to **approximate** the first 4 moments of the log chi squared distribution. This is defined by:
+
+$$
+\begin{aligned}
+f(z_t) = \sum_{i=1}^{K} q_if_N(z_i|m_i-1.2704, \nu_i^2)
+\end{aligned}
+$$
+
+Where K is the mixture of normal densities $f_N$, component probabilities $q_i$, mean $m_i-1.2704$ and variance $\nu_i^2$. These parameters were seleted using moment matching where they found 7 normal densities with varying mean and variance parameters best approximated the log chi squared moments.
+
+Importantly, since the model is now linear and gaussian, the model can be sampled in its state space form via a kalman filter and associated full conditional distributions (i.e the strategy used to sample linear gaussian state space models).
+
+Lastly KSC also apply a Metropois Hastings correction for the fact that the sampling strategy approximates the error distribution. 
 
 # SBC
 So what does this mean for our research question? 
@@ -153,9 +177,9 @@ So what does this mean for our research question?
 
 We could:
 
-- Generate data from CP or NCP and do SBC with the CP, NCP model and KSC model. See what the difference is in "calibration". We can provide a new set of diagnostics for testing the calibration of the mixture approxmiation model. In the paper they performed two sets of diagnostics:
+- Generate data from CP or NCP and do SBC with the CP model, NCP model and KSC model. See what the difference is in "calibration" diagnostics. We can provide a new set of diagnostics for testing the calibration of the mixture approxmiation model. In the paper they performed two sets of diagnostics:
 
-1) Simulated data from the SV model and compare to a GARCH model, which is another type of model for modelling volatility by fitting to the simulated data and performing likelihood ratio tests. Where the null is "SV model is correct". They used the posterior mean of the SV model to get the log likelihoods and a MLE estimate of GARCH
+1) Simulated data from the SV model and compare to a GARCH model (which is another type volatility model) by fitting to the simulated data and performing likelihood ratio tests. Where the null is "SV model is correct". They used the posterior mean of the SV model to get the log likelihoods and a MLE estimate of GARCH
 
 2) Used bayes factors to compare performance of SV and GARCH on different currency data.
 
