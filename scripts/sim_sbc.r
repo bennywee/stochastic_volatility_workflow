@@ -23,7 +23,7 @@ simulation <- function(seed) {
 
     # Load data
     prior_params <- readRDS(here::here("data/simulated/sbc", data_location, paste(seed_index, "RDS", sep = ".")))
-    returns <- prior_params$data$y_sim
+    returns <- prior_params$y_sim
     data_list <- list(T = length(returns), y_sim = returns)
 
     sv_fit <- mod$sample(
@@ -41,7 +41,7 @@ simulation <- function(seed) {
     params <- draws[, !grepl("lp__|.chain|.iteration|.draw|y_sim|h_std", names(draws))]
     
     rank_stats <- function(parameter){
-        sum(params[[parameter]] < prior_params$parameters[[parameter]])
+        sum(params[[parameter]] < prior_params[[parameter]])
     }
 
     agg_ranks = sapply(names(params), rank_stats,USE.NAMES = TRUE)    

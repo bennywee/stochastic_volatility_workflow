@@ -1,13 +1,17 @@
-simulation_name <- "sbc_ncp_ksc_priors_0.999_adapt_delta_test_retry_function_r3"
+simulation_name <- "sbc_ncp_ksc_priors_0.999_adapt_delta_premade_datasets_r2"
 simulation_description = "
-SBC with non centereed model and ksc priors (TEST: retry function and error handling) run: 3.0
+SBC with non centered model and ksc priors with pre-simulated datasets run: 2.0
 "
 
-# Retry attempts
-max_retries <- 5
+# Simulation iterations
+sim_iter <- 1000
 
 # Model metadata
 model_name <- "sv_ncp_ksc_sbc" # Name of the .stan file in the models directory
+
+# Data location
+data_location <- "sbc_data_gen_sv_ncp_ksc_priors"
+dependent_variable <- "y_sim"
 
 ## Stan parameters
 chains <- 1
@@ -16,15 +20,3 @@ refresh <- 500
 adapt_delta <- 0.999
 save_warmup <- FALSE
 iter_sampling <- 999
-
-## Model parameters to track
-params <- c("mu",
-    "phi",
-    "sigma",
-    "h_1",
-    "h_100",
-    "h_400",
-    "h_500",
-    "h_600",
-    "h_1000"
-)
