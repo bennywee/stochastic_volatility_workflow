@@ -20,7 +20,7 @@ transformed parameters {
 model {
   p ~ beta(20, 1.5);
   sigma_sqd ~ inv_gamma(5./2., (0.01*5.)/2.);
-  mu ~ normal(0, 10);
+  mu ~ normal(0, sqrt(10));
   h_std ~ std_normal();
   y_sim ~ normal(0, exp(h / 2));
 }
