@@ -45,7 +45,7 @@ gen_cp_sv_dataset <- function(seed){
     T <- 1000
 
     # Priors
-    mu <- rnorm(1, 0, 10)
+    mu <- rnorm(1, 0, sqrt(10))
     sigma_sqd <- 1 / rgamma(1, 5/2, (0.01*5)/2)
     sigma <- sqrt(sigma_sqd)
     p <- rbeta(1, 20, 1.5)
@@ -109,7 +109,7 @@ gen_ncp_sv_dataset <- function(seed){
     T <- 1000
 
     # Priors
-    mu <- rnorm(1, 0, 10)
+    mu <- rnorm(1, 0, sqrt(10))
     sigma_sqd <- 1 / rgamma(1, 5/2, (0.01*5)/2)
     sigma <- sqrt(sigma_sqd)
     p <- rbeta(1, 20, 1.5)
