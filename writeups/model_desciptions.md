@@ -1,15 +1,24 @@
 # "Centered" Stochastic Volatility Model
-This uses notation from the Stan user guide. The KSC version of this has slightly different notation but is the same model.
+The stochastic volatility model models the **variance** as a random variable and can be expressed in state space form. Using the notation in  Kim, Shepherd and Chib (1998), $y_t$ on the left hand side of the measurement equation is defined as log returns for equally spaced intervals t. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $\phi<1$ for stationarity. The parameter $\sigma$ is the 
 
 $$
 \begin{aligned}
 y_t =& \space \epsilon_t exp(h_t/2) \\
 h_{t+1} =& \space \mu +\phi(h_t - \mu) + \delta_t \sigma\\
 h_1 \sim& \space normal\left(\mu, \frac{\sigma}{\sqrt{1-\phi^2}}\right) \\
+\end{aligned}
+$$
+
+
+
+$$
+\begin{aligned}
 \epsilon_t \sim& \space normal(0,1) \\
 \delta_t \sim& \space normal(0,1)
 \end{aligned}
 $$
+
+This uses notation from the Stan user guide. The KSC version of this has slightly different notation but is the same model.
 
 This can be expressed more succinctly as:
 
