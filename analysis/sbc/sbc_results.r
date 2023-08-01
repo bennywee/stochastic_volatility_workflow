@@ -6,10 +6,10 @@ source("R/sbc.r")
 plan(multicore, workers = 9)
 
 # Get all parameter data
-path <- "simulation_output/sbc_ncp_ksc_priors_0.999_adapt_delta_premade_datasets_r3"
+path <- "simulation_output/sbc_ncp_ksc_priors_0.999_adapt_delta_premade_datasets_test_run2"
 rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
-results <- lapply(paste("output", rds_list, sep = "/"), get_ranks)
-df <- as.data.frame(do.call("rbind", results)) %>% select(-p)
+results <- lapply(paste("output", rds_list, sep = "/"), get_ranks, model_path = path)
+df <- as.data.frame(do.call("rbind", results))
 
 # Parameters
 n_iterations <- length(rds_list)
@@ -18,7 +18,7 @@ n_bins <- 20 # Bins
 expected_count <- n_iterations / n_bins # Chi sqd stat
 
 # Create bins and chi sq stats
-rank_bins <- as.data.frame(lapply(df, binning))
+rank_bins <- as.data.frame(lapply(df, binning, posterior_draws = posterior_samples, bins = n_bins))
 rank_stats <- as.data.frame(lapply(rank_bins, rank_chi_sqd, expected = expected_count))
 
 # Define static and state parameters
@@ -27,8 +27,8 @@ state_parameters <- names(rank_bins)[!(names(rank_bins) %in% static_parameters)]
 additional_parameters <- c("h.1.", "h.10.", "h.100.", "h.500.", "h.1000.", "h.995.")
 
 # Facet plots (hist of params)
-facet_hist(data = rank_bins, variables = static_parameters, expected_bin_count = expected_count)
-facet_hist(data = rank_bins, variables = append(static_parameters, additional_parameters), expected_bin_count = expected_count)
+facet_hist(data = rank_bins, variables = static_parameters, expected_bin_count = expected_count, nbins = n_bins)
+facet_hist(data = rank_bins, variables = append(static_parameters, additional_parameters), expected_bin_count = expected_count, nbins = n_bins)
 
 # Chi squared state parameters (dot plots)
 dot_plots(data = rank_stats,
@@ -36,7 +36,7 @@ dot_plots(data = rank_stats,
     plot_title = "Chi squared estimates for state rank statistics")
 
 # Chi squared state parameters (hist)
-chi_sq_hist(data = ranks_stats,
+chi_sq_hist(data = rank_stats,
     variables = state_parameters,
     plot_title = "Chi squared estimates for state rank statistics")
 
@@ -49,33 +49,37 @@ pval_hist(data = rank_stats,
     expected_bin_count = n_bins,
     plot_title = "Distribution of p-values")
 
-# R hats, effective sample size, "time taken to run"
-rhats <- future_lapply(paste("output", rds_list, sep = "/"), get_rhat, future.seed = NULL)
+# R hats
+rhats <- future_lapply(paste("output", rds_list, sep = "/"), get_rhat, model_path = path, future.seed = NULL)
 rhat_df <- as.data.frame(do.call("rbind", rhats))
 
+# Basic R hats
+basic_rhats <- future_lapply(paste("output", rds_list, sep = "/"), get_rhat_basic, model_path = path, future.seed = NULL)
+basic_rhat_df <- as.data.frame(do.call("rbind", basic_rhats))
+
 # Basic ESS
-ess_basic <- future_lapply(paste("output", rds_list, sep = "/"), get_ess, posterior::ess_basic, future.seed = NULL)
+ess_basic <- future_lapply(paste("output", rds_list, sep = "/"), get_ess, model_path = path, ess_type = "ess_basic", chains = "one_chain", future.seed = NULL)
 ess_basic_df <- as.data.frame(do.call("rbind", ess_basic))
 ess_boxplot(data = ess_basic_df,
     variables = static_parameters,
     plot_title = "Basic ESS distribution")
 
 # Bulk ESS
-ess_bulk <- future_lapply(paste("output", rds_list, sep = "/"), get_ess, posterior::ess_bulk, future.seed = NULL)
+ess_bulk <- future_lapply(paste("output", rds_list, sep = "/"), get_ess, model_path = path, ess_type = "ess_bulk", chains = "one_chain", future.seed = NULL)
 ess_bulk_df <- as.data.frame(do.call("rbind", ess_bulk))
 ess_boxplot(data = ess_bulk_df,
     variables = static_parameters,
     plot_title = "Bulk ESS distribution")
 
 # Tail ESS
-ess_tail <- future_lapply(paste("output", rds_list, sep = "/"), get_ess, posterior::ess_tail, future.seed = NULL)
+ess_tail <- future_lapply(paste("output", rds_list, sep = "/"), get_ess, model_path = path, ess_type = "ess_tail", chains = "one_chain", future.seed = NULL)
 ess_tail_df <- as.data.frame(do.call("rbind", ess_tail))
-ess_boxplot(data = ess_bulk_df,
+ess_boxplot(data = ess_tail_df,
     variables = static_parameters,
-    plot_title = "Bulk ESS distribution")
+    plot_title = "Tail ESS distribution")
 
 # Total time for each model
-times <- future_lapply(paste("output", rds_list, sep = "/"), get_time, future.seed = NULL)
+times <- future_lapply(paste("output", rds_list, sep = "/"), get_time, model_path = path, future.seed = NULL)
 times_df <- as.data.frame(do.call("rbind", times))
 
 
