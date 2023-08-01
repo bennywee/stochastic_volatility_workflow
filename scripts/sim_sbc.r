@@ -7,7 +7,7 @@ source(here::here("configs", "sbc_sim.r"))
 
 ## Stan sampling seeds
 set.seed(123)
-sample_vect <- sample.int(10000)[1:sim_iter] # Number of data files
+sample_vect <- sample.int(1e6)[1:sim_iter] # Number of data files
 
 # Set executables path
 executables_path <- here::here("models/executables")
@@ -20,9 +20,13 @@ mod <- cmdstan_model(file, include_paths = here::here("models", "functions"), di
 
 simulation <- function(seed) {
     seed_index <- which(sample_vect == seed)
+    results <- list()
+    results[["all_chains"]] <- list()
+    results[["one_chain"]] <- list()
 
     # Load data
     prior_params <- readRDS(here::here("data/simulated/sbc", data_location, paste(seed_index, "RDS", sep = ".")))
+    parameters <- names(prior_params)
     returns <- prior_params$y_sim
     data_list <- list(T = length(returns), y_sim = returns)
 
@@ -37,20 +41,31 @@ simulation <- function(seed) {
         iter_sampling = iter_sampling
     )
 
-    draws <- sv_fit$draws(format = "df")
-    params <- draws[, !grepl("lp__|.chain|.iteration|.draw|y_sim|h_std", names(draws))]
-    
-    rank_stats <- function(parameter){
-        sum(params[[parameter]] < prior_params[[parameter]])
+    draws <- as.data.frame(sv_fit$draws(format = "df"))
+    nuisance_vars = "lp__|.chain|.iteration|.draw|y_sim|h_std"
+    all_draws <- draws[, !grepl(nuisance_vars, names(draws))]
+    draws_one_chain <- draws[draws[".chain"] == 1, !grepl(nuisance_vars, names(draws))]
+
+    rank_stats <- function(parameter, draws, prior_parameters) {
+        sum(draws[[parameter]] < prior_parameters[[parameter]])
     }
 
-    agg_ranks = sapply(names(params), rank_stats,USE.NAMES = TRUE)    
-    
-    results <- list()
-    results[["agg_ranks"]] <- agg_ranks
+    results[["all_chains"]][["agg_ranks"]] <- sapply(parameters, rank_stats, draws = all_draws, prior_parameters = prior_params, USE.NAMES = TRUE)
+    results[["all_chains"]][["rhat_basic"]] <- sapply(all_draws, posterior::rhat_basic, USE.NAMES = TRUE)
+    results[["all_chains"]][["rhat"]] <- sapply(all_draws, posterior::rhat, USE.NAMES = TRUE)
+    results[["all_chains"]][["ess_basic"]] <- sapply(all_draws, posterior::ess_basic, USE.NAMES = TRUE)
+    results[["all_chains"]][["ess_bulk"]] <- sapply(all_draws, posterior::ess_bulk, USE.NAMES = TRUE)
+    results[["all_chains"]][["ess_tail"]] <- sapply(all_draws, posterior::ess_tail, USE.NAMES = TRUE)
+
+    results[["one_chain"]][["agg_ranks"]] <- sapply(parameters, rank_stats, draws = draws_one_chain, prior_parameters = prior_params, USE.NAMES = TRUE)
+    results[["one_chain"]][["ess_basic"]] <- sapply(draws_one_chain, posterior::ess_basic, USE.NAMES = TRUE)
+    results[["one_chain"]][["ess_bulk"]] <- sapply(draws_one_chain, posterior::ess_bulk, USE.NAMES = TRUE)
+    results[["one_chain"]][["ess_tail"]] <- sapply(draws_one_chain, posterior::ess_tail, USE.NAMES = TRUE)
+
     results[["seed_index"]] <- seed_index
     results[["seed"]] <- seed
-    results[["sv_fit"]] <- sv_fit
+    results[["diagnostic_smmary"]] <- sv_fit$diagnostic_summary()
+    results[["time"]] <- sv_fit$time()
 
     saveRDS(results,
         file = here::here("simulation_output",

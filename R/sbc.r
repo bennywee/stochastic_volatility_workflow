@@ -1,13 +1,13 @@
-get_ranks <- function(rds_path) {
-    data = readRDS(here::here(paste(path, rds_path, sep = "/")))
-    return(data$agg_ranks)
+get_ranks <- function(rds_path, model_path) {
+    data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
+    return(data$one_chain$agg_ranks)
 }
 
 rank_chi_sqd <- function(column, expected) {
     return(sum((table(column) - expected)^2 / expected))
 }
 
-binning <- function(rank, posterior_draws = m, bins = j) {
+binning <- function(rank, posterior_draws, bins) {
     return(1 + floor(rank / ((posterior_draws + 1) / bins)))
 }
 
@@ -22,31 +22,13 @@ load_parameters <- function(rds_path) {
     return(results)
 }
 
-get_rhat <- function(rds_path) {
-    simulation_data <- load_parameters(rds_path)
-    rhats <- apply(simulation_data$parameters, 2, posterior::rhat_basic)
-    return(c(rhats, seed_index = simulation_data$seed_index))
-}
-
-get_ess <- function(rds_path, ess_type) {
-    simulation_data <- load_parameters(rds_path)
-    ess <- apply(simulation_data$parameters, 2, ess_type)
-    return(c(ess, seed_index = simulation_data$seed_index))
-}
-
-get_time <- function(rds_path) {
-    data <- readRDS(here::here(paste(path, rds_path, sep = "/")))
-    time <- data$sv_fit$time()$total
-    return(c(total_time = time, seed_index = data$seed_index))
-}
-
-facet_hist <- function(data, variables, expected_bin_count) {
+facet_hist <- function(data, variables, nbins, expected_bin_count) {
     rank_bins %>%
         select(all_of(variables)) %>%
         tidyr::pivot_longer(everything(), names_to = "variable", values_to = "rank") %>%
         ggplot(.) +
-        geom_histogram(aes(rank), bins = j, fill = "light blue", alpha = 0.7) +
-        scale_x_continuous(labels = function(x) x * e) +
+        geom_histogram(aes(rank), bins = nbins, fill = "light blue", alpha = 0.7) +
+        scale_x_continuous(labels = function(x) x * expected_bin_count) +
         facet_wrap(~variable) +
         theme_minimal() +
         geom_hline(yintercept = expected_bin_count, size = 0.5, alpha = 0.3) +
@@ -54,8 +36,8 @@ facet_hist <- function(data, variables, expected_bin_count) {
 }
 
 dot_plots <- function(data, variables, plot_title) {
-    ranks_stats %>%
-        select(variables) %>%
+    data %>%
+        select(all_of(variables)) %>%
         tidyr::pivot_longer(everything(), names_to = "parameter", values_to = "chisq_stat") %>%
         arrange(chisq_stat) %>%
         mutate(parameter = factor(parameter, unique(parameter))) %>%
@@ -74,7 +56,7 @@ dot_plots <- function(data, variables, plot_title) {
 
 chi_sq_hist <- function(data, variables, plot_title) {
     data %>%
-        select(variables) %>%
+        select(all_of(variables)) %>%
         tidyr::pivot_longer(everything(), names_to = "parameter", values_to = "chisq_stat") %>%
         arrange(chisq_stat) %>%
         mutate(parameter = factor(parameter, unique(parameter))) %>%
@@ -114,27 +96,30 @@ load_parameters <- function(rds_path) {
     return(results)
 }
 
-get_rhat <- function(rds_path) {
-    simulation_data <- load_parameters(rds_path)
-    rhats <- apply(simulation_data$parameters, 2, posterior::rhat_basic)
-    return(c(rhats, seed_index = simulation_data$seed_index))
+get_rhat_basic <- function(rds_path, model_path) {
+    data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
+    return(data$all_chains$rhat_basic)
 }
 
-get_ess <- function(rds_path, ess_type) {
-    simulation_data <- load_parameters(rds_path)
-    ess <- apply(simulation_data$parameters, 2, ess_type)
-    return(c(ess, seed_index = simulation_data$seed_index))
+get_rhat <- function(rds_path, model_path) {
+    data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
+    return(data$all_chains$rhat)
 }
 
-get_time <- function(rds_path) {
-    data <- readRDS(here::here(paste(path, rds_path, sep = "/")))
-    time <- data$sv_fit$time()$total
-    return(c(total_time = time, seed_index = data$seed_index))
+get_ess <- function(rds_path, model_path, ess_type, chains) {
+    data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
+    return(data[[chains]][[ess_type]])
+}
+
+get_time <- function(rds_path, model_path) {
+    data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
+    time <- data$time
+    return(c(total_time = time$total))
 }
 
 ess_boxplot <- function(data, variables, plot_title) {
     data %>%
-        select(variables) %>%
+        select(all_of(variables)) %>%
         tidyr::pivot_longer(everything(), names_to = "variable", values_to = "ess") %>%
         ggplot(.) +
         geom_boxplot(aes(x = variable, y = ess)) +
