@@ -1,14 +1,13 @@
 # "Centered" Stochastic Volatility Model
-The stochastic volatility model models the **variance** as a random variable and can be expressed in state space form. Using the notation in  Kim, Shepherd and Chib (1998), $y_t$ on the left hand side of the measurement equation is defined as log returns for equally spaced intervals t. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $\phi<1$ for stationarity. The parameter $\sigma$ is the 
+The univariate stochastic volatility model described by Kim, Shepherd and Chib (1998), now denoted as KSC, models the **variance** as a random variable following some latent stochastic process. $y_t$ is the mean corrected returns of some asset for equally spaced intervals t. $\beta$ is a constant scaling factor which is also defined as $exp(\mu / 2)$ representing instantaneous volatility. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$. This autoregressive parameter represents the persistence or "stickiness" of log volatility and the dispersion parameter $\sigma_{\eta}$ is its variance. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks. 
 
 $$
 \begin{aligned}
-y_t =& \space \epsilon_t exp(h_t/2) \\
-h_{t+1} =& \space \mu +\phi(h_t - \mu) + \delta_t \sigma\\
-h_1 \sim& \space normal\left(\mu, \frac{\sigma}{\sqrt{1-\phi^2}}\right) \\
+y_t =& \space \beta exp(h_t/2) \epsilon_t \\
+h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t  \\
+h_1 \sim& \space normal\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
 \end{aligned}
 $$
-
 
 
 $$
@@ -18,30 +17,30 @@ $$
 \end{aligned}
 $$
 
-This uses notation from the Stan user guide. The KSC version of this has slightly different notation but is the same model.
-
-This can be expressed more succinctly as:
+Setting $\beta=1$, the model can be expressed more succinctly as:
 
 $$
 \begin{aligned}
 y_t \sim& \space normal(0, exp(h_t/2)) \\ 
-h_1 \sim& \space normal \left(\mu, \frac{\sigma}{\sqrt{1-\phi^2}}\right) \\
-h_{t+1} \sim& \space normal(\mu +\phi(h_t - \mu) , \sigma), \space\space t\neq 1\\ 
+h_1 \sim& \space normal \left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
+h_{t+1} \sim& \space normal(\mu +\phi(h_t - \mu) , \sigma_{\eta}^2), \space\space t\neq 1\\ 
 \end{aligned}
 $$
 
-With KSC priors:
+With priors for the static parameters as defined in KSC:
 
 $$
 \begin{aligned}
-\mu \sim& \space normal(0, 10) \\
-\sigma^2 \sim& \space IG(5/2, (0.01*5)/2) \\
-\phi \sim& \space stretched\space beta(20, 1.5) \\
+\mu \sim& \space normal(0, 10^2) \\
+\sigma_{\eta}^2 \sim& \space IG(5/2, (0.01*5)/2) \\
+\phi^{*} \sim& \space beta(20, 1.5) \\
+\phi &=  2\phi^{*} - 1
 \end{aligned}
 $$
 
-Aside on stretched beta: this is a beta distribution which has been transformed to have support (-1, 1). Suppose we have a beta distributed variable $p\sim beta(a,b)$ with support (0,1). Then to apply this transformation, we define $\phi = 2p - 1$
+The prior on $\phi$ is a "stretched" beta distribution. This is a beta distribution (as defined on the parameter $\phi^*$) which has been transformed to have support (-1, 1).
 
+This parameterisation of the model is called the "centered" model because the mean of the latent state parameters are "centered" on the mean plus lag of the log volatility $\mu +\phi(h_t - \mu)$. 
 
 ## SBC code
 Below is code to simulate 1000 datasets from the above centered model.
@@ -79,13 +78,15 @@ simulated_cp_datasets = lapply(seed_list, gen_cp_sv_dataset)
 ```
 
 # "Non Centered" Stochastic Volatility Model
-The preposed reparameterisation samples from a *standard normal distribution* and rescales the parameters to give log volatility (as opposed to sampling log volatility directly). First sample from a standard normal distribuition and multiply by the variance of the log volatility parameter.
+For computational purposes, it may be difficult to sample directly from the centered parameterisation of a model, conditional on the type of algorithm. We can reparameterise the model such that the states are first sampled on a distribution centered on 0 (i.e "non centered") which are then transformed to have the correct mean. 
+
+First sample from a standard normal distribuition and multiply by the variance of the log volatility.
 
 $$
 \begin{aligned}
 h_{std} \sim& \space normal(0,1) \\
-h =& h_{std} \times \sigma \\ 
-h \sim& normal(0, \sigma)
+h =& h_{std} \times \sigma_{\eta} \\ 
+h \sim& normal(0, \sigma_{\eta}^2)
 \end{aligned}
 $$
 
@@ -93,8 +94,8 @@ Then we can apply the appropriate rescaling to get samples from the log volatili
 
 $$
 \begin{aligned}
-h_1 =& \space \frac{h_{std, 1}\times \sigma} {\sqrt{1 - \phi^2}} + \mu \\
-h_t =& \space h_{std, t}\times \sigma + \mu  + \phi(h_{std, t-1} - \mu),\space t\neq 1
+h_1 =& \space \frac{h_{std, 1}\times \sigma_{\eta}} {\sqrt{1 - \phi^2}} + \mu \\
+h_t =& \space h_{std, t}\times \sigma_{\eta} + \mu  + \phi(h_{std, t-1} - \mu),\space t\neq 1
 \end{aligned}
 $$
 
@@ -102,8 +103,8 @@ This returns log volatility as desired.
 
 $$
 \begin{aligned}
-h_1 \sim& \space normal \left(\mu, \frac{\sigma}{\sqrt{1-\phi^2}}\right) \\
-h_{t+1} \sim& \space normal(\mu +\phi(h_t - \mu) , \sigma), \space\space t\neq 1\\ 
+h_1 \sim& \space normal \left(\mu, \frac{\sigma_{\eta}}{1-\phi^2}\right) \\
+h_{t+1} \sim& \space normal(\mu +\phi(h_t - \mu) , \sigma_{\eta}^2), \space\space t\neq 1\\ 
 \end{aligned}
 $$
 
