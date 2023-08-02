@@ -1,4 +1,5 @@
 analysis/sandbox.r
+.env/
 writeups/model_desciptions_files
 writeups/results_files
 writeups/week1_files
