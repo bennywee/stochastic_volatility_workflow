@@ -32,9 +32,9 @@ With priors for the static parameters as defined in KSC:
 $$
 \begin{aligned}
 \mu \sim& \space normal(0, 10^2) \\
-\sigma_{\eta}^2 \sim& \space IG(5/2, (0.01*5)/2) \\
-\phi^* \sim& \space beta(20, 1.5) \\
-\phi &=  2\phi^* - 1
+\sigma_{\eta}^2 \sim& \space IG(5/2, (0.01\times 5) / 2) \\
+\phi^{*} \sim& \space beta(20, 1.5) \\
+\phi &=  2\phi^{*} - 1
 \end{aligned}
 $$
 
