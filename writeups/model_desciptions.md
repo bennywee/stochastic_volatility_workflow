@@ -94,13 +94,8 @@ Then we can apply the appropriate rescaling to get samples from the log volatili
 
 $$
 \begin{aligned}
-<<<<<<< HEAD
-h_1 =& \space \frac{h_{std, 1}\times \sigma} {\sqrt{1 - \phi^2}} + \mu \\
-h_t =& \space h_{std, t}\times \sigma + \mu  + \phi(h_{t-1} - \mu),\space t\neq 1
-=======
 h_1 =& \space \frac{h_{std, 1}\times \sigma_{\eta}} {\sqrt{1 - \phi^2}} + \mu \\
 h_t =& \space h_{std, t}\times \sigma_{\eta} + \mu  + \phi(h_{std, t-1} - \mu),\space t\neq 1
->>>>>>> update_model_description
 \end{aligned}
 $$
 
