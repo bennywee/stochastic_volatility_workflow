@@ -103,7 +103,7 @@ This returns log volatility as desired.
 
 $$
 \begin{aligned}
-h_1 \sim& \space normal \left(\mu, \frac{\sigma_{\eta}}{1-\phi^2}\right) \\
+h_1 \sim& \space normal \left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
 h_{t+1} \sim& \space normal(\mu +\phi(h_t - \mu) , \sigma_{\eta}^2), \space\space t\neq 1\\ 
 \end{aligned}
 $$
