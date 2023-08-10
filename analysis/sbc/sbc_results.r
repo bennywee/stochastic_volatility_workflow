@@ -6,7 +6,7 @@ source("R/sbc.r")
 plan(multicore, workers = 9)
 
 # Get all parameter data
-path <- "simulation_output/sbc_ncp_ksc_priors_0.999_adapt_delta_premade_datasets_test_run2"
+path <- "simulation_output/sbc_ncp_ksc_priors_0.999_adapt_delta_premade_datasets_r5_1000_iterations"
 rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
 results <- lapply(paste("output", rds_list, sep = "/"), get_ranks, model_path = path)
 df <- as.data.frame(do.call("rbind", results))
@@ -19,6 +19,7 @@ expected_count <- n_iterations / n_bins # Chi sqd stat
 
 # Create bins and chi sq stats
 rank_bins <- as.data.frame(lapply(df, binning, posterior_draws = posterior_samples, bins = n_bins))
+rank_bins <- rank_bins[!(names(rank_bins) %in% c("y_sim", "sigma"))]
 rank_stats <- as.data.frame(lapply(rank_bins, rank_chi_sqd, expected = expected_count))
 
 # Define static and state parameters
@@ -38,7 +39,17 @@ dot_plots(data = rank_stats,
 # Chi squared state parameters (hist)
 chi_sq_hist(data = rank_stats,
     variables = state_parameters,
-    plot_title = "Chi squared estimates for state rank statistics")
+    plot_title = "Chi squared estimates for state rank statistics") + geom_vline(xintercept = qchisq(0.95, df =n_bins-1))
+
+sum(rank_stats > qchisq(0.95, df =n_bins-1)) / 1003
+
+# QQ plot
+chisq_ranks = rank_stats %>%
+        tidyr::pivot_longer(everything(), names_to = "parameter", values_to = "chisq_stat") %>%
+        arrange(chisq_stat) %>%
+        mutate(parameter = factor(parameter, unique(parameter))) 
+
+qqPlot(chisq_ranks$chisq_stat, distribution = "chisq", df =19)
 
 # Chi squared state parameters (dot plots)
 dot_plots(data = rank_stats,
@@ -83,6 +94,13 @@ times <- future_lapply(paste("output", rds_list, sep = "/"), get_time, model_pat
 times_df <- as.data.frame(do.call("rbind", times))
 
 
+basic_rhat_df %>% 
+    select(c("mu", "sigma_sqd", "phi")) %>% 
+    tidyr::pivot_longer(everything(), names_to = "variable", values_to = "rhat") %>%
+    ggplot(.) +
+        geom_boxplot(aes(x = variable, y = rhat)) +
+        theme_minimal() +
+        labs(title = "Basic Rhats")
 # fit = t$sv_fit
 # fit$summary()
 
