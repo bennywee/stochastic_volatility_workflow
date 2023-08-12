@@ -26,7 +26,6 @@ simulation <- function(seed) {
 
     # Load data
     prior_params <- readRDS(here::here("data/simulated/sbc", data_location, paste(seed_index, "RDS", sep = ".")))
-    parameters <- names(prior_params)
     returns <- prior_params$y_sim
     data_list <- list(T = length(returns), y_sim = returns)
 
@@ -41,27 +40,31 @@ simulation <- function(seed) {
         iter_sampling = iter_sampling
     )
 
-    draws <- as.data.frame(sv_fit$draws(format = "df"))
-    nuisance_vars = "lp__|.chain|.iteration|.draw|y_sim|h_std"
-    all_draws <- draws[, !grepl(nuisance_vars, names(draws))]
-    draws_one_chain <- draws[draws[".chain"] == 1, !grepl(nuisance_vars, names(draws))]
+    nuisance_vars = "lp__|.chain|.iteration|.draw|y_sim|h_std|sigma$"
+    parameters <- names(prior_params)[!grepl(nuisance_vars, names(prior_params))]
+    diagnostics <- c("rhat", "rhat_basic", "ess_bulk", "ess_tail", "ess_basic")
+    all_chains_diagnostics <- posterior::summarise_draws(sv_fit$draws(variables = parameters), diagnostics)
 
+    draws_df <- as.data.frame(sv_fit$draws(variables = parameters, format = "df"))
+    draws_one_chain <- draws_df[draws_df[".chain"] == 1, !grepl(nuisance_vars, names(draws_df))]
+    all_draws <- draws_df[, !grepl(nuisance_vars, names(draws_df))]
+    
     rank_stats <- function(parameter, draws, prior_parameters) {
         sum(draws[[parameter]] < prior_parameters[[parameter]])
     }
 
+    ess_basic <- sapply(draws_one_chain, posterior::ess_basic, USE.NAMES = TRUE)
+    ess_bulk <- sapply(draws_one_chain, posterior::ess_bulk, USE.NAMES = TRUE)
+    ess_tail <- sapply(draws_one_chain, posterior::ess_tail, USE.NAMES = TRUE)
+
+    one_chain_diagnostic <- as.data.frame(cbind(ess_bulk, ess_tail, ess_basic))
+    one_chain_diagnostic["variable"] <- rownames(one_chain_diagnostic)
+    rownames(one_chain_diagnostic) <- NULL
+
     results[["all_chains"]][["agg_ranks"]] <- sapply(parameters, rank_stats, draws = all_draws, prior_parameters = prior_params, USE.NAMES = TRUE)
-    results[["all_chains"]][["rhat_basic"]] <- sapply(all_draws, posterior::rhat_basic, USE.NAMES = TRUE)
-    results[["all_chains"]][["rhat"]] <- sapply(all_draws, posterior::rhat, USE.NAMES = TRUE)
-    results[["all_chains"]][["ess_basic"]] <- sapply(all_draws, posterior::ess_basic, USE.NAMES = TRUE)
-    results[["all_chains"]][["ess_bulk"]] <- sapply(all_draws, posterior::ess_bulk, USE.NAMES = TRUE)
-    results[["all_chains"]][["ess_tail"]] <- sapply(all_draws, posterior::ess_tail, USE.NAMES = TRUE)
-
     results[["one_chain"]][["agg_ranks"]] <- sapply(parameters, rank_stats, draws = draws_one_chain, prior_parameters = prior_params, USE.NAMES = TRUE)
-    results[["one_chain"]][["ess_basic"]] <- sapply(draws_one_chain, posterior::ess_basic, USE.NAMES = TRUE)
-    results[["one_chain"]][["ess_bulk"]] <- sapply(draws_one_chain, posterior::ess_bulk, USE.NAMES = TRUE)
-    results[["one_chain"]][["ess_tail"]] <- sapply(draws_one_chain, posterior::ess_tail, USE.NAMES = TRUE)
-
+    results[["all_chains"]][["diagnostics"]] <- all_chains_diagnostics
+    results[["one_chain"]][["diagnostics"]] <- one_chain_diagnostic
     results[["seed_index"]] <- seed_index
     results[["seed"]] <- seed
     results[["diagnostic_smmary"]] <- sv_fit$diagnostic_summary()
