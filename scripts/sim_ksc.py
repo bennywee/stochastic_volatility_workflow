@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
+from joblib import Parallel, delayed
 np.set_printoptions(suppress=True, precision=5)
 
 from src.gaussianMixture import *
@@ -18,15 +19,18 @@ data_path = "data/simulated/sbc"
 with open(config_path) as f:
     config = json.load(f)
 
+# Create output directories
 output_dir = "simulation_output/" + config["simulation_name"] 
 os.mkdir(output_dir)
 os.mkdir(output_dir + "/output")
 os.mkdir(output_dir + "/tmp")
 os.mkdir(output_dir + "/std_out")
 
-# Need to save metadata and parallelise
-# config...
+# Save config
+with open(output_dir + "/config.json", "w") as outfile:
+    json.dump(config, outfile, indent=4)
 
+# Set seed and configure seed, data location and chains
 random.seed(config["seed"])
 
 sample_vect = random.sample(list(range(1, int(1e6))), config["n_iterations"] * config["chains"])
@@ -36,7 +40,7 @@ seed_data_files = list(zip(sample_vect, data_file_indexes))
 
 def simulation(seed_data):
     random.seed(seed_data[0])
-    data_file = data_path + "/" + config["data_location"] + f"/{seed_data[0][1]}.json"
+    data_file = data_path + "/" + config["data_location"] + f"/{seed_data[1]}.json"
 
     with open(data_file) as f:
         prior_params = json.load(f)
@@ -91,7 +95,9 @@ def simulation(seed_data):
 
     # Save as parquet
     table = pa.Table.from_pandas(samples)
-    pq.write_table(table, output_dir + "/tmp/" + f'{seed_data[0][1]}.parquet')
+    pq.write_table(table, output_dir + "/tmp/" + f'{seed_data[1]}_{seed_data[0]}.parquet')
 
 # parallelise
-simulation(seed_data_files[1:2])
+# import multiprocessing as mp
+# print("Number of processors: ", mp.cpu_count())
+Parallel(n_jobs=2)(delayed(simulation)(i) for i in seed_data_files[0:10])
