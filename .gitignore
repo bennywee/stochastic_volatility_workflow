@@ -1,3 +1,4 @@
+analysis/.discard/*
 *__pycache__
 writeups/*_files/
 .env/
