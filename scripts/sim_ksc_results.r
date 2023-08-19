@@ -12,12 +12,12 @@ tmp_data_location <- paste("simulation_output/", config$simulation_name, "/tmp",
 file_metadata <- as.data.frame(list.files(tmp_data_location))
 names(file_metadata) <- c("files")
 
-file_metadata <- separate_wider_delim(file_metadata, 
-                     cols = files, 
-                     delim = "_", 
-                     names = c("dataset", "mcmc_seed"), 
-                     cols_remove = FALSE) %>% 
-    separate_wider_delim(., cols = mcmc_seed, delim = ".", names = c("mcmc_seed", "parquet")) %>% 
+file_metadata <- tidyr::separate(file_metadata, 
+                     col = files, 
+                     sep = "_", 
+                     into = c("dataset", "mcmc_seed"),
+                     remove = FALSE) %>% 
+    tidyr::separate(., col = mcmc_seed, sep = "\\.", into = c("mcmc_seed", "parquet"), remove = TRUE) %>% 
     select(-parquet)
 
 simulation_results <- function(file_number){
