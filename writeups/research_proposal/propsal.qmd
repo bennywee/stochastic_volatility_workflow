@@ -3,9 +3,17 @@ title: "Comparison of MCMC algorithms in Stochastic Volatility Models"
 format:
   pdf:
     fig-pos: H
+    include-in-header:
+        text: |
+          \usepackage{lipsum}
+          \usepackage{setspace}
+          \onehalfspacing
+          \linespread{1.5}
+fontsize: 12pt
+geometry: margin=1in
 ---
 
-# Background and Motivation
+<!-- # Background and Motivation
 Maybe focus on the MCMC as opposed to SV upfront.
 
 ## SV
@@ -21,7 +29,7 @@ Hamiltonian Monte Carlo is a . It has been popularised through its implementatio
 
 However, as the developments of these tools enable the estimation of more complicated models (with relative ease and accessibility through the development of open source software), so do the risk of mistakes and the need for procedures diagnose problems or mistakes when implementing these methods. How do we know that these algorithms are doing what we expect them to be doing, and how can we effectively differentiate the strengths and weaknesses of different tools.
 
-How do we validate the computation and implementation of our sampling strategies and algorithms in increasingly complex models? And how do these form part of the computational modelling workflow?   
+How do we validate the computation and implementation of our sampling strategies and algorithms in increasingly complex models? And how do these form part of the computational modelling workflow?    -->
 
 <!-- ## HMC
 - There have been many developemnts over the past few decades on estimating Bayesian models through Markov Chain Monte Carlo methods. 
@@ -55,15 +63,16 @@ Over the past few decades there have been many developments in computing hardwar
 
 RESEARCH GOAL: To compare the performance of different MCMC algorithms and estimation strategies when fitting stochastic volatility models. The study will use a discrete formulation is described 
 
-# Literature Review
+# Background and Literature Review
 
-## KSC
-- KSC (1998) compare the performance of likelihood based inference and Bayesian inference at estimating the fit of these models. 
-- Specifically KSC propose a method of sampling using an offset mixture normal approximation with a reweighting procedure to sample from the joint posterior of the SV model. This is estimated using conjugate priors as well as MH.
-- The use of simulation and sampling are used as part of model diagnostics and evaluation. This is compared with other estimation strategies (MLE) and volatility models such as autogregressive conditional heteroskedasticity (ARCH). 
+Kim Sherpherd and Chib (1998) estimate the discrete time Stochastic Volatility model by proposing a simulation strategy using Bayesian methods. Specifically, KSC propose a method of sampling using an offset mixture normal approximation with a reweighting procedure to sample from the posterior of the SV model parameters. By linearing the model and using a mixture of Gaussian's, they were able to apply a Kalman Filter to estimate the latent volatilities of the state space models. The use of simulation and sampling are used as part of model diagnostics and evaluation. This is compared with other estimation strategies and volatility models such as autogregressive conditional heteroskedasticity (ARCH). Their specificaiton of the Stochastic Volatility model and estimation approaches provide the context for comparing the performance of different MCMC algorithms. 
 
-## Stan HMC + NUTs
-There have been many developments in MCMC algorithms since the introduction of classical methods such as GIBBS and MH. Hamiltoninn Monte Carlo (algorithm introduced when, widely available since 2010...?) is a relatively new im.
+The simulations run by KSC rely on sampling directly from conjugate priors and classic Markov Chain Monte Carlo algorithms, Gibbs and Metropolis Hastings. Since the paper was written, new and more powerful MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Hamiltonian Monte Carlo, through open source programming languages such as Stan and PyMC, have become 
+
+
+There have been many developments in MCMC algorithms since the introduction of classical methods such as Gibbs and Metropolis Hastings. 
+
+Hamiltoninn Monte Carlo (algorithm introduced when, widely available since 2010...?) is a relatively new im.
 
 
 - Since then, there have been many developments in MCMC algorithms. In particular, HMC provides a flexible alternative to fitting and sampling from complicated high dimensional Bayesian models.
@@ -161,7 +170,7 @@ Stan's default Hamiltonian Monte Carlo algorithm, the No-U-Turn Sampler, allows 
 
 HMC will use the same priors are specified in the KSC model, however, the HMC algorithm does not require the priors to be conjugate (nor does the algorithm sample from conjugate or conditionally posterior distributions). 
 
-## Simulation Based Calibration (SBC)
+## 3.3 Simulation Based Calibration (SBC)
 <!-- SBC validates posterior samples and inferences generated by MCMC algorithms. It identifies inconsistencies and bias in computation and estimation of a generative model. This procedure  -->
 
 SBC is conducted by comparing the distribution of rank statistics to the discrete uniform distribution which arises from a correctly calibrated algorithm. The procedure starts by generating datasets implied by the prior distribution and data generating process and calculating rank statistics from the resulting posterior samples. Starting with the parameters $\theta$ and data $y$, draw a sample from the prior distribution:
