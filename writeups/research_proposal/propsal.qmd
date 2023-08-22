@@ -46,11 +46,13 @@ In particular, the implementation of Hamiltonian Monte Carlo, a variant of the M
 ## SBC -->
 
 ## Research Goal
-The objective of this research is to evaluate the performance of MCMC algorithms for estimating SV models through a simulation study. Simulations are useful since there is control over the data generating process. This will help us understand the behaviour of MCMC and evaluate its performance against known parameters. Particular attention will be given to the calibration of the MCMC algorithms in the stochastic volatility context. Further diagnostics to evaluate performance will be explored to determine the efficiency of the MCMC sampler. 
+The objective of this research is to validate and compare the comutational methods used to estimate Bayesian Stochastic Volatiity models. Specifically, Simulation Based Calibration will be used to identify bias and errors arising from the results of computational algorithms. The source of such errors include, but are not limited to, different estimation strategies, problems with the sampler, problematic model specifications and coding mistakes. This study will compare the estimation strategies detailed in the Stochastic Volatility literature and the application of Hamiltonina Monte Carlo for estimating these class of models. Results and diagnostics from these simulations will help identify strengths and limitations that arise from these approaches and provide tools for evaluating other types models and algorithms. 
+
+<!-- The objective of this research is to evaluate the performance of MCMC algorithms for estimating SV models through a simulation study. Simulations are useful since there is control over the data generating process. This will help us understand the behaviour of MCMC and evaluate its performance against known parameters. Particular attention will be given to the calibration of the MCMC algorithms in the stochastic volatility context. Further diagnostics to evaluate performance will be explored to determine the efficiency of the MCMC sampler. 
 
 The first step is to understand what "performance" of MCMC algorithms means and what exactly we are measuring. At a high level, the objective of MCMC is to sample from the target posterior distribution and to provide reliable inference.  Convergence to the target posterior can be measured through efficiency measures such as rhat and effective sample size. 
 
-- Explcitly outline what is compared. KSC and HMC algorithms and estimation strategies. 
+- Explcitly outline what is compared. KSC and HMC algorithms and estimation strategies.  -->
 
 <!-- 
 Frequentist methods 
@@ -60,14 +62,22 @@ Frequentist methods
 - There are a variety of ways of estimating this model using a Bayesian frameworks. 
 
 Over the past few decades there have been many developments in computing hardware -->
-
-RESEARCH GOAL: To compare the performance of different MCMC algorithms and estimation strategies when fitting stochastic volatility models. The study will use a discrete formulation is described 
+<!-- 
+RESEARCH GOAL: To compare the performance of different MCMC algorithms and estimation strategies when fitting stochastic volatility models. The study will use a discrete formulation is described  -->
 
 # Background and Literature Review
 
-Kim Sherpherd and Chib (1998) estimate the discrete time Stochastic Volatility model by proposing a simulation strategy using Bayesian methods. Specifically, KSC propose a method of sampling using an offset mixture normal approximation with a reweighting procedure to sample from the posterior of the SV model parameters. By linearing the model and using a mixture of Gaussian's, they were able to apply a Kalman Filter to estimate the latent volatilities of the state space models. The use of simulation and sampling are used as part of model diagnostics and evaluation. This is compared with other estimation strategies and volatility models such as autogregressive conditional heteroskedasticity (ARCH). Their specificaiton of the Stochastic Volatility model and estimation approaches provide the context for comparing the performance of different MCMC algorithms. 
+Kim, Sherpherd and Chib (1998) estimate the discrete time Stochastic Volatility model by proposing a simulation strategy using Bayesian methods. Specifically, they propose a method of sampling using an offset mixture normal approximation with a reweighting procedure to sample from the posterior of the SV model parameters. By linearing the model and using a mixture of Gaussian's, they were able to apply a Kalman Filter to estimate the latent volatilities of the state space models. The use of simulation and sampling are used as part of model diagnostics and evaluation. This is compared with other estimation strategies and volatility models such as autogregressive conditional heteroskedasticity (ARCH). Their specificaiton of the Stochastic Volatility model and estimation approaches provide the context for comparing the performance of different MCMC algorithms. 
 
-The simulations run by KSC rely on sampling directly from conjugate priors and classic Markov Chain Monte Carlo algorithms, Gibbs and Metropolis Hastings. Since the paper was written, new and more powerful MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Hamiltonian Monte Carlo, through open source programming languages such as Stan and PyMC, have become 
+The simulations run by Kim, Sherpherd and Chib rely on sampling directly from conjugate priors and use of classic Markov Chain Monte Carlo algorithms, Gibbs and Metropolis Hastings. Since the paper was written, new MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Specifically, Hamiltonian Monte Carlo is an a MCMC algorithm which has been become widely available for efficiently sampling from sophisticated models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo was developed in the physics literature (Duane et al., 1987) before being applied in the statistics literature by Radford Neal through his works in Bayesean Neural Networks (Nael, 1995) and statistical computing (Neal 2011). The algorithm has since become widely available through open source developement projects such as Stan (Stan Development Team, 2017) and PyMC (2023). 
+
+New developments in MCMC algorithms and improved computing resources have enabled estimation of richer and more complicated models. However, as the development of tools to enable us to fit more complicated models, so does the need to validate the output of these tools. Cook, Gelman and Rubin (2006) introduce simulation techniques to evaluate the "correctness" of the software used to sample Bayesian models. Their contribution used CDF quantiles from the posterior samples will be uniformly distributed. Talts et al. build upon this work by developing Simulation Based Calibration to provide more robust validation of output from a MCMC sampler through the use of rank statistics. 
+
+ <!-- through the use of the CDF quantiles approximated from the posterior distribution. -->
+
+<!-- , through open source programming languages such as Stan and PyMC, have become 
+
+As new and complicated 
 
 
 There have been many developments in MCMC algorithms since the introduction of classical methods such as Gibbs and Metropolis Hastings. 
@@ -82,10 +92,8 @@ Hamiltoninn Monte Carlo (algorithm introduced when, widely available since 2010.
 
 - How do we compare models? SBC. ESS in the tails, rhats. 
 
-- Given this context, my research looks to compare the efficacy of KSCs proposed MCMC sampling strategy with Hamiltonina Monte Carlo (NUTs). 
-
-## Simulation based calibration
-- 2 papers
+- Given this context, my research looks to compare the efficacy of KSCs proposed MCMC sampling strategy with Hamiltonina Monte Carlo (NUTs).  -->
+ 
 
 
 
