@@ -46,7 +46,7 @@ In particular, the implementation of Hamiltonian Monte Carlo, a variant of the M
 ## SBC -->
 
 ## Research Goal
-The objective of this research is to validate and compare the comutational methods used to estimate Bayesian Stochastic Volatiity models. Specifically, Simulation Based Calibration will be used to identify biases and errors arising from the results of Markov Chain Monte Carlo (MCMC) algorithms. The source of any miscalibration include, but are not limited to, estimation strategies, choice of sampler, model specifications and coding mistakes. This study will compare the estimation strategies detailed in the stochastic volatility literature with Hamiltonian Monte Carlo for estimating these class of models. Results and diagnostics from these simulations will help identify strengths and limitations that arise from these approaches.
+The objective of this research is to validate and compare the computational methods used to estimate Bayesian stochastic volatility models. Specifically, Simulation Based Calibration will be used to identify biases and errors arising from the results of Markov Chain Monte Carlo (MCMC) algorithms. The source of any miscalibration include, but are not limited to, estimation strategies, choice of sampler, model specifications and coding mistakes. This study will compare the estimation strategies detailed in the stochastic volatility literature with Hamiltonian Monte Carlo for estimating these class of models. Results and diagnostics from these simulations will help identify strengths and limitations that arise from these approaches.
 
 <!-- and provide tools for evaluating other types models and algorithms.  -->
 
@@ -67,15 +67,17 @@ Over the past few decades there have been many developments in computing hardwar
 <!-- 
 RESEARCH GOAL: To compare the performance of different MCMC algorithms and estimation strategies when fitting stochastic volatility models. The study will use a discrete formulation is described  -->
 
+<!-- The use of simulation and sampling are used as part of model diagnostics and evaluation. -->
+
 # Background and Literature Review
 
-Kim, Sherpherd and Chib (1998) estimate the discrete time stochastic volatility model by proposing a simulation strategy using Bayesian methods. Specifically, they propose a method of sampling using an offset mixture normal approximation with a reweighting procedure to sample from the posterior of the stochastic volatility model parameters. By linearing the model and using a mixture of Gaussian's, they were able to apply a Kalman Filter to estimate the posterior density over the latent volatilities and static parameters. The use of simulation and sampling are used as part of model diagnostics and evaluation. This is compared with other estimation strategies and volatility models such as autogregressive conditional heteroskedasticity (ARCH). Their specificaiton of the stochastic volatility model and estimation approaches provide the context for comparing the performance of different MCMC algorithms. 
+Kim, Sherpherd and Chib (1998) estimate the discrete time stochastic volatility model by proposing a simulation strategy using Bayesian methods. Specifically, they propose a method of sampling by using an offset mixture normal approximation with a reweighting procedure to sample from the posterior. By linearing the model and using a mixture of Gaussians, they were able to apply a Kalman Filter to estimate the posterior density over the latent volatilities and static parameters. This is compared with other estimation strategies and volatility models such as autoregressive conditional heteroskedasticity (ARCH). Their specification of the stochastic volatility model and estimation approaches provide the context for comparing the performance of different MCMC algorithms.
 
-The simulations run by Kim, Sherpherd and Chib rely on sampling directly from conjugate priors and use of classic MCMC algorithms, Gibbs and Metropolis Hastings. Since the paper was written, new MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Specifically, Hamiltonian Monte Carlo is an a MCMC algorithm which has been become widely available for efficiently sampling from sophisticated models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo was developed in the physics literature (Duane et al., 1987) before being applied in the statistics literature by Radford Neal through his works in Bayesean Neural Networks (Nael, 1995) and statistical computing (Neal 2011). The algorithm has since become widely available through open source developement projects such as Stan (Stan Development Team, 2023) and PyMC (2023). 
+This strategy relies on sampling directly from conjugate posterior distributions and the use of classic MCMC algorithms, Gibbs and Random Walk Metropolis Hastings. Since the paper was written, new MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Specifically, Hamiltonian Monte Carlo is a MCMC algorithm which has become widely available for efficiently sampling from sophisticated models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo, was developed in the physics literature (Duane et al. 1987) before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks (Nael, 1995) and statistical computing (Neal 2011). The algorithm has since become widely available through open source development projects such as Stan (Stan Development Team, 2023) and PyMC (2023).
 
 The key innovation of Hamiltonian Monte Carlo is using the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. Unlike Random Walk Metropolis Hastings, it takes advantage of the geometry of the posterior to determine its next step. A comprehensive explanation of the sampler is beyond the scope of this research and can be found in the above references. 
 
-New developments in MCMC algorithms and improved computing resources have enabled estimation of richer and more complicated models. However, as the development of tools to enable us to fit more complicated models, so does the need to validate the output of these tools. Cook, Gelman and Rubin (2006) introduce simulation techniques to evaluate the "correctness" of the software used to sample Bayesian models. Their contribution identified that cumulative density quantiles from the posterior samples will be uniformly distributed. Talts et al. build upon this work by developing Simulation Based Calibration to provide more robust validation of output from a MCMC sampler through the use of rank statistics. 
+New developments in MCMC algorithms and improved computing resources have enabled estimation of richer and more complicated models. However, as the development of tools enables us to fit more complicated models, so does the need to validate the output of these tools. Cook, Gelman and Rubin (2006) introduce simulation techniques to evaluate the "correctness" of the software used to sample Bayesian models. Their contribution identified that cumulative density quantiles from the posterior samples can be tested for uniformity. Talts et al (2018). build upon this work by developing Simulation Based Calibration to provide more robust validation of output from a MCMC sampler through the use of rank statistics.
 
  <!-- through the use of the CDF quantiles approximated from the posterior distribution. -->
 
@@ -105,7 +107,7 @@ Hamiltoninn Monte Carlo (algorithm introduced when, widely available since 2010.
 The aim of this research is to use Simulation Based Calibration (SBC) to validate the inference of posterior samples generated by different MCMC algorithms in the context of Stochastic Volatility models. This will help identify any bias in computation and inconsistencies in model implementation and estimation strategies. Comparison of the SBC results between different computational approaches may help identify any strengths or shortcomings as well as any errors in model specification. 
 
 ## 3.1) Stochastic Volatility Model
-The univariate stochastic volatility model described by Kim, Shepherd and Chib (1998), models the variance as a random variable following some latent stochastic process. $y_t$ is the mean corrected returns of some asset for equally spaced intervals t. $\beta$ is a constant scaling factor which is also defined as $exp(\mu / 2)$ representing instantaneous volatility. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$. This autoregressive parameter represents the persistence or "stickiness" of log volatility and the dispersion parameter $\sigma_{\eta}$ is its variance. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks. 
+The univariate stochastic volatility model described by Kim, Shephard and Chib (1998) models the variance as a random variable following some latent stochastic process. $y_t$ is the mean corrected returns of some asset for equally spaced intervals t. $\beta$ is a constant scaling factor which is also defined as $exp(\mu / 2)$ representing instantaneous volatility. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$. This autoregressive parameter represents the persistence or "stickiness" of log volatility and the dispersion parameter $\sigma_{\eta}$ is its variance. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks. 
 
 $$
 \begin{aligned}
@@ -133,7 +135,7 @@ h_{t+1} \sim& \space normal(\mu +\phi(h_t - \mu) , \sigma_{\eta}^2), \space\spac
 \end{aligned}
 $$
 
-Priors for the static parameters are defined below with $\mu$ and $\sigma^2$ being conjugate priors:
+Priors for the static parameters are defined below with conjugate priors on $\mu$ and $\sigma^2$:
 
 $$
 \begin{aligned}
@@ -149,7 +151,7 @@ The prior on $\phi$ is a "stretched" beta distribution. This is a beta distribut
 ## 3.2) Estimation Strategy
 
 ### Gaussian Mixture Approximation
-Kim Shepherd and Chib estimate the stochastic volatility model using a Kalman Filter and smoother[^1] (de Jong and Shephard, 1995) to compute the posterior distribution over the latent states. This requires the state space model to be linear and conditionally Gaussian. 
+Kim, Shephard and Chib estimate the stochastic volatility model using a Kalman Filter and smoother[^1] (de Jong and Shephard, 1995) to compute the posterior distribution over the latent states. This requires the state space model to be linear and conditionally Gaussian. 
 
 [^1]: In this research the exact software to apply the simulation smoother is unavailable, so a more recent simulation smoother is used which is based on the software written by the same author. 
 
@@ -165,7 +167,7 @@ y_t^{*} &= log(y_t^2) \\
 \end{aligned}
 $$
 
-Where $z_t = log(\epsilon_t^2)$ follows a log chi-squared distribution with mean -1.2704 and varaince 4.93. However, it is not simple to sample from this parameterisation of the model. Kim, Sherpherd and Chib use a mixture of Gaussians to **approximate** the first 4 moments of the log chi squared distribution. This is defined by:
+Where $z_t = log(\epsilon_t^2)$ follows a log chi-squared distribution with mean -1.2704 and variance 4.93. However, it is not simple to sample from this parameterisation of the model. Kim, Sherpherd and Chib use a mixture of Gaussians to **approximate** the first 4 moments of the log chi squared distribution. This is defined by:
 
 $$
 \begin{aligned}
@@ -173,12 +175,12 @@ f(z_t) = \sum_{i=1}^{K} q_if_N(z_i|m_i-1.2704, \nu_i^2)
 \end{aligned}
 $$
 
-Where K is the mixture of normal densities $f_N$, component probabilities $q_i$, mean $m_i-1.2704$ and variance $\nu_i^2$. These parameters were seleted using moment matching where they found 7 normal densities with varying mean and variance parameters best approximated the log chi squared moments. These parameters and weights can be found in Appendix A.
+Where K is the mixture of normal densities $f_N$, component probabilities $q_i$, mean $m_i-1.2704$ and variance $\nu_i^2$. These parameters were selected using moment matching where they found 7 normal densities with varying mean and variance parameters best approximated the log chi squared moments. These parameters and weights can be found in Appendix A.
 
 The model can be sampled via the simulation smoother since the model is now linear and conditionally gaussian. The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conjugate posterior distributions where as $\phi$ is sampled via a metropolis hastings accept/reject procedure. The details can be be around in Appendix B. 
 
 ### Hamiltonian Monte Carlo (No-U-Turn Sampler)
-The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler (Hoffman & Gelman 2014), allows for direct sampling of the spcified stochastic volatility model. Hamiltonian Monte Carlo allows for sampling of the generative model and can flexibly handle complicated likelihood functions. This approach will use the same priors are specified in the Gaussian mixture approximation. However, Hamiltonian does not sample directly from the analytical form of conjugate or conditionally conjugate distribution, so different priors can be chosen if necessary. 
+The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler (Hoffman & Gelman 2014), allows for direct sampling of the specified stochastic volatility model. Hamiltonian Monte Carlo allows for sampling of the generative model and can flexibly handle complicated likelihood functions. This approach will use the same priors as specified in the Gaussian mixture approximation. However, Hamiltonian does not sample directly from the analytical form of conjugate or conditionally conjugate distribution, so different priors can be chosen if necessary. 
 
 ## 3.3 Simulation Based Calibration (SBC)
 <!-- SBC validates posterior samples and inferences generated by MCMC algorithms. It identifies inconsistencies and bias in computation and estimation of a generative model. This procedure  -->
@@ -198,7 +200,7 @@ y^{sim} \sim \pi (y|\theta^{sim})
 \end{aligned}
 $$
 
-Then take draws from the posterior distribution generated by a MCMC algorithm or estimation strategy (Hamiltonian Monte Carlo or Gaussian apprimation in our case).
+Then take draws from the posterior distribution generated by a MCMC algorithm or estimation strategy (Hamiltonian Monte Carlo or Gaussian approximation in our case).
 
 $$
 \begin{aligned}
@@ -219,7 +221,7 @@ That is, the posterior averaged over the joint distribution follows the same dis
 
 <!-- The simulation if done correctly should produce samples from the prior distribution.  -->
 
-Since the distribution of the posterior samples follows the prior distribution, the rank statistic for a given parameter and simultion follows a discrete uniform distribution[^2].
+Since the distribution of the posterior samples follows the prior distribution, the rank statistic for a given parameter and simulation follows a discrete uniform distribution[^2].
 
 [^2]: Proof of this result in Talts et al 2018.
 
@@ -252,7 +254,7 @@ ADEMP:
 - Tail ESS calculates ESS in the tail quantiles. Such  -->
 
 # Results
-SBC for Hamiltonian Monte Carlo and the Gaussian approxmiation are performed with simulated dataset sizes of 1000 simulation interations, 1000 observations, and post warmup/burnin samples of 999 (which gives 1000 possible rank statistics). The histogram is drawn with 20 bins and 50 observations in each bin which is the expected count for a discrete uniform distribution. This algorithm is summarised below: 
+SBC for Hamiltonian Monte Carlo and the Gaussian approximation are performed with simulated dataset sizes of 1000 simulation iterations, 1000 observations, and post warmup/burnin samples of 999 (which gives 1000 possible rank statistics). The histogram is drawn with 20 bins and 50 observations in each bin which is the expected count for a discrete uniform distribution. This algorithm is summarised below:
 
 | **1) for n in 1000 iterations:**
 |   2) Draw from prior: $\theta^{sim}\sim\pi (\theta)$
@@ -260,15 +262,17 @@ SBC for Hamiltonian Monte Carlo and the Gaussian approxmiation are performed wit
 |   4) Draw 999 posterior samples (post warmup) $\{\theta_1,\dots , \theta_{L}\} \sim p(\theta | y^{sim})$
 |   5) Compute rank statistics $r = rank(\{\theta_1,\dots , \theta_{L}\}, \theta^{sim})$
 
-Figure 1 shows the the distribution of rank statistics for Hamiltonian Monte Carlo, with the horizontal black line at 50 representing the discrete uniform distribution. The preliminary figures focus on the static parameters and arbitrarily chosen states (since there is one state parameter per data observation). Phi and sigma_sqd look relatively uniform. However mu and h.995 have some lumpiness which may suggest a lack of calibration. 
+Figure 1 shows the distribution of rank statistics for Hamiltonian Monte Carlo, with the horizontal black line at 50 representing the discrete uniform distribution. The preliminary figures focus on the static parameters and arbitrarily chosen states (since there is one state parameter per data observation). Phi and sigma_sqd look relatively uniform. However mu and h.995 (the 995th state parameter) have some lumpiness which may suggest a lack of calibration. 
 
 ![Distribution of parameter ranks for HMC algorithm (1000 iterations)](../../simulation_output/sbc_ncp_ksc_priors_0.999_adapt_delta_premade_datasets_r7_1000_iterations/static_state_hist.png){width=75%}
 
-One of the drackbacks of SBC is that any deviation from uniform from a calibrated analysis maybe due to finite samples. Figure 2 shows more consistent uniform bahviour from all parameters after increasing the number of iterations from 1000 to 5000. This suggests that Hamiltonian Monte Carlo and overall analysis is well calibrated.
+One of the drawbacks of SBC is that any deviation from uniform from a calibrated analysis maybe due to finite samples. Figure 2 shows more consistent uniform behaviour from all parameters after increasing the number of iterations from 1000 to 5000. This suggests that Hamiltonian Monte Carlo and overall analysis is well calibrated.
 
 ![Distribution of parameter ranks for HMC algorithm (5000 iterations)](../../simulation_output/sbc_ncp_ksc_priors_0.999_adapt_delta_premade_datasets_r6_5000_iterations/static_state_hist.png){width=75%}
 
-Figure 3 shows results for the Gaussian approximation. The distribution of the rank statistics deviate heavily from the expected discrete uniform distribution, with various peaks at each end of the histogram as well as peaks in the middle. This lack of calibration is expected. The Gaussian approximiation only approximates the log chi squared distribution, where as Hamiltonian Monte Carlo samples directly from the same likelihood as the data generating process. 
+Figure 3 shows results for the Gaussian approximation. The distribution of the rank statistics deviates heavily from the expected discrete uniform distribution, with various peaks at each end of the histogram as well as peaks in the middle. This lack of calibration is expected. The Gaussian approximation only approximates the log chi squared distribution, whereas Hamiltonian Monte Carlo samples directly from the same likelihood as the data generating process.
+
+This result may also be due to the small number of posterior samples drawn from the model. The MCMC sampler may not have converged yet which may explain the deviations from uniformity. A follow up step is to compare the effective sample sizes (ESS) of the two methods and to increase the length of the MCMC chain to ensure the ESS is approximately the same before comparing histograms.  
 
 ![Distribution of parameter ranks for KSC sampling strategy (1000 iterations)](../../simulation_output/sbc_cp_ksc_model_cp_dgf_r1/static_state_hist.png){width=75%}
 
@@ -280,7 +284,7 @@ $$
 \end{aligned}
 $$
 
-These chi squared statistics can be considered independent draws from a chi squared distribution with 19 degrees of freedom (since there are 20 bins). Visualising this should give a chi squared distribution (if performing a hypothesis test, this would be the sampling distribution under a null of uniformity). 
+These chi squared statistics can be considered draws from a chi squared distribution with 19 degrees of freedom (since there are 20 bins). Visualising this should give a chi squared distribution (if performing a hypothesis test, this would be the sampling distribution under a null of uniformity). One caveat about this is the chi squared statistics calculated in this way may not be independent. That is, each iteration of SBC may be independent however, the calculation of the rank statistics for a given iteration may be dependent between some parameters (since each state parameter is a function of the previous state parameter).
 
 Figure 4 are the chi squared statistic histograms results of Hamiltonian Monte Carlo and Gaussian approximation respectively. The vertical black line marks the 95th quantile which represents the critical value for hypothesis testing. The HMC chi squared statistics look like they are sampled from the correct distribution, with 6.2\% of the samples greater than the 95\% critical value (doing this calculation for 5000 iterations leads to 4.8\% of samples in the critical area). Figure 5 shows the majority of chi squared statistics for Gaussian approximation within the critical area, suggesting the estimation strategy is not well calibrated. 
 
@@ -299,14 +303,14 @@ Kim, Sherpherd and Chib apply a Metropolis Hastings reweighting to the posterior
 
 The parameterisation of a model can affect the performance of a sampler. This can cause significant problems in getting unbiased MCMC samples for complex models. An example of this is Neal's funnel (Neal 2003) which arises in hierarchical models which causes performance issues with the Hamiltonian Monte Carlo sampler. Rewriting the model with non centered parameterisation significantly improves the performance of MCMC. Another consideration for this research is to consider both centered and non centered parametersations of the stochastic volatility model to see if there are any improvements to the simulation diagnostics.
 
-The models and parametiersations for this research are summarised in the below table:
+The models and parameterisations for this research are summarised in the below table:
 
 ![Model matrix](model_table.png)
 
 ## Plan
 Week 7: Reflect and integrate feedback from presentation into plan for the rest of the semester
 
-Week 8: Finish off any simulation or modelling not yet complete (listed in above matrix)
+Week 8: Finish off any simulation or modeling not yet complete (listed in above matrix)
 
 Week 9: Write up any other results and have a first draft ready for feedback
 
