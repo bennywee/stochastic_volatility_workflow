@@ -7,7 +7,6 @@ import numpy as np
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-# from joblib import Parallel, delayed
 import multiprocessing as mp
 np.set_printoptions(suppress=True, precision=5)
 
@@ -72,9 +71,14 @@ def simulation(seed_data):
     # Iterations
     for s in range(1, config["mcmc_samples"] + 1):
         # Update the parameters of the model
-        mod.update_mixing(trace_mixing[s-1])
         params = np.r_[trace_mu[s-1], trace_phi[s-1], trace_sigma2[s-1]]
-        mod.update(params, transformed=True)
+        mod.update_mixing(indicators = trace_mixing[s-1], 
+                          params = params,
+                          parameterisation = config["parameterisation"])
+                          
+        mod.update(params = params, 
+                   parameterisation = config["parameterisation"],
+                   transformed=True)
 
         # Simulation smoothing
         sim.simulate()

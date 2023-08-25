@@ -43,17 +43,29 @@ class TVLLDT(sm.tsa.statespace.MLEModel):
         self['design', 0, 0] = 1 # mod.ssm.design. 
         self['selection', 0, 0] = 1 # mod.ssm.selection
 
-    def update_mixing(self, indicators):
+    def update_mixing(self, indicators, params, parameterisation):
         # z_t | s_t ~ N(m_i - 1.27036, v_i^2)
         # See equation (10), p. 371
         # Indicators is a vector
-        self['obs_intercept', 0] = ksc_params[indicators, 1] - 1.27036
+        if parameterisation == "centered":
+            self['obs_intercept', 0] = ksc_params[indicators, 1] - 1.27036
+        elif parameterisation == "noncentered":
+            self['obs_intercept', 0] = ksc_params[indicators, 1] - 1.27036 + params[0] * (1 - params[1])
+        else:
+            raise ValueError("Incorrect parameterisation")
+
         self['obs_cov', 0, 0] = ksc_params[indicators, 2]
 
-    def update(self, params, **kwargs):
+    def update(self, params, parameterisation, **kwargs):
         params = super(TVLLDT, self).update(params, **kwargs)
-
-        self['state_intercept', 0, 0] = params[0] * (1 - params[1])
+        
+        if parameterisation == "centered":
+            self['state_intercept', 0, 0] = params[0] * (1 - params[1])
+        elif parameterisation == "noncentered":
+            self['state_intercept', 0, 0] = 0
+        else:
+            raise ValueError("Incorrect parameterisation")
+        
         self['transition', 0, 0] = params[1]
         self['state_cov', 0, 0] = params[2]
 

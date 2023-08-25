@@ -9,5 +9,6 @@
     "chains": 4,
     "model_name": "sv_ncp_ksc_sbc",
     "data_location": "sbc_data_gen_sv_ncp_ksc_priors",
-    "dependent_variable": "y_sim"
+    "dependent_variable": "y_sim",
+    "parameterisation": "centered"
 }
