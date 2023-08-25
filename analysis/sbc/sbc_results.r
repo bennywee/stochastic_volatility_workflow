@@ -2,11 +2,12 @@ library(dplyr)
 library(ggplot2)
 library(future.apply)
 library(posterior)
+library(car)
 source("R/sbc.r")
 plan(multicore, workers = 9)
 
 # Get all parameter data
-path <- "simulation_output/sbc_ncp_ksc_priors_0.999_adapt_delta_premade_datasets_r5_1000_iterations"
+path <- "simulation_output/sbc_cp_ksc_model_cp_dgf_r1"
 rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
 results <- lapply(paste("output", rds_list, sep = "/"), get_ranks, model_path = path)
 df <- as.data.frame(do.call("rbind", results))
@@ -28,18 +29,25 @@ state_parameters <- names(rank_bins)[!(names(rank_bins) %in% static_parameters)]
 additional_parameters <- c("h.1.", "h.10.", "h.100.", "h.500.", "h.1000.", "h.995.")
 
 # Facet plots (hist of params)
-facet_hist(data = rank_bins, variables = static_parameters, expected_bin_count = expected_count, nbins = n_bins)
-facet_hist(data = rank_bins, variables = append(static_parameters, additional_parameters), expected_bin_count = expected_count, nbins = n_bins)
+static_hist <- facet_hist(data = rank_bins, variables = static_parameters, expected_bin_count = expected_count, nbins = n_bins)
+ggsave(paste(path, "/static_hist.png", sep =""), static_hist, bg = "white")
+
+static_state_hist <- facet_hist(data = rank_bins, variables = append(static_parameters, additional_parameters), expected_bin_count = expected_count, nbins = n_bins)
+ggsave(paste(path, "/static_state_hist.png", sep =""), static_state_hist, bg = "white")
 
 # Chi squared state parameters (dot plots)
-dot_plots(data = rank_stats,
+chi_sq_dot_plots <- dot_plots(data = rank_stats,
     variables = state_parameters,
     plot_title = "Chi squared estimates for state rank statistics")
+ggsave(paste(path, "/chi_sq_dot_plots.png", sep =""), chi_sq_dot_plots, bg = "white")
 
 # Chi squared state parameters (hist)
-chi_sq_hist(data = rank_stats,
+chi_sq_histogram <- chi_sq_hist(data = rank_stats,
     variables = state_parameters,
-    plot_title = "Chi squared estimates for state rank statistics") + geom_vline(xintercept = qchisq(0.95, df =n_bins-1))
+    plot_title = "Chi squared estimates for state rank statistics") + 
+    geom_vline(xintercept = qchisq(0.95, df =n_bins-1))
+
+ggsave(paste(path, "/chi_sq_hist.png", sep =""), chi_sq_histogram, bg = "white")
 
 sum(rank_stats > qchisq(0.95, df =n_bins-1)) / 1003
 
@@ -49,12 +57,15 @@ chisq_ranks = rank_stats %>%
         arrange(chisq_stat) %>%
         mutate(parameter = factor(parameter, unique(parameter))) 
 
-qqPlot(chisq_ranks$chisq_stat, distribution = "chisq", df =19)
+
+chi_sq_qq <- qqPlot(chisq_ranks$chisq_stat, distribution = "chisq", df =19)
+ggsave(paste(path, "/chi_sq_qq.png", sep =""), chi_sq_qq, bg = "white")
 
 # Chi squared state parameters (dot plots)
-dot_plots(data = rank_stats,
+chi_sq_static_dots <- dot_plots(data = rank_stats,
     variables = static_parameters,
     plot_title = "Chi squared estimates for static rank statistics")
+ggsave(paste(path, "/chi_sq_static_dots.png", sep =""), chi_sq_static_dots, bg = "white")
 
 pval_hist(data = rank_stats,
     expected_bin_count = n_bins,
