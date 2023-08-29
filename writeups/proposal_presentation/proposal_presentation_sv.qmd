@@ -10,7 +10,15 @@ institute: "Supervised by Catherine Forbes and Lauren Kennedy"
 ---
 
 ## Background
-- Hello
+- Variety of Bayesian estimation strategies for different types of Stochastic Volatility models using classical Markov Chain Monte Carlo (MCMC) algorithms
+
+- Since then, more advanced algorithms such as Hamiltoninan Monte Carlo has enabled the estimation of richer and more complicated models
+
+- However, as the developments of these tools enable the estimation of more complicated models so do the risk of mistakes and the need to validate the output of our algorithms
+
+- How do we ensure the validity of inferences from our algorithms across different estimation strategies?
+
+<!-- What is the fundamental difference between convergence diagnostics, bayes factors with SBC? Check the fit of the model?-->
 
 ## Research Goal
 
@@ -18,11 +26,10 @@ Validate the computational methods used to estimate Bayesian stochastic volatili
 
 . . .
 
-- 3 key components of research
+- 3 key components
     + Kim, Sherphard and Chib (1998) SV model
     + Hamiltonian Monte Carlo
     + Simulation Based Calibration to validate MCMC computation
-
 
 ## Stochastic Volatility (SV) model
 KSC (1998) estimate a univariate discrete time SV model which models the variance as a latent stochastic process.
@@ -34,6 +41,7 @@ $$
 y_t =& \space \beta exp(h_t/2) \epsilon_t \\
 h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t  \\
 h_1 \sim& \space normal\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
+\epsilon_t \sim &N(0,1) \space\space\space \eta_t \sim N(0,1)
 \end{aligned}
 $$
 
@@ -46,7 +54,7 @@ $$
 
 - $\beta = exp(\mu / 2)$ constant scaling factor (set to 1)
 
-- $h_t$ is log volatility where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$.
+- $h_t$ is log volatility where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ is a stationary process governed by the autoregressive parameter $\phi$ where $|\phi|<1$.
 
 :::
 
@@ -167,8 +175,12 @@ That is, the posterior averaged over the joint distribution follows the same dis
 ![1000 Iterations of SBC (KSC)](../../simulation_output/sbc_cp_ksc_model_cp_dgf_r1/static_state_hist.png){width=75%}
 
 ## Next steps
-- Consider different model parameterisation
+
+- Increasing number of posterior draws for KSC model
+    + MCMC may not have converged onto target distribution
+
+- Different model parameterisation
     + Performance of a sampler may be sensititive to the shape of the posterior density
 
-- Consider KSC's correction using importance sampling weights (MH correction step)
+- KSC's correction using importance sampling weights (MH correction step)
     + Reweights samples from approximate distribution such that reweighted draws come from the correct distribution
