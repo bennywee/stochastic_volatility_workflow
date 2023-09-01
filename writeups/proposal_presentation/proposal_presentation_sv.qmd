@@ -14,7 +14,7 @@ institute: "Supervised by Catherine Forbes and Lauren Kennedy"
 
 - Variety of Bayesian estimation strategies using classic Markov Chain Monte Carlo (MCMC) algorithms such as Gibbs and Metropolis Hastings
 
-- Since then, more advanced algorithms such as Hamiltoninan Monte Carlo has enabled the estimation of richer and more complicated models
+- Since then, more advanced algorithms such as Hamiltonian Monte Carlo has enabled the estimation of richer and more complicated models
 
 - As the developments of these tools enable the estimation of more complicated models so do the risk of mistakes and the need to validate the output of our algorithms. How do we ensure the validity of our inferences across different estimation strategies?
 
@@ -38,7 +38,7 @@ KSC (1998) estimate a univariate discrete time SV model which models the varianc
 
 $$
 \begin{aligned}
-y_t =& \space \beta exp(h_t/2) \epsilon_t \\
+y_t =& \space \beta e^{h_t/2} \epsilon_t \\
 h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t  \\
 h_1 \sim& \space normal\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
 \epsilon_t \sim &N(0,1) \space\space\space \eta_t \sim N(0,1)
@@ -58,7 +58,9 @@ $$
 
 <!-- ::: -->
 
-## Kim Sherphard Chib (1998) Estimation strategy
+#  Estimation strategy
+
+## Kim Sherphard Chib (1998)
 :::{.nonincremental}
 - Estimation of states using a Kalman filter, however, this requires the model to be linear and Gaussian. 
 
@@ -98,34 +100,17 @@ K is the mixture of 7 normal densities $f_N$, component probabilities $q_i$, mea
 The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conjugate posterior distributions where as $\phi$ is sampled via a metropolis hastings accept/reject procedure.
 
 ## Hamiltonian Monte Carlo (HMC)
-- Developed in the physics literature (Duane et al. 1987) before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks (Nael, 1995) and statistical computing (Neal 2011). 
+- Key innovations: 
 
-- Key innovation: using the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. It takes advantage of the geometry of the posterior to determine its next step.
+    + Uses the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. 
 
-- The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler (Hoffman & Gelman 2014), allows for direct sampling of the specified stochastic volatility model.
+    + Runs physics simulation - imagine the parameter is a marble rolling in random directions inside a bowl
 
+    + Allows for direct sampling of the specified stochastic volatility model
+    
+- The Stan programming language's implementation of Hamiltonian Monte Carlo, the No-U-Turn Sampler (Hoffman & Gelman 2014), will be compared with KSC's strategy.
 
-## Simulation Based Calibration (SBC)
-<!-- Probably need to talk about what calibration means-->
-<!-- - The procedure starts by taking draws from the prior distribution and creating datasets implied by each draw. 
-
-- Rank statistics are then calculated on the posterior samples estimated from the simulated data.  
-
-If B computation is correct it can capture the known parameers.-->
-:::{.nonincremental}
-SBC simulates data with known parameters and checks if on average, the interval of an estimated model contains the true parameter
-
-1) Take a draw from the joint prior $\theta^{sim}$
-2) Generate a dataset conditional on the prior draw
-3) Calculate a rank statistics
-4)  Compare the distribution of rank statistics to the discrete uniform distribution which arises when an algorithm is correctly calibrated.
-
-:::
-
-. . .
-
-If Bayesian computation is well calibrated, then the posterior (credible) intervals will have sufficient coverage. That is, for any percentage interval selected (for example 90%) then 90\% of these constructed intervals will contain $\theta^{sim}$.
-
+# Simulation Based Calibration (SBC)
 
 ## Simulation Based Calibration (SBC)
 Let $\theta$ be a parameter and $y$ represent the dataset. Start with draw a sample from the prior distribution:
@@ -157,17 +142,7 @@ $$
 
 
 ## Simulation Based Calibration (SBC)
-A key result from this procedure is that the posterior sample $\{\theta_1,\dots , \theta_{L}\}$ will share the same distribution as the prior samples.
-
-$$
-\begin{aligned}
-\pi(\theta) &= \int \pi(\theta|y^{sim}) \pi(y^{sim}|\theta^{sim}) \pi(\theta^{sim})dy^{sim} d\theta^{sim} 
-\end{aligned}
-$$
-<!-- &= \int \pi(\theta|y^{sim}) \pi(y^{sim},\theta^{sim}) dy^{sim} d\theta^{sim}
- -->
-
-That is, the posterior averaged over the joint distribution follows the same distribution as the prior. The rank statistic for a given parameter and simulation follows a discrete uniform distribution (proven in Talts et al. (2018)).
+The rank statistic for a given parameter and simulation follows a discrete uniform distribution (proven in Talts et al. (2018)).
 
 $$
 \begin{aligned}
@@ -177,8 +152,11 @@ $$
 
 Therefore, any deviation of the posterior samples from the prior distribution suggests an error - either in computation, code or overall analysis. 
 
+If Bayesian computation is well calibrated, then the posterior (credible) intervals will have sufficient coverage. That is, for any percentage interval selected (for example 90%) then 90\% of these constructed intervals will contain $\theta^{sim}$.
+
 <!-- Algorithm, computation, model strategy on average fails to estimate the parameters of a known data generating process. Whether or not the model is fit for a particular use case is not answered here. It's whether the model can capture the _assumed_ structure of the proposed DGP (we can't tell if this DGP is "correct" in the real world) -->
 
+# Results
 
 ## HMC Results (1000 iterations)
 
@@ -200,7 +178,21 @@ Therefore, any deviation of the posterior samples from the prior distribution su
 - Different model parameterisation
     + Performance of a sampler may be sensititive to the shape of the posterior density
 
-- KSC's correction using importance sampling weights (MH correction step)
-    + Reweights samples from approximate distribution such that reweighted draws come from the correct distribution
+- KSC's correction using importance sampling weights
+    + Reweight samples from Gaussian mixture so that the new draws come from the correct distribution
 
 :::
+
+# Appendix
+
+## Simulation Based Calibration (SBC)
+A key result from this procedure is that the posterior sample $\{\theta_1,\dots , \theta_{L}\}$ will share the same distribution as the prior samples.
+
+$$
+\begin{aligned}
+\pi(\theta) &= \int \pi(\theta|y^{sim}) \pi(y^{sim}|\theta^{sim}) \pi(\theta^{sim})dy^{sim} d\theta^{sim}  \\
+&= \int \pi(\theta|y^{sim}) \pi(y^{sim},\theta^{sim}) dy^{sim} d\theta^{sim}
+\end{aligned}
+$$
+
+That is, the posterior averaged over the joint distribution follows the same distribution as the prior. The rank statistic for a given parameter and simulation follows a discrete uniform distribution (proven in Talts et al. (2018)).
