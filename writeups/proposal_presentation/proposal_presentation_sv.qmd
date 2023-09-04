@@ -9,16 +9,29 @@ author: "By Benjamin Wee"
 institute: "Supervised by Catherine Forbes and Lauren Kennedy"
 ---
 
-## Background
-- Stochastic volatility models the variance of a financial instrument as a random variable
+# What is Stochastic Volatility?
 
-- Variety of Bayesian estimation strategies using classic Markov Chain Monte Carlo (MCMC) algorithms such as Gibbs and Metropolis Hastings
+## Log returns S&P 500
+![]("returns.png")
 
-- Since then, more advanced algorithms such as Hamiltonian Monte Carlo has enabled the estimation of richer and more complicated models
+## Stochastic Volatility (SV) model
 
-- As the developments of these tools enable the estimation of more complicated models so do the risk of mistakes and the need to validate the output of our algorithms. How do we ensure the validity of our inferences across different estimation strategies?
+$$
+\begin{aligned}
+y_t =& \space \beta e^{h_t/2} \epsilon_t \\
+h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t  \\
+h_1 \sim&  N\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
+\epsilon_t \sim& N(0,1) \quad \eta_t \sim N(0,1) \\
+\end{aligned}
+$$
 
-<!-- What is the fundamental difference between convergence diagnostics, bayes factors with SBC? Check the fit of the model?-->
+- $y_t$ is mean corrected returns for equally spaced intervals $t$
+
+- $\beta = e^{\mu / 2}$ constant scaling factor (set to 1)
+
+- $h_t$ is log volatility where $h_1$ is a draw from a stationary distribution  
+
+- State equation $h_{t+1}$ is a stationary process where $\mu$ is the "average" log volatility and determined by the autoregressive parameter $\phi$ where $|\phi|<1$.
 
 ## Research Goal
 
@@ -26,43 +39,39 @@ Validate the computational methods used to estimate Bayesian stochastic volatili
 
 . . .
 
-- 3 key components
-    + Kim, Sherphard and Chib (1998) SV model
-    + Hamiltonian Monte Carlo
-    + Simulation Based Calibration to validate MCMC computation
+- Compare the Kim, Shephard and Chib (1998) estimation strategy with Hamiltonian Monte Carlo
+
+- Simulation Based Calibration to validate MCMC computation
+
+# Estimation strategy
 
 ## Stochastic Volatility (SV) model
 KSC (1998) estimate a univariate discrete time SV model which models the variance as a latent stochastic process.
-
-. . .
 
 $$
 \begin{aligned}
 y_t =& \space \beta e^{h_t/2} \epsilon_t \\
 h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t  \\
-h_1 \sim& \space normal\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
-\epsilon_t \sim &N(0,1) \space\space\space \eta_t \sim N(0,1)
+h_1 \sim& N\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
+\epsilon_t \sim& N(0,1) \quad \eta_t \sim N(0,1) \\
 \end{aligned}
 $$
 
 . . .
 
-<!-- :::{.nonincremental} -->
-- $y_t$ is mean corrected returns for equally spaced intervals $t$
+With priors:
+$$
+\begin{aligned}
+\mu \sim& \space N(0, 10^2) \\
+\sigma_{\eta}^2 \sim& \space IG(5/2, (0.01\times 5) / 2) \\
+\phi^{\ast} \sim& \space beta(20, 1.5) \\
+\phi =& 2\phi^{\ast} - 1
+\end{aligned}
+$$
 
-- $\beta = exp(\mu / 2)$ constant scaling factor (set to 1)
-
-- $h_t$ is log volatility where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ is a stationary process governed by the autoregressive parameter $\phi$ where $|\phi|<1$.
-
-- $\mu$ is the "average" log volatility
-
-<!-- ::: -->
-
-#  Estimation strategy
-
-## Kim Sherphard Chib (1998)
+## Kim Shephard Chib (1998)
 :::{.nonincremental}
-- Estimation of states using a Kalman filter, however, this requires the model to be linear and Gaussian. 
+- Estimation of states using a standard Kalman filter, however, this requires the model to be linear and Gaussian. 
 
 . . .
 
@@ -84,7 +93,7 @@ Where $z_t = log(\epsilon_t^2)$ follows a log chi-squared distribution with mean
 
 :::
 
-## Kim Sherphard Chib (1998) Estimation strategy
+## Kim Shephard Chib (1998)
 Model is now linear but not Gaussian. KSC use a mixture of Gaussians to **approximate** the first 4 moments of the log chi squared distribution through moment matching. This is defined by:
 
 $$
@@ -104,7 +113,7 @@ The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conju
 
     + Uses the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. 
 
-    + Runs physics simulation - imagine the parameter is a marble rolling in random directions inside a bowl
+    + Imagine the parameter is a marble rolling in random directions inside a bowl (negative log transformation of joint posterior)
 
     + Allows for direct sampling of the specified stochastic volatility model
     
@@ -150,7 +159,11 @@ r = rank(\{\theta_1,\dots , \theta_{L}\}, \theta^{sim}) = \sum_{l=1}^{L}1[\theta
 \end{aligned}
 $$
 
-Therefore, any deviation of the posterior samples from the prior distribution suggests an error - either in computation, code or overall analysis. 
+. . .
+
+Therefore, if the distribution of rank statistics deviates from a discrete uniform distribution, there may be evidence that our analysis or computation is not returning the correct posteriors (not calibrated). 
+
+. . .
 
 If Bayesian computation is well calibrated, then the posterior (credible) intervals will have sufficient coverage. That is, for any percentage interval selected (for example 90%) then 90\% of these constructed intervals will contain $\theta^{sim}$.
 
