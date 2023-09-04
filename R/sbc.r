@@ -30,9 +30,11 @@ facet_hist <- function(data, variables, nbins, expected_bin_count) {
         geom_histogram(aes(rank), bins = nbins, fill = "light blue", alpha = 0.7) +
         scale_x_continuous(labels = function(x) x * expected_bin_count) +
         facet_wrap(~variable) +
-        theme_minimal() +
+        theme_minimal(base_size = 22) +
         geom_hline(yintercept = expected_bin_count, size = 0.5, alpha = 0.3) +
-        labs(title = "Distribution of Rank Statistics")
+        labs(title = "Distribution of Rank Statistics",
+                y = "Count",
+                x = "Ranks")
 }
 
 dot_plots <- function(data, variables, plot_title) {
@@ -45,7 +47,7 @@ dot_plots <- function(data, variables, plot_title) {
         geom_segment(aes(x = parameter, xend = parameter, y = 0, yend = chisq_stat), color = "grey") +
         geom_point(aes(x = parameter, y = chisq_stat), size = 3, colour = "light blue") +
         coord_flip() +
-        theme_minimal() +
+        theme_minimal(base_size = 22) +
         theme(axis.title.y = element_blank(),
             axis.text.y = element_blank(),
             axis.ticks.y = element_blank()) +
@@ -62,7 +64,7 @@ chi_sq_hist <- function(data, variables, plot_title) {
         mutate(parameter = factor(parameter, unique(parameter))) %>%
         ggplot(.) +
         geom_histogram(aes(x = chisq_stat), fill = 'blue', alpha = 0.4) +
-        theme_minimal() +
+        theme_minimal(base_size = 22) +
         theme(axis.title.y = element_blank(),
             axis.text.y = element_blank(),
             axis.ticks.y = element_blank()) +
