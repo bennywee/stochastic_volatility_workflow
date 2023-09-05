@@ -100,17 +100,26 @@ load_parameters <- function(rds_path) {
 
 get_rhat_basic <- function(rds_path, model_path) {
     data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
-    return(data$all_chains$rhat_basic)
+    diagnostics = do.call("rbind", data$all_chains$diagnostics)
+    results <- as.data.frame(cbind(rownames(diagnostics), diagnostics$rhat_basic))
+    names(results) <- c("parameters", "rhat_basic")
+    return(results)
 }
 
 get_rhat <- function(rds_path, model_path) {
     data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
-    return(data$all_chains$rhat)
+    diagnostics = do.call("rbind", data$all_chains$diagnostics)
+    results <- as.data.frame(cbind(rownames(diagnostics), diagnostics$rhat))
+    names(results) <- c("parameters", "rhat")
+    return(results)
 }
 
 get_ess <- function(rds_path, model_path, ess_type, chains) {
     data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
-    return(data[[chains]][[ess_type]])
+    diagnostics = data[[chains]][["diagnostics"]]
+    results <- as.data.frame(cbind(rownames(diagnostics), diagnostics[ess_type]))
+    names(results) <- c("parameters", ess_type)
+    return(results)
 }
 
 get_time <- function(rds_path, model_path) {
