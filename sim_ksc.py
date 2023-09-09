@@ -97,7 +97,7 @@ def simulation(seed_data):
     draws = np.concatenate((trace_mu, trace_phi, trace_sigma2, trace_states), axis = 1)
     static_names = ['mu', 'phi', 'sigma2']
     state_names = [f"h[{state}]" for state in np.arange(1, trace_states.shape[1]+1)]
-    samples = pd.DataFrame(draws[config["burn"]:draws.shape[0]])
+    samples = pd.DataFrame(draws[config["burn"]+1:draws.shape[0]])
     samples.columns = static_names + state_names
 
     # Save as parquet
