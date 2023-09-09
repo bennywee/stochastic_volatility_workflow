@@ -1,3 +1,7 @@
+*.png
+*.jpg
+*.pdf
+writeups/proposal_presentation/prompts_files
 analysis/.discard/*
 *__pycache__
 writeups/*_files/
@@ -68,3 +72,4 @@ vignettes/*.pdf
 renv/Icon
 */Icon\r"
 "Icon\r"
+/.luarc.json
