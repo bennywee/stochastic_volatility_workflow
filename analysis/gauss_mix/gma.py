@@ -1,7 +1,7 @@
 from __future__ import division
 
 import numpy as np
-import pandas as pd
+import scipy as sp
 import statsmodels.api as sm
 
 from statsmodels.tsa.statespace.tools import (
@@ -140,3 +140,31 @@ def draw_mixing(mod, states):
     sample = np.argmax(tmp, axis=1)
 
     return sample
+
+def mixture_loglike_v(data,states, burn):
+    state_val = states[burn+1:states.shape[0]]
+    norm_list = [ksc_params[i,0] * norm.pdf(x=data, loc=state_val+ksc_params[i,1]- 1.2704, scale=ksc_params[i,2]**0.5) for i in range(0,7)]
+    log_kn = np.log(sum(norm_list))
+    sum_log_kn = np.sum(log_kn, axis = 1)
+    return sum_log_kn
+
+def logchi2_loglike(x):
+    return np.sum(np.log(sp.stats.chi2.pdf(np.exp(x), df = 1) * np.exp(x)))
+
+def logchi2_loglike_v(data, states, burn):
+    index = np.arange(burn+1, states.shape[0])
+    sum_log_fn = [logchi2_loglike(data - states[i]) for i in index]
+    return sum_log_fn
+
+def importance_weights(data, states, burn):
+    log_k = mixture_loglike_v(data = data, 
+            states = states, 
+            burn = burn)
+
+    log_f = logchi2_loglike_v(data = data, 
+            states = states, 
+            burn = burn)
+
+    w = log_f - log_k
+    c = np.exp(w) / np.sum(np.exp(w))
+    return c

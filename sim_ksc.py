@@ -94,11 +94,19 @@ def simulation(seed_data):
         trace_mu[s] = draw_posterior_mu(mod, states, trace_phi[s-1], trace_sigma2[s-1])
 
     # Create dataframe
-    draws = np.concatenate((trace_mu, trace_phi, trace_sigma2, trace_states), axis = 1)
+    y_star = np.log(endog**2 + 0.001)
+    weights = importance_weights(data = y_star, 
+          states = trace_states, 
+          burn = config["burn"])
+
+    burn_draws = np.concatenate((trace_mu, trace_phi, trace_sigma2, trace_states), axis = 1)
+    param_draws = burn_draws[config["burn"]+1:burn_draws.shape[0]]
+    draws = np.concatenate((param_draws, weights.reshape(-1,1)), axis = 1)
+    samples = pd.DataFrame(draws)
+    
     static_names = ['mu', 'phi', 'sigma2']
     state_names = [f"h[{state}]" for state in np.arange(1, trace_states.shape[1]+1)]
-    samples = pd.DataFrame(draws[config["burn"]+1:draws.shape[0]])
-    samples.columns = static_names + state_names
+    samples.columns = static_names + state_names + ['weights']
 
     # Save as parquet
     table = pa.Table.from_pandas(samples)
