@@ -9,7 +9,7 @@ plan(multisession)
 source("R/ksc_results.r")
 
 config <- jsonlite::read_json("configs/ksc.json")
-tmp_data_location <- paste("data/preprocessed/", config$simulation_name, "/tmp", sep ="") 
+tmp_data_location <- paste("simulation_output/", config$simulation_name, "/tmp", sep ="") 
 
 file_metadata <- as.data.frame(list.files(tmp_data_location))
 names(file_metadata) <- c("files")
