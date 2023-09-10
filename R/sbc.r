@@ -1,6 +1,6 @@
-get_ranks <- function(rds_path, model_path) {
+get_ranks <- function(rds_path, model_path, rank_type) {
     data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
-    return(data$one_chain$agg_ranks)
+    return(data$one_chain[[rank_type]])
 }
 
 rank_chi_sqd <- function(column, expected) {
@@ -22,13 +22,13 @@ load_parameters <- function(rds_path) {
     return(results)
 }
 
-facet_hist <- function(data, variables, nbins, expected_bin_count) {
+facet_hist <- function(data, variables, nbins, expected_bin_count, rank_scales) {
     rank_bins %>%
         select(all_of(variables)) %>%
         tidyr::pivot_longer(everything(), names_to = "variable", values_to = "rank") %>%
         ggplot(.) +
         geom_histogram(aes(rank), bins = nbins, fill = "light blue", alpha = 0.7) +
-        scale_x_continuous(labels = function(x) x * expected_bin_count) +
+        scale_x_continuous(labels = function(x) x * rank_scales/nbins) +
         facet_wrap(~variable) +
         theme_minimal(base_size = 22) +
         geom_hline(yintercept = expected_bin_count, size = 0.5, alpha = 0.3) +
@@ -117,7 +117,7 @@ get_rhat <- function(rds_path, model_path) {
 get_ess <- function(rds_path, model_path, ess_type, chains) {
     data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
     diagnostics = data[[chains]][["diagnostics"]]
-    results <- as.data.frame(cbind(rownames(diagnostics), diagnostics[ess_type]))
+    results <- as.data.frame(cbind(diagnostics["variable"], diagnostics[ess_type]))
     names(results) <- c("parameters", ess_type)
     return(results)
 }
@@ -128,12 +128,20 @@ get_time <- function(rds_path, model_path) {
     return(c(total_time = time$total))
 }
 
-ess_boxplot <- function(data, variables, plot_title) {
+ess_boxplot <- function(data, variables, plot_title, ess_type) {
     data %>%
-        select(all_of(variables)) %>%
-        tidyr::pivot_longer(everything(), names_to = "variable", values_to = "ess") %>%
+        filter(parameters %in% variables) %>% 
         ggplot(.) +
-        geom_boxplot(aes(x = variable, y = ess)) +
+        geom_boxplot(aes(x = parameters, y = {{ess_type}})) +
+        theme_minimal() +
+        labs(title = plot_title)
+}
+
+rhat_boxplot <- function(data, variables, plot_title, rhat_type) {
+    data %>%
+        filter(parameters %in% variables) %>% 
+        ggplot(.) +
+        geom_boxplot(aes(x = parameters, y = {{rhat_type}})) +
         theme_minimal() +
         labs(title = plot_title)
 }

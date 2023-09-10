@@ -7,16 +7,21 @@ source("R/sbc.r")
 plan(multicore, workers = 9)
 
 # Get all parameter data
-path <- "simulation_output/sbc_cp_ksc_model_cp_dgf_r1"
+path <- "simulation_output/sbc_cp_ksc_model_cp_dgf_10kmcmc_r1"
 rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
-results <- lapply(paste("output", rds_list, sep = "/"), get_ranks, model_path = path)
-df <- as.data.frame(do.call("rbind", results))
+rds_path <- paste("output", rds_list, sep = "/")
 
 # Parameters
 n_iterations <- length(rds_list)
 posterior_samples <- 999 # Posterior samples. m+1 possible ranks. So want (m+1)/J = expected samples for uniform dist.
 n_bins <- 20 # Bins
 expected_count <- n_iterations / n_bins # Chi sqd stat
+
+# Load ranks
+weighted_results <- lapply(rds_path, get_ranks, model_path = path, rank_type = "weighted_ranks")
+results <- lapply(rds_path, get_ranks, model_path = path, rank_type = "agg_ranks")
+df <- as.data.frame(do.call("rbind", results))
+wdf <- as.data.frame(do.call("rbind", weighted_results)) * posterior_samples
 
 # Create bins and chi sq stats
 rank_bins <- as.data.frame(lapply(df, binning, posterior_draws = posterior_samples, bins = n_bins))
@@ -29,10 +34,21 @@ state_parameters <- names(rank_bins)[!(names(rank_bins) %in% static_parameters)]
 additional_parameters <- c("h.1.", "h.10.", "h.100.", "h.500.", "h.1000.", "h.995.")
 
 # Facet plots (hist of params)
-static_hist <- facet_hist(data = rank_bins, variables = static_parameters, expected_bin_count = expected_count, nbins = n_bins)
+static_hist <- facet_hist(data = rank_bins, 
+                          variables = static_parameters, 
+                          expected_bin_count = expected_count, 
+                          nbins = n_bins,
+                          rank_scales = (posterior_samples+1)
+                          )
+
 ggsave(paste(path, "/static_hist.png", sep =""), static_hist, bg = "white")
 
-static_state_hist <- facet_hist(data = rank_bins, variables = append(static_parameters, additional_parameters), expected_bin_count = expected_count, nbins = n_bins)
+static_state_hist <- facet_hist(data = rank_bins, 
+                                variables = append(static_parameters, additional_parameters), 
+                                expected_bin_count = expected_count, 
+                                nbins = n_bins,
+                                rank_scales = (posterior_samples+1)
+                                )
 ggsave(paste(path, "/static_state_hist.png", sep =""), static_state_hist, bg = "white")
 
 # Chi squared state parameters (dot plots)
@@ -46,10 +62,9 @@ chi_sq_histogram <- chi_sq_hist(data = rank_stats,
     variables = state_parameters,
     plot_title = "Chi squared estimates for state rank statistics") + 
     geom_vline(xintercept = qchisq(0.95, df =n_bins-1))
-
 ggsave(paste(path, "/chi_sq_hist.png", sep =""), chi_sq_histogram, bg = "white")
 
-sum(rank_stats > qchisq(0.95, df =n_bins-1)) / 1003
+# sum(rank_stats > qchisq(0.95, df =n_bins-1)) / 1003
 
 # QQ plot
 chisq_ranks = rank_stats %>%
@@ -57,9 +72,11 @@ chisq_ranks = rank_stats %>%
         arrange(chisq_stat) %>%
         mutate(parameter = factor(parameter, unique(parameter))) 
 
+jpeg(file=paste(path, "/chi_sq_qq.png", sep =""))
+qqPlot(chisq_ranks$chisq_stat, distribution = "chisq", df =19)
+dev.off()
 
-chi_sq_qq <- qqPlot(chisq_ranks$chisq_stat, distribution = "chisq", df =19)
-ggsave(paste(path, "/chi_sq_qq.png", sep =""), chi_sq_qq, bg = "white")
+# fsave(paste(path, "/chi_sq_qq.png", sep =""), chi_sq_qq, bg = "white")
 
 # Chi squared state parameters (dot plots)
 chi_sq_static_dots <- dot_plots(data = rank_stats,
@@ -67,51 +84,97 @@ chi_sq_static_dots <- dot_plots(data = rank_stats,
     plot_title = "Chi squared estimates for static rank statistics")
 ggsave(paste(path, "/chi_sq_static_dots.png", sep =""), chi_sq_static_dots, bg = "white")
 
-pval_hist(data = rank_stats,
-    expected_bin_count = n_bins,
-    plot_title = "Distribution of p-values")
+# pval_hist(data = rank_stats,
+#     expected_bin_count = n_bins,
+#     plot_title = "Distribution of p-values")
 
 # R hats
-rhats <- future_lapply(paste("output", rds_list, sep = "/"), get_rhat, model_path = path, future.seed = NULL)
+rhats <- future_lapply(rds_path, 
+                       get_rhat, 
+                       model_path = path, 
+                       future.seed = NULL)
 rhat_df <- as.data.frame(do.call("rbind", rhats))
+rhat_df$rhat <- as.numeric(rhat_df$rhat)
+rhat_box <- rhat_boxplot(data = rhat_df,
+    variables = static_parameters,
+    plot_title = "Rhat distribution",
+    rhat_type = rhat)
+
+ggsave(paste(path, "/rhat_box_static_box.png", sep =""), rhat_box, bg = "white")
 
 # Basic R hats
-basic_rhats <- future_lapply(paste("output", rds_list, sep = "/"), get_rhat_basic, model_path = path, future.seed = NULL)
+basic_rhats <- future_lapply(rds_path, 
+                             get_rhat_basic, 
+                             model_path = path, 
+                             future.seed = NULL)
 basic_rhat_df <- as.data.frame(do.call("rbind", basic_rhats))
+basic_rhat_df$rhat_basic <- as.numeric(basic_rhat_df$rhat_basic)
+rhat_basic_box <- rhat_boxplot(data = basic_rhat_df,
+    variables = static_parameters,
+    plot_title = "Basic Rhat distribution",
+    rhat_type = rhat_basic)
+
+ggsave(paste(path, "/rhat_basic_box_static_box.png", sep =""), rhat_basic_box, bg = "white")
 
 # Basic ESS
-ess_basic <- future_lapply(paste("output", rds_list, sep = "/"), get_ess, model_path = path, ess_type = "ess_basic", chains = "one_chain", future.seed = NULL)
+ess_basic <- future_lapply(rds_path,
+                           get_ess, 
+                           model_path = path, 
+                           ess_type = "ess_basic", 
+                           chains = "one_chain", 
+                           future.seed = NULL)
+
 ess_basic_df <- as.data.frame(do.call("rbind", ess_basic))
-ess_boxplot(data = ess_basic_df,
+ess_basic_box <- ess_boxplot(data = ess_basic_df,
     variables = static_parameters,
-    plot_title = "Basic ESS distribution")
+    plot_title = "Basic ESS distribution",
+    ess_type = ess_basic)
+
+ggsave(paste(path, "/ess_basic_static_box.png", sep =""), ess_basic_box, bg = "white")
 
 # Bulk ESS
-ess_bulk <- future_lapply(paste("output", rds_list, sep = "/"), get_ess, model_path = path, ess_type = "ess_bulk", chains = "one_chain", future.seed = NULL)
+ess_bulk <- future_lapply(rds_path, 
+                          get_ess, 
+                          model_path = path, 
+                          ess_type = "ess_bulk", 
+                          chains = "one_chain", 
+                          future.seed = NULL)
 ess_bulk_df <- as.data.frame(do.call("rbind", ess_bulk))
-ess_boxplot(data = ess_bulk_df,
-    variables = static_parameters,
-    plot_title = "Bulk ESS distribution")
+ess_bulk_box <- ess_boxplot(data = ess_bulk_df,
+                           variables = static_parameters,
+                           plot_title = "Bulk ESS distribution",
+                           ess_type = ess_bulk)
+ggsave(paste(path, "/ess_bulk_static_box.png", sep =""), ess_bulk_box, bg = "white")
 
 # Tail ESS
-ess_tail <- future_lapply(paste("output", rds_list, sep = "/"), get_ess, model_path = path, ess_type = "ess_tail", chains = "one_chain", future.seed = NULL)
+ess_tail <- future_lapply(rds_path, 
+                          get_ess, 
+                          model_path = path, 
+                          ess_type = "ess_tail", 
+                          chains = "one_chain", 
+                          future.seed = NULL)
 ess_tail_df <- as.data.frame(do.call("rbind", ess_tail))
-ess_boxplot(data = ess_tail_df,
+ess_tail_box <- ess_boxplot(data = ess_tail_df,
     variables = static_parameters,
-    plot_title = "Tail ESS distribution")
+    plot_title = "Tail ESS distribution",
+    ess_type = ess_tail)
+ggsave(paste(path, "/ess_tail_static_box.png", sep =""), ess_tail_box, bg = "white")
 
 # Total time for each model
-times <- future_lapply(paste("output", rds_list, sep = "/"), get_time, model_path = path, future.seed = NULL)
-times_df <- as.data.frame(do.call("rbind", times))
+# times <- future_lapply(paste("output", rds_list, sep = "/"), get_time, model_path = path, future.seed = NULL)
+# times_df <- as.data.frame(do.call("rbind", times))
 
 
-basic_rhat_df %>% 
-    select(c("mu", "sigma_sqd", "phi")) %>% 
-    tidyr::pivot_longer(everything(), names_to = "variable", values_to = "rhat") %>%
-    ggplot(.) +
-        geom_boxplot(aes(x = variable, y = rhat)) +
-        theme_minimal() +
-        labs(title = "Basic Rhats")
+# basic_rhat_df %>% 
+#     select(c("mu", "sigma_sqd", "phi")) %>% 
+#     tidyr::pivot_longer(everything(), names_to = "variable", values_to = "rhat") %>%
+#     ggplot(.) +
+#         geom_boxplot(aes(x = variable, y = rhat)) +
+#         theme_minimal() +
+#         labs(title = "Basic Rhats")
+
+
+
 # fit = t$sv_fit
 # fit$summary()
 
