@@ -100,16 +100,26 @@ load_parameters <- function(rds_path) {
 
 get_rhat_basic <- function(rds_path, model_path) {
     data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
-    diagnostics = do.call("rbind", data$all_chains$diagnostics)
-    results <- as.data.frame(cbind(rownames(diagnostics), diagnostics$rhat_basic))
+    if(is.null(dim(data$all_chains$diagnostics))){
+        diagnostics = do.call("rbind", data$all_chains$diagnostics)
+        results <- as.data.frame(cbind(rownames(diagnostics), diagnostics$rhat_basic))
+    } else{
+        diagnostics = data$all_chains$diagnostics
+        results <- as.data.frame(cbind(diagnostics$variable, diagnostics$rhat_basic))
+    }
     names(results) <- c("parameters", "rhat_basic")
     return(results)
 }
 
 get_rhat <- function(rds_path, model_path) {
     data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
-    diagnostics = do.call("rbind", data$all_chains$diagnostics)
-    results <- as.data.frame(cbind(rownames(diagnostics), diagnostics$rhat))
+    if(is.null(dim(data$all_chains$diagnostics))){
+        diagnostics = do.call("rbind", data$all_chains$diagnostics)
+        results <- as.data.frame(cbind(rownames(diagnostics), diagnostics$rhat))
+    } else{
+        diagnostics = data$all_chains$diagnostics
+        results <- as.data.frame(cbind(diagnostics$variable, diagnostics$rhat))
+    }
     names(results) <- c("parameters", "rhat")
     return(results)
 }
