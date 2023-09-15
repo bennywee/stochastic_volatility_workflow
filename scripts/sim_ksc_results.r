@@ -40,6 +40,10 @@ simulation_results <- function(file_number){
             tibble::rowid_to_column("index") %>% 
             pivot_longer(cols = -c(index),  names_to = "chain", values_to = "weights")
 
+    post_weights_ess <- post_weights %>% 
+                            group_by(chain) %>% 
+                            summarise(ess_weights=1/sum(weights^2))
+
     all_chains <- within(all_chains, rm(weights))
     
     one_chain = sapply(all_chains, one_chain_f, simplify=FALSE)
@@ -75,6 +79,7 @@ simulation_results <- function(file_number){
     results[["one_chain"]][["diagnostics"]] <- one_chain_diagnostic
     results[["config"]] <- config
     results[["seed_files"]] <- file_metadata[file_metadata["dataset"] == file_number, ]
+    results[["weights_ess"]] <- post_weights_ess
 
     saveRDS(results,
             file = here::here("simulation_output",
