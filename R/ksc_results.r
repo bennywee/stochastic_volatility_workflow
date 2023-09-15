@@ -1,4 +1,6 @@
 combine_chains <- function(parameter, list_obj){
+
+        if(length(list_obj)==4){
         parameter_df = as.data.frame(cbind(
         list_obj[[1]][parameter],
         list_obj[[2]][parameter],
@@ -6,9 +8,13 @@ combine_chains <- function(parameter, list_obj){
         list_obj[[4]][parameter]
             )
         )
-
         names(parameter_df) <- c("chain_1", "chain_2", "chain_3", "chain_4")
-
+        } else if (length(list_obj)==1) {
+        parameter_df = as.data.frame(list_obj[[1]][parameter])
+        names(parameter_df) <- c("chain_1")
+        } else {
+            print("error")
+        }        
         return(parameter_df)
     }
 
@@ -29,7 +35,7 @@ combine_chains <- function(parameter, list_obj){
         return(results)
     }
 
-    one_chain <- function(df){
+    one_chain_f <- function(df){
         return(df$chain_1)
     }
 

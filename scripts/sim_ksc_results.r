@@ -22,9 +22,6 @@ file_metadata <- tidyr::separate(file_metadata,
     tidyr::separate(., col = mcmc_seed, sep = "\\.", into = c("mcmc_seed", "parquet"), remove = TRUE) %>% 
     select(-parquet)
 
-## DElETE
-# file_number = "1"
-
 simulation_results <- function(file_number){
     results <- list()
     results[["all_chains"]] <- list()
@@ -38,12 +35,6 @@ simulation_results <- function(file_number){
 
     all_chains = sapply(parameter_names, combine_chains, list_obj = iteration_list, simplify=FALSE)
     names(all_chains)[names(all_chains) == "sigma2"] <- "sigma_sqd"
-    
-    # ###REMOVE    
-    # weights <- as.data.frame(cbind(rep(1,9999),rep(1,9999),rep(1,9999),rep(1,9999)))
-    # names(weights) <- c("chain_1", "chain_2", "chain_3", "chain_4")
-    # all_chains[["weights"]] <- weights
-    # ###REMOVE
 
     post_weights <- all_chains[['weights']] %>% 
             tibble::rowid_to_column("index") %>% 
@@ -51,10 +42,14 @@ simulation_results <- function(file_number){
 
     all_chains <- within(all_chains, rm(weights))
     
-    one_chain = sapply(all_chains, one_chain, simplify=FALSE)
+    one_chain = sapply(all_chains, one_chain_f, simplify=FALSE)
 
     # All chain diagnostics
+    if(length(iteration_list)>1){
     all_chains_diagnostics <- sapply(all_chains, diagnostics, simplify=FALSE)
+    } else{
+    all_chains_diagnostics <- "Only one chain"
+    }
 
     # One chain diagnostics
     ess_basic <- sapply(one_chain, posterior::ess_basic, USE.NAMES = TRUE)
@@ -68,9 +63,11 @@ simulation_results <- function(file_number){
     data_location <- here::here("data/simulated/sbc", config$data_location, paste(file_number, "json", sep = "."))
     prior_params <- jsonlite::read_json(data_location)
 
+    if(length(iteration_list)>1){
     results[["all_chains"]][["agg_ranks"]] <- sapply(names(all_chains), rank_stats, draws = all_chains, prior_parameters = prior_params, USE.NAMES = TRUE)
-    results[["one_chain"]][["agg_ranks"]] <- sapply(names(one_chain), rank_stats, draws = one_chain, prior_parameters = prior_params, USE.NAMES = TRUE)
     results[["all_chains"]][["weighted_ranks"]] <- sapply(names(all_chains), weighted_ranks, draws = all_chains, prior_parameters = prior_params, USE.NAMES = TRUE, posterior_weights = post_weights, one_chain = FALSE)
+    }
+    results[["one_chain"]][["agg_ranks"]] <- sapply(names(one_chain), rank_stats, draws = one_chain, prior_parameters = prior_params, USE.NAMES = TRUE)
     results[["one_chain"]][["weighted_ranks"]] <- sapply(names(all_chains), weighted_ranks, draws = all_chains, prior_parameters = prior_params, USE.NAMES = TRUE, posterior_weights = post_weights, one_chain = TRUE)
     
     # Append results
