@@ -14,8 +14,8 @@ beta <- 0.64733
 
 # Model training
 ## Model metadata
-model_name <- "sv_user_guide_reparameterised_ksc_priors" # Name of the .stan file in the models directory
-unique_identifier <- "adapt_delta_0.95" # Suffix given for specific run of that stan script, needed to identify exact model output
+model_name <- "semi_centered" # Name of the .stan file in the models directory
+unique_identifier <- "r1" # Suffix given for specific run of that stan script, needed to identify exact model output
 
 ## Data location
 data_loc <- "simulated" # Either simulated or preprocessed data (don't use raw)

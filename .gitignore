@@ -1,4 +1,16 @@
-analysis/sandbox.r
+old_simulations/
+writeups/proposal_presentation/prompts.md
+writeups/reweight_samples/reweight.qmd
+*/week1.qmd
+*.png
+*.jpg
+*.pdf
+writeups/proposal_presentation/prompts_files
+analysis/.discard/*
+*__pycache__
+writeups/*_files/
+.env/
+*.pyc
 .env/
 writeups/model_desciptions_files
 writeups/results_files

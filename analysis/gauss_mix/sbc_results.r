@@ -7,27 +7,23 @@ source("R/sbc.r")
 plan(multicore, workers = 9)
 
 # Get all parameter data
-path <- "simulation_output/stan/ncp/sbc_ncp_ksc_priors_0.999_adapt_delta_premade_datasets_r9_5000_iterations"
-rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
-rds_path <- paste("output", rds_list, sep = "/")
+# path <- "simulation_output/sbc_cp_ksc_model_cp_dgf_10kmcmc_r2"
+rds_list <- list.files(path = "analysis/gauss_mix/results", pattern = "*.rds")
+rds_path <- "analysis/gauss_mix/results/results_real_data.rds"
 
 # Rank type
 # rank_type = "weighted_ranks"
 rank_type = "agg_ranks"
 
-# get_ranks <- function(rds_path, model_path, rank_type) {
-#     data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
-#     return(data$all_chains[[rank_type]])
-# }
-
 # Parameters
-n_iterations <- length(rds_list)
+# n_iterations <- length(rds_list)
 posterior_samples <- 999 # Posterior samples. m+1 possible ranks. So want (m+1)/J = expected samples for uniform dist.
 n_bins <- 20 # Bins
 expected_count <- n_iterations / n_bins # Chi sqd stat
 
 # Load ranks
-results <- lapply(rds_path, get_ranks, model_path = path, rank_type = rank_type)
+data <- readRDS(rds_path)
+results <- data$one_chain[[rank_type]]
 
 if (rank_type == "agg_ranks"){
     df <- as.data.frame(do.call("rbind", results))
@@ -37,84 +33,20 @@ if (rank_type == "agg_ranks"){
     print("error")
 }
 
-# Create bins and chi sq stats
-rank_bins <- as.data.frame(lapply(df, binning, posterior_draws = posterior_samples, bins = n_bins))
-rank_bins <- rank_bins[!(names(rank_bins) %in% c("y_sim", "sigma"))]
-rank_stats <- as.data.frame(lapply(rank_bins, rank_chi_sqd, expected = expected_count))
-
-# Define static and state parameters
-static_parameters <- c("mu", "sigma_sqd", "phi")
-state_parameters <- names(rank_bins)[!(names(rank_bins) %in% static_parameters)]
-additional_parameters <- c("h.1.", "h.10.", "h.100.", "h.500.", "h.1000.", "h.995.")
-
-# Facet plots (hist of params)
-static_hist <- facet_hist(data = rank_bins, 
-                          variables = static_parameters, 
-                          expected_bin_count = expected_count, 
-                          nbins = n_bins,
-                          rank_scales = (posterior_samples+1)
-                          )
-
-ggsave(paste(path, "/static_hist_", rank_type, ".png", sep =""), static_hist, bg = "white", width = 11)
-
-static_state_hist <- facet_hist(data = rank_bins, 
-                                variables = append(static_parameters, additional_parameters), 
-                                expected_bin_count = expected_count, 
-                                nbins = n_bins,
-                                rank_scales = (posterior_samples+1)
-                                )
-ggsave(paste(path, "/static_state_hist_", rank_type, ".png", sep =""), static_state_hist, bg = "white", width = 11)
-
-# Chi squared state parameters (dot plots)
-chi_sq_dot_plots <- dot_plots(data = rank_stats,
-    variables = state_parameters,
-    plot_title = "Chi squared estimates for state rank statistics")
-ggsave(paste(path, "/chi_sq_dot_plots_", rank_type, ".png", sep =""), chi_sq_dot_plots, bg = "white", width = 11)
-
-# Chi squared state parameters (hist)
-chi_sq_histogram <- chi_sq_hist(data = rank_stats,
-    variables = state_parameters,
-    plot_title = "Chi squared estimates for state rank statistics") + 
-    geom_vline(xintercept = qchisq(0.95, df =n_bins-1))
-ggsave(paste(path, "/chi_sq_hist", rank_type, ".png", sep =""), chi_sq_histogram, bg = "white", width = 11)
-
-# sum(rank_stats > qchisq(0.95, df =n_bins-1)) / 1003
-
-# QQ plot
-chisq_ranks = rank_stats %>%
-        tidyr::pivot_longer(everything(), names_to = "parameter", values_to = "chisq_stat") %>%
-        arrange(chisq_stat) %>%
-        mutate(parameter = factor(parameter, unique(parameter))) 
-
-jpeg(file=paste(path, "/chi_sq_qq_", rank_type, ".png", sep =""))
-qqPlot(chisq_ranks$chisq_stat, distribution = "chisq", df =19)
-dev.off()
-
-# fsave(paste(path, "/chi_sq_qq.png", sep =""), chi_sq_qq, bg = "white")
-
-# Chi squared state parameters (dot plots)
-chi_sq_static_dots <- dot_plots(data = rank_stats,
-    variables = static_parameters,
-    plot_title = "Chi squared estimates for static rank statistics")
-ggsave(paste(path, "/chi_sq_static_dots_", rank_type, ".png", sep =""), chi_sq_static_dots, bg = "white", width = 11)
-
-# pval_hist(data = rank_stats,
-#     expected_bin_count = n_bins,
-#     plot_title = "Distribution of p-values")
-
 # R hats
 rhats <- future_lapply(rds_path, 
                        get_rhat, 
                        model_path = path, 
                        future.seed = NULL)
 rhat_df <- as.data.frame(do.call("rbind", rhats))
+
 rhat_df$rhat <- as.numeric(rhat_df$rhat)
 rhat_box <- rhat_boxplot(data = rhat_df,
     variables = static_parameters,
     plot_title = "Rhat distribution",
     rhat_type = rhat)
 
-ggsave(paste(path, "/rhat_box_static.png", sep =""), rhat_box, bg = "white")
+ggsave(paste(path, "/rhat_box_static_box.png", sep =""), rhat_box, bg = "white")
 
 # Basic R hats
 basic_rhats <- future_lapply(rds_path, 
@@ -128,7 +60,7 @@ rhat_basic_box <- rhat_boxplot(data = basic_rhat_df,
     plot_title = "Basic Rhat distribution",
     rhat_type = rhat_basic)
 
-ggsave(paste(path, "/rhat_basic_box_static.png", sep =""), rhat_basic_box, bg = "white")
+ggsave(paste(path, "/rhat_basic_box_static_box.png", sep =""), rhat_basic_box, bg = "white")
 
 # Basic ESS
 ess_basic <- future_lapply(rds_path,

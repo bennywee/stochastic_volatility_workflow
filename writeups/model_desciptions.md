@@ -95,7 +95,7 @@ Then we can apply the appropriate rescaling to get samples from the log volatili
 $$
 \begin{aligned}
 h_1 =& \space \frac{h_{std, 1}\times \sigma_{\eta}} {\sqrt{1 - \phi^2}} + \mu \\
-h_t =& \space h_{std, t}\times \sigma_{\eta} + \mu  + \phi(h_{std, t-1} - \mu),\space t\neq 1
+h_t =& \space h_{std, t}\times \sigma_{\eta} + \mu  + \phi(h_{t-1} - \mu),\space t\neq 1
 \end{aligned}
 $$
 
@@ -196,3 +196,52 @@ We could:
 **Note:** The sampling in KSC has many more iterations from their sampling algorithms (orders of 100k). I'm unsure how this will affect SBC. 
 
 - Generate data from KSC's mixture model and run SBC using the KSC model and an implementation of KSC in Stan. This would be comparing the difference between Stan and the KF + MH correction for sampling the model.
+
+$$
+\begin{aligned}
+\alpha_1 & = a + A \delta + R_0 \eta_0 \\
+\delta & \sim N(0, \kappa I), \kappa \to \infty \\
+\eta_0 & \sim N(0, Q_0)
+\end{aligned}
+$$
+
+$$
+\alpha_1^{(i)} \sim N(a^{(i)}, Q_0^{(i)})
+$$
+
+$$
+(I - T^{(i)})^{-1} c_t
+$$
+
+$$
+  T^{(i)} Q_0^{(i)} T^{(i)} + (R Q R')^{(i)} = Q_0^{(i)}
+$$
+
+$$
+\alpha_1^{(i)} \sim N(a^{(i)}, Q_0^{(i)})
+$$
+$$
+a^{(i)} = 0`
+$$
+$$
+`\alpha_1^{(i)} \sim N(a^{(i)}, Q_0^{(i)})
+$$
+$$
+`\alpha_1^{(i)} \sim N(a^{(i)}, Q_0^{(i)})
+$$
+$$
+`\alpha_1^{(i)} \sim N(a^{(i)}, Q_0^{(i)})
+$$
+
+   If a block is initialized as known, then a known (possibly degenerate)
+    distribution is used; in particular, the block of states is understood to
+    be distributed
+    :math:`\alpha_1^{(i)} \sim N(a^{(i)}, Q_0^{(i)})`. Here, is is possible to
+    set :math:`a^{(i)} = 0`, and it is also possible that
+    :math:`Q_0^{(i)}` is only positive-semidefinite; i.e.
+    :math:`\alpha_1^{(i)}` may be degenerate. One particular example is
+    that if the entire block's initial values are known, then
+    :math:`R_0^{(i)} = 0`, and so `Var(\alpha_1^{(i)}) = 0`.
+
+    Here, `constant` must be provided (although it can be zeros), and
+    `stationary_cov` is optional (by default it is a matrix of zeros).
