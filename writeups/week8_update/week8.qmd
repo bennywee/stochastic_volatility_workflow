@@ -1,0 +1,84 @@
+---
+title: " "
+format:
+  pdf:
+    fig-pos: H
+    include-in-header:
+        text: |
+          \usepackage{lipsum}
+          \usepackage{setspace}
+          \onehalfspacing
+          \linespread{1.5}
+fontsize: 12pt
+geometry: margin=1in
+mathspec: true
+---
+
+## Rank formula
+
+$$
+\begin{aligned}
+r = rank(\{\theta_1,\dots , \theta_{L}\}, \theta^{sim}) = \sum_{l=1}^{L}1[\theta_{l} < \theta^{sim}]
+\end{aligned}
+$$
+
+## Reweighting
+
+Let $f(\theta, h_t | y_t)$ be the posterior of the true stochastic volatility model, $g(\theta, h_t | y^{\ast}_t)$ be the linearised model with log chi squared standard errors, and $k(\theta, h_t | y^{\ast}_t)$ be the Gaussian approximation model. KSC define their log weights as:
+
+$$
+\begin{aligned}
+w(\theta, h) = log\: f(\theta, h | y) - log\:  k(\theta, h_t | y^{\ast}_t) = const + log\: f(y|h) - log\: k(y^{\ast} | h)
+\end{aligned}
+$$
+
+However, I think the weights should be with respect to the log chi squared distribtion. So I define log weights as:
+
+$$
+\begin{aligned}
+w(\theta, h) = log\: g(\theta, h | y^{\ast}_t) - log\:  k(\theta, h_t | y^{\ast}_t)
+\end{aligned}
+$$
+
+Take the exponential and normalise the weights for the $l^{th}$ posterior draw:
+
+$$
+\begin{aligned}
+c^l = \frac{exp(w(\theta, h)_l)}{\sum_i exp(w(\theta, h)_i)}
+\end{aligned}
+$$
+
+# Reweighted Rank formula
+Note that multiplying the L (the number of posterior draws) brings it back to the correct scale (otherwise all the ranks are between 0 and 1).
+$$
+\begin{aligned}
+r &= L \times \sum_{l=1}^{L}1[\theta_{l} < \theta^{sim}]\times c^l   \\
+&= L \times \sum_{l=1}^{L}1[\theta_{l} < \theta^{sim}]\times \frac{exp(w(\theta, h)_l)}{\sum_i exp(w(\theta, h)_i)}
+\end{aligned}
+$$
+
+# Visualising histograms of log weights
+
+KSC use the SV model with normal errors as the target "true" distribution instead of the linearised log chi squared model when calculating weights. If you create a histogram using their formulation for log weights, you get:
+
+![](../reweight_samples/incorrect.png)
+
+This is way off from zero. However, if you use the log chi squared density  as the "true" density we are trying to approximate, we get the correct plot which they have in their paper. These weights are defined as: $w(\theta, h) = log\: g(\theta, h_t | y^{\ast}_t) - log\:  k(\theta, h_t | y^{\ast}_t)$
+
+![](../reweight_samples/correct.png)
+
+This is much better. This is also why I needed help getting the density of the log chi squared distribution in order to calculate this. And this also makes much more sense - the whole point of the Gaussian mixture was to approximate the lineared log chi squared model _not_ the SV model with normal errors.
+
+Taking the delta:
+
+![](delta_histograms.png)
+
+- count	9999
+- mean -1004.297735
+- std	0.120312
+- min	-1004.943507
+- 25%	-1004.375330
+- 50%	-1004.289475
+- 75%	-1004.214196
+- max	-1003.923458
+
