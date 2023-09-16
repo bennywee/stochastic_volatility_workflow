@@ -12,6 +12,9 @@ writeups/*_files/
 .env/
 *.pyc
 .env/
+writeups/model_desciptions_files
+writeups/results_files
+writeups/week1_files
 docs/
 analysis/eight_schools/executables/
 Sim_SV.R
@@ -76,4 +79,3 @@ vignettes/*.pdf
 renv/Icon
 */Icon\r"
 "Icon\r"
-/.luarc.json
