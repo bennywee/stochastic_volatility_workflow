@@ -1,14 +1,13 @@
 {
-    "simulation_name": "sbc_cp_ksc_model_r3",
-    "simulation_description": "SBC with KSC model run:3.0", 
-    "mcmc_samples": 10999,
+    "simulation_name": "sbc_cp_ksc_model_cp_dgf_10kmcmc_3000_niter_r1",
+    "simulation_description": "SBC with centered KSC model and centered dataset and 10k MCMC samples, 3000 interations run:1.0", 
+    "mcmc_samples": 19999,
     "burn": 10000,
     "thin": 10,
     "seed": 123,
-    "n_iterations": 1000,
-    "chains": 4,
-    "model_name": "sv_ncp_ksc_sbc",
-    "data_location": "sbc_data_gen_sv_ncp_ksc_priors",
+    "n_iterations": 3000,
+    "chains": 1,
+    "data_location": "sbc_data_gen_sv_cp_ksc_priors_5000_datasets",
     "dependent_variable": "y_sim",
     "parameterisation": "centered"
 }

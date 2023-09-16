@@ -10,7 +10,7 @@ get_data_name <- function(data_name){
     return(unlist(strsplit(data_name, split='.', fixed=TRUE))[1])
 }
 
-data_path <- "data/simulated/sbc/sbc_data_gen_sv_ncp_ksc_priors"
+data_path <- "data/simulated/sbc/sbc_data_gen_sv_cp_ksc_priors_5000_datasets"
 data_list <- list.files(path = data_path, pattern = "*.RDS")
 file_names <- unlist(lapply(data_list, get_data_name))
 file_names <- file_names[file_names != "metadata"]

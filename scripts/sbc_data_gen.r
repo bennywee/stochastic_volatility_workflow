@@ -1,6 +1,6 @@
-model_name <- "sbc_data_gen_sv_cp_ksc_priors_1000_datasets"
+model_name <- "sbc_data_gen_sv_cp_ksc_priors_5000_datasets"
 n_time_points <- 1000
-n_datasets <- 1000
+n_datasets <- 5000
 data_path <- here::here("data", "simulated", "sbc", model_name)
 seed <- 543
 parameterisation <- "cp"
