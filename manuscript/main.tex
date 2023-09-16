@@ -2,6 +2,12 @@
 \usepackage{graphicx} % Required for inserting images
 \usepackage[parfill]{parskip} % Removes indent from new paragraphs
 \usepackage{amsmath, amssymb, amsfonts}
+\usepackage[colorlinks = true,
+			citecolor  = blue]{hyperref}
+
+\usepackage[longnamesfirst,authoryear, round]{natbib}
+\bibliographystyle{unsrtnat}
+
 \usepackage[
 top    = 1.0in,
 bottom = 1.2in,
@@ -23,10 +29,12 @@ right  = 1.0in]{geometry}
 
 \section{Introduction}
 
-\section{Background and Literature Review}
-    Stochastic volatility models are used in financial econometrics to model the variance or volatility of returns in a financial instrument. The return of a financial asset often exhibits patterns in the variance which can be modeled to improve prediction and estimates of risk or tail events. Unlike other volatility models such as ARCH or GARCH, stochastic volatility models treat the variance as a random variable. Furthermore, these models have a state space representation since the variance is expressed as a latent stochastic process. State space models can be difficult to estimate since there is a latent state for every data observation in the time series, which means there are often more parameters than data points. These models can be estimated using frequent frameworks but this research will focus on Bayesian estimation strategies. \\
+- Should make reference to workflow, and reparameterisation of SV.
 
-    Kim, Shephard and Chib (1998) estimate a discrete time, univariate stochastic volatility model using Bayesian methods which is outlined below. $y_t$ is the mean corrected returns of some asset for equally spaced intervals t. $\beta$ is a constant scaling factor which is also defined as $exp(\mu / 2)$ representing instantaneous volatility. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$. This autoregressive parameter represents the persistence or "stickiness" of log volatility and the dispersion parameter $\sigma_{\eta}$ is the constant variance of the states. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks and are uncorrelated with each other. 
+\section{Background and Literature Review}
+    Stochastic volatility models are used in financial econometrics to model the variance or volatility of returns in a financial instrument. The return of a financial asset often exhibits patterns in the variance which can be modelled to improve prediction and estimates of risk or tail events. Unlike other volatility models such as ARCH or GARCH, stochastic volatility models treat the variance as a random variable. Furthermore, these models have a state space representation since the variance is expressed as a latent stochastic process. State space models can be difficult to estimate since there is a latent state for every data observation in the time series, which means there are often more parameters than data points. These models can be estimated using frequent frameworks but this research will focus on Bayesian estimation strategies.
+
+    \citet{kim1998stochastic} estimate a discrete time, univariate stochastic volatility model using Bayesian methods which is outlined below. $y_t$ is the mean corrected returns of some asset for equally spaced intervals t. $\beta$ is a constant scaling factor which is also defined as $exp(\mu / 2)$ representing instantaneous volatility. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$. This autoregressive parameter represents the persistence or "stickiness" of log volatility and the dispersion parameter $\sigma_{\eta}$ is the constant variance of the states. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks and are uncorrelated with each other. 
 
     $$
     \begin{aligned}
@@ -68,7 +76,7 @@ right  = 1.0in]{geometry}
     The prior on $\phi$ is a "stretched" beta distribution. This is a beta distribution (as defined on the parameter $\phi^*$) which has been transformed to have support (-1, 1).
 
     \subsection{Estimation strategy}
-        Kim, Shephard and Chib (KSC) sample the posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings and the Kalman Filter and smoother\footnote{In this research the exact software to apply the simulation smoother is unavailable, so a more recent simulation smoother is used which is based on the software written by the same author.} (de Jong and Shephard, 1995).
+        Kim, Shephard and Chib (KSC) sample the posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings and the Kalman Filter and smoother\footnote{In this research the exact software to apply the simulation smoother is unavailable, so a more recent simulation smoother is used which is based on the software written by the same author.} \citep{dejong1995}.
 
         The standard Kalman Filter and smoother is used to compute the posterior distribution over the latent states. This requires the state and measurement equations to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring and taking the log of $y_t$.
 
@@ -95,11 +103,11 @@ right  = 1.0in]{geometry}
         The model can be sampled via the Kalman Filter and simulation smoother since the model is now linear and conditionally gaussian. The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conjugate posterior distributions whereas $\phi$ is sampled via a Metropolis Hastings accept/reject procedure. The details can be around in Appendix B. 
 
     \subsection{Hamiltonian Monte Carlo}
-        Since the paper was written, new MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Specifically, Hamiltonian Monte Carlo is a MCMC algorithm which has become widely available for efficiently sampling from sophisticated models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo, was developed in the physics literature (Duane et al. 1987) before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks (Neal, 1995) and statistical computing (Neal 2011). The algorithm has since become widely available through open source development projects such as Stan (Stan Development Team, 2023) and PyMC (2023).
+        Since the paper was written, new MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Specifically, Hamiltonian Monte Carlo is a MCMC algorithm which has become widely available for efficiently sampling from sophisticated models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo, was developed in the physics literature \citep{duane1987hybrid} before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks \citep{neal1995bayesian} and statistical computing \citep{neal2011mcmc}. The algorithm has since become widely available through open source development projects such as Stan \citep{stan} and PyMC \citep{pymc2023}.
 
         The key innovation of Hamiltonian Monte Carlo is using the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. Unlike Random Walk Metropolis Hastings, it takes advantage of the geometry of the posterior to determine its next proposal step. A comprehensive explanation of the sampler is beyond the scope of this research and can be found in the above references. 
 
-        The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler (Hoffman \& Gelman 2014), allows for direct sampling of the specified stochastic volatility model. Hamiltonian Monte Carlo allows for sampling of the generative model and can flexibly handle complicated likelihood functions. This approach will also use the same priors as specified in the Gaussian mixture approximation.
+        The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler \citep{hoffman2014no}, allows for direct sampling of the specified stochastic volatility model. Hamiltonian Monte Carlo allows for sampling of the generative model and can flexibly handle complicated likelihood functions. This approach will also use the same priors as specified in the Gaussian mixture approximation.
 
 
 \section{Methodology}
@@ -142,7 +150,7 @@ right  = 1.0in]{geometry}
 
         That is, the posterior averaged over the joint distribution follows the same distribution as the prior. The procedure of generating posterior samples implicitly performs this integral since the expression on the right of the integral is proportional to the prior density. Therefore, any deviation of the posterior samples from the prior distribution suggests that the sampling methodology is not producing the correct posteriors.
 
-        If the posterior samples follows the prior distribution, the rank statistic for a given parameter follows a discrete uniform distribution\footnote{Proof of this result in Talts et al (2018).}. The rank statistic is defined as:
+        If the posterior samples follows the prior distribution, the rank statistic for a given parameter follows a discrete uniform distribution\footnote{Proof of this result in \citet{talts2018validating}.}. The rank statistic is defined as:
 
         $$
         \begin{aligned}
@@ -179,6 +187,7 @@ right  = 1.0in]{geometry}
 
 \section{Conclusion}
 
-
+% \bibliographystyle{apa} % Econometrica referencing
+\bibliography{references}
 
 \end{document}
