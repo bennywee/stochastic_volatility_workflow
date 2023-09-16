@@ -32,8 +32,8 @@ class TVLLDT(sm.tsa.statespace.MLEModel):
         endog = np.log(endog**2 + offset)
 
         # Initialize base model
-        super(TVLLDT, self).__init__(endog, k_states=1, k_posdef=1,
-                                     initialization='stationary')
+        super(TVLLDT, self).__init__(endog, k_states=1,
+                                     initialization='known', initial_state =[0], initial_state_cov=np.array([[0.02/(1-0.95**2)]]))
 
         # Setup time-varying arrays for observation equation
         self['obs_intercept'] = np.zeros((1, self.nobs)) # mod.ssm.obs_intercept

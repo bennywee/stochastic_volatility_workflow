@@ -8,12 +8,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import pyarrow as pa
 import pyarrow.parquet as pq
-import scipy as sp
 np.set_printoptions(suppress=True, precision=5)
 
 from gma import *
 
-np.random.seed(1234)
+seed=2413
+np.random.seed(seed)
 
 # df = pd.read_csv("../../data/simulated/ksc/phi_0.97779_sig_0.1585_beta_0.64733.csv")
 # endog = df['yobs']
@@ -67,10 +67,56 @@ for s in range(1, n_iterations + 1):
 
 # Create dataframe
 burn_draws = np.concatenate((trace_mu, trace_phi, trace_sigma2, trace_states), axis = 1)
-draws = burn_draws[burn:burn_draws.shape[0]]
+draws = burn_draws[burn+1:burn_draws.shape[0]]
 static_names = ['mu', 'phi', 'sigma2']
 state_names = [f"h[{state}]" for state in np.arange(1, trace_states.shape[1]+1)]
 
+y_star = np.log(endog**2 + 0.001)
+weights = importance_weights(data = y_star, 
+          states = trace_states, 
+          burn = burn)
+
+weights_ess = 1/sum(weights**2)
+
+burn_draws = np.concatenate((trace_mu, trace_phi, trace_sigma2, trace_states), axis = 1)
+param_draws = burn_draws[burn+1:burn_draws.shape[0]]
+draws = np.concatenate((param_draws, weights.reshape(-1,1)), axis = 1)
+samples = pd.DataFrame(draws)
+    
+static_names = ['mu', 'phi', 'sigma2']
+state_names = [f"h[{state}]" for state in np.arange(1, trace_states.shape[1]+1)]
+samples.columns = static_names + state_names + ['weights']
+
+table = pa.Table.from_pandas(samples)
+pq.write_table(table, f'data/{seed}.parquet')
+
+mean_phi = np.mean(trace_phi[burn::thin])
+mean_sigma = np.mean(trace_sigma2[burn::thin]**0.5)
+mean_beta = np.mean(np.exp(trace_mu[burn::thin] / 2))
+
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+
+axes[0].hist(trace_phi[burn::thin])
+ylim = (0, 140)
+axes[0].vlines(mean_phi, ylim[0], ylim[1], label='Posterior mean')
+# axes[0].vlines(res_QLSV.params[0], ylim[0], ylim[1], color='r', label='QMLE')
+axes[0].set(title=r'$\phi$', ylim=ylim)
+axes[0].legend(loc='upper left')
+
+axes[1].hist(trace_sigma2[burn::thin]**0.5)
+ylim = (0, 110)
+axes[1].vlines(mean_sigma, ylim[0], ylim[1], label='Posterior mean')
+# axes[1].vlines(res_QLSV.params[1]**0.5, ylim[0], ylim[1], color='r', label='QMLE')
+axes[1].set(title=r'$\sigma_\eta$', ylim=ylim)
+
+axes[2].hist(np.exp(trace_mu[burn::thin] / 2))
+ylim = (0, 340)
+axes[2].vlines(mean_beta, ylim[0], ylim[1], label='Posterior mean')
+# axes[2].vlines(np.exp(res_QLSV.params[2] / 2), ylim[0], ylim[1], color='r', label='QMLE')
+axes[2].set(title=r'$\beta$', ylim=ylim);
+
+###################################################################################
 # Weights
 y_star = np.log(endog**2 + 0.001)
 
@@ -287,27 +333,93 @@ np.mean(k_wsseights(data = 1000000,
 
 ### WORKING#######################
 import math
-def logchi2(x):
-    return np.sum(-0.5 * np.log(2) - np.log(math.gamma(0.5)) + 0.5*(x-np.exp(x)))
+# def logchi2(x):
+#     return np.sum(-0.5 * np.log(2) - np.log(math.gamma(0.5)) + 0.5*(x-np.exp(x)))
 
-def k_weights(data,states, burn):
-    q0 = ksc_params[0,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[0,1]- 1.2704, scale=ksc_params[0,2]**0.5)
-    q1 = ksc_params[1,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[1,1]- 1.2704, scale=ksc_params[1,2]**0.5)
-    q2 = ksc_params[2,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[2,1]- 1.2704, scale=ksc_params[2,2]**0.5)
-    q3 = ksc_params[3,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[3,1]- 1.2704, scale=ksc_params[3,2]**0.5)
-    q4 = ksc_params[4,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[4,1]- 1.2704, scale=ksc_params[4,2]**0.5)
-    q5 = ksc_params[5,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[5,1]- 1.2704, scale=ksc_params[5,2]**0.5)
-    q6 = ksc_params[6,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[6,1]- 1.2704, scale=ksc_params[6,2]**0.5)
-    log_kn = np.log((q0+q1+q2+q3+q4+q5+q6))
+
+
+# def k_weights(data,states, burn):
+#     q0 = ksc_params[0,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[0,1]- 1.2704, scale=ksc_params[0,2]**0.5)
+#     q1 = ksc_params[1,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[1,1]- 1.2704, scale=ksc_params[1,2]**0.5)
+#     q2 = ksc_params[2,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[2,1]- 1.2704, scale=ksc_params[2,2]**0.5)
+#     q3 = ksc_params[3,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[3,1]- 1.2704, scale=ksc_params[3,2]**0.5)
+#     q4 = ksc_params[4,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[4,1]- 1.2704, scale=ksc_params[4,2]**0.5)
+#     q5 = ksc_params[5,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[5,1]- 1.2704, scale=ksc_params[5,2]**0.5)
+#     q6 = ksc_params[6,0] * norm.pdf(x=data, loc=states[burn:states.shape[0]]+ksc_params[6,1]- 1.2704, scale=ksc_params[6,2]**0.5)
+#     log_kn = np.log((q0+q1+q2+q3+q4+q5+q6))
+#     sum_log_kn = np.sum(log_kn, axis = 1)
+#     return sum_log_kn
+
+# burn+1 coz of intiial values
+
+def mixture_loglike_v(data,states, burn):
+    state_val = states[burn+1:states.shape[0]]
+    norm_list = [ksc_params[i,0] * norm.pdf(x=data, loc=state_val+ksc_params[i,1]- 1.2704, scale=ksc_params[i,2]**0.5) for i in range(0,7)]
+    log_kn = np.log(sum(norm_list))
     sum_log_kn = np.sum(log_kn, axis = 1)
     return sum_log_kn
+
+def logchi2_loglike(x):
+    return np.sum(np.log(sp.stats.chi2.pdf(np.exp(x), df = 1) * np.exp(x)))
+
+def logchi2_loglike_v(data, states, burn):
+    index = np.arange(burn+1, states.shape[0])
+    sum_log_fn = [logchi2_loglike(data - states[i]) for i in index]
+    return sum_log_fn
+
+def importance_weights(data, states, burn):
+    log_k = mixture_loglike_v(data = data, 
+            states = states, 
+            burn = burn)
+
+    log_f = logchi2_loglike_v(data = data, 
+            states = states, 
+            burn = burn)
+
+    w = log_f - log_k
+    c = np.exp(w) / np.sum(np.exp(w))
+    return c
+
+weights = importance_weights(data = y_star, 
+          states = trace_states, 
+          burn = burn)
+
+k = mixture_loglike_v(data = y_star, 
+            states = trace_states, 
+            burn = burn)
+
+g = logchi2_loglike_v(data = y_star, 
+            states = trace_states, 
+            burn = burn)
+
+
+pd.DataFrame((g - k) / np.sum(g-k)).plot.hist()
+
+
+
+def f_weights(data, states, burn):
+    fn = lambda h: norm.logpdf(x=data, loc=0, scale=np.exp(h)**0.5)
+    log_fn = fn(states[burn+1:states.shape[0]])
+    sum_log_fn = np.sum(log_fn, axis = 1)
+    return sum_log_fn
+f = f_weights(data = endog, states = trace_states, burn = burn)
+pd.DataFrame(f - k).plot.hist()
+pd.DataFrame((f - k)/np.sum(f - k)).plot.hist()
+
+
+fig, ax = plt.subplots()
+pd.DataFrame(g - f).plot.hist(ax=ax)
+ax.ticklabel_format(useOffset=False)
+
+pd.DataFrame(g - f).describe()
+
 
 test = list()
 
 for idx, val in enumerate(list((np.arange(burn, trace_states.shape[0])))):
     test.append(logchi2(y_star - trace_states[val]))
 
-k = k_weights(data = y_star, 
+k = log_mixture(data = y_star, 
           states = trace_states, 
           burn = burn)
 
