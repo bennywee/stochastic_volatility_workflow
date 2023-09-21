@@ -102,7 +102,14 @@ def simulation(seed_data):
     burn_draws = np.concatenate((trace_mu, trace_phi, trace_sigma2, trace_states), axis = 1)
     param_draws = burn_draws[config["burn"]+1:burn_draws.shape[0]]
     draws = np.concatenate((param_draws, weights.reshape(-1,1)), axis = 1)
-    samples = pd.DataFrame(draws)
+
+    if config['reweight_samples']:
+        n_samples = weights.shape[0]
+        resampled_indexes = np.random.choice(np.arange(0,n_samples), size=n_samples, replace=True, p=weights)
+        resampled_draws = draws[resampled_indexes]
+        samples = pd.DataFrame(resampled_draws)
+    else:
+        samples = pd.DataFrame(draws)
     
     static_names = ['mu', 'phi', 'sigma2']
     state_names = [f"h[{state}]" for state in np.arange(1, trace_states.shape[1]+1)]
