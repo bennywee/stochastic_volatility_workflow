@@ -23,7 +23,7 @@ load_parameters <- function(rds_path) {
 }
 
 facet_hist <- function(data, variables, nbins, expected_bin_count, rank_scales) {
-    rank_bins %>%
+    data %>%
         select(all_of(variables)) %>%
         tidyr::pivot_longer(everything(), names_to = "variable", values_to = "rank") %>%
         ggplot(.) +
@@ -154,4 +154,10 @@ rhat_boxplot <- function(data, variables, plot_title, rhat_type) {
         geom_boxplot(aes(x = parameters, y = {{rhat_type}})) +
         theme_minimal() +
         labs(title = plot_title)
+}
+
+get_ess_weights <- function(rds_path, model_path) {
+    data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
+    results = data[["weights_ess"]]
+    return(results)
 }
