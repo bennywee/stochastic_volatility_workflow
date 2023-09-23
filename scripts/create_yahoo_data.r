@@ -1,12 +1,13 @@
 # Load data functions
 source(here::here("R", "data.R"))
-source(here::here("config.r"))
+# source(here::here("configs", "config.r"))
+config <- FALSE
 
 # (Download) and load data
 if (!(config)) {
     stock_index <- "GSPC"
-    start_date <- "2019-01-04"
-    end_date <- "2023-02-01"
+    start_date <- "2023-01-01"
+    end_date <- "2023-09-10"
 }
 
 raw_data_loc <- fin_data_location(stock_index, "raw", start_date, end_date)
