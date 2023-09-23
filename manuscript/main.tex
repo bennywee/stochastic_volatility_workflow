@@ -34,88 +34,121 @@ right  = 1.0in]{geometry}
 
 \section{Introduction}
 
-- Should make reference to workflow, and reparameterisation of SV.
+Stochastic volatility is a type of volatility model which explicitly treats the variance as a latent random variable. These are typically expressed as non linear Gaussian state space models and are difficult to estimate using classical methods. The likelihood is unavailable in closed form and there are at least as many variables as data points. Bayesian approaches to estimating these models rely on computational Markov Chain Monte Carlo (MCMC) techniques to sample from the target joint posterior of these high dimensional latent parameter spaces. 
 
-\section{Background and Literature Review}
+Kim, Shephard and Chib (1998) published a method for sampling this model using a combination of Kalman Filters, Gibbs, and Metropolis Hastings over 20 years ago.  Since then, there have been many advances in Bayesian, and more broadly, statistical computation to estimate complex, high dimensional state space models. In particular, the recent availability of Hamiltonian Monte Carlo, a variant of the Metropolis Hastings algorithm, is a advancement of MCMC for efficient sampling of complex probabilistic models. The adoption of such new techniques have been made widely available through the delveopment of various open source libraries such as the Stan programming language and the PyMC library. Other algorithms have also improved the speed of estimating high dimensional models using approximations of the posterior such as Integrated nested Laplace approximation and Approximate Bayesian Computation. 
 
-    \subsection{Stochastic Volatility}
-        Stochastic volatility models are used in financial econometrics to model the variance or volatility of returns in a financial instrument. The return of a financial asset often exhibits patterns in the variance which can be modelled to improve prediction and estimates of risk or tail events. Unlike other volatility models such as ARCH or GARCH, stochastic volatility models treat the variance as a random variable. Furthermore, these models have a state space representation since the variance is expressed as a latent stochastic process. State space models can be difficult to estimate since there is a latent state for every data observation in the time series, which means there are often more parameters than data points. These models can be estimated using frequent frameworks but this research will focus on Bayesian estimation strategies.
+These conceptually and practically different techniques to estimate complex models did not exist 20 years ago (or perhaps more accurately, were not easily accessible or implemented 20 years ago). As the development of new algorithms rapidly increase, so does the need to develop new methods to assess their output. How do we develop our workflow to assesss new sampling algorithms? And how can we compare the comptuational strategies used to estimate increasingly complex models?
 
-        \citet{kim1998stochastic} estimate a discrete time, univariate stochastic volatility model using Bayesian methods which is outlined below. $y_t$ is the mean corrected returns of some asset for equally spaced intervals t. $\beta$ is a constant scaling factor which is also defined as $exp(\mu / 2)$ representing instantaneous volatility. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$. This autoregressive parameter represents the persistence or "stickiness" of log volatility and the dispersion parameter $\sigma_{\eta}$ is the constant variance of the states. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks and are uncorrelated with each other. 
+% - SV models and more broadly state space models are complex, high dimensional models which require computational tools to estimate them.
+% - Modelling variance useful and important?
 
-        $$
-        \begin{aligned}
-        y_t =& \space \beta exp(h_t/2) \epsilon_t \\
-        h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t  \\
-        h_1 \sim& \space normal\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
-        \end{aligned}
-        $$
+% - Advanced in Bayesian computation
+%     + Conceptually and practically diff techniques to estimate complex models didn't exist not that long ago
+%     + Performance metrics useful for checking fit on single dataset. However not much emphasis on checking performance between MCMC
+
+% - A principled Bayesian workflow which usually requires checking of multiple componenets: prior, posterior, model choice. 
+%     + Lots of different components which could contribute to an incorrect fit or error. 
+
+% - This research focuses on evaluating the computational tools used to esitmate a specific type of model.
+
+% % One para
+% - This research </contributes> examine the algos used to estimate SV model 
+%     + Particular focus is on the computational tools used to estimate these models and whether they are returning what we expect.
+%     + conditional on the same prior
+
+%     - Additionally, check the sensitivity of the simulation and algortihms to the parameterisation of the model. Taking idea and advice from Catherine's paper about improvements in sampling performance.
+
+% %  2nd 
+% - Investigating two algorithms, HMC and GMA from KSC.
+
+% % 3
+% - Two samplings methods are used and are compared through simulation
+%     + Specifically, the simulation designed which is taken from talts et al. 
+
+% % 4
+% - Key metrics of interests are ESS for efficiency and tests of uniformity for calibration.
+
+% - Goal is to show which algo and parameterisation is "better". Moreover, want to demonstarte that this part of a Bayesian workflow which can be applied more generally is important for checking that the model is returning the correct posteriros - and if not, where the problem may be occurring and why. Give a set of tools to evaluate algos and parametiersations (before real data is even considered). **Why is this important.**
+
+% - Sections outlined below:
+
+\section{Resarch Context}
+
+\subsection{Stochastic Volatility}
+    \citet{kim1998stochastic} estimate a discrete time, univariate stochastic volatility model using Bayesian methods which is outlined below. $y_t$ is the mean corrected returns of some asset for equally spaced intervals t. $\beta$ is a constant scaling factor which is also defined as $exp(\mu / 2)$ representing instantaneous volatility. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$. This autoregressive parameter represents the persistence or "stickiness" of log volatility and the dispersion parameter $\sigma_{\eta}$ is the constant variance of the states. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks and are uncorrelated with each other. 
+
+    $$
+    \begin{aligned}
+    y_t =& \space \beta exp(h_t/2) \epsilon_t \\
+    h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t  \\
+    h_1 \sim& \space normal\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
+    \end{aligned}
+    $$
 
 
-        $$
-        \begin{aligned}
-        \epsilon_t \sim& \space normal(0,1) \\
-        \delta_t \sim& \space normal(0,1)
-        \end{aligned}
-        $$
+    $$
+    \begin{aligned}
+    \epsilon_t \sim& \space normal(0,1) \\
+    \delta_t \sim& \space normal(0,1)
+    \end{aligned}
+    $$
 
-        Setting $\beta=1$, the model can be expressed more succinctly as:
+    Setting $\beta=1$, the model can be expressed more succinctly as:
 
-        $$
-        \begin{aligned}
-        y_t \sim& \space normal(0, exp(h_t/2)) \\ 
-        h_1 \sim& \space normal \left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
-        h_{t+1} \sim& \space normal(\mu +\phi(h_t - \mu) , \sigma_{\eta}^2), \space\space t\neq 1\\ 
-        \end{aligned}
-        $$
+    $$
+    \begin{aligned}
+    y_t \sim& \space normal(0, exp(h_t/2)) \\ 
+    h_1 \sim& \space normal \left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
+    h_{t+1} \sim& \space normal(\mu +\phi(h_t - \mu) , \sigma_{\eta}^2), \space\space t\neq 1\\ 
+    \end{aligned}
+    $$
 
-        Priors for the static parameters are defined below with conjugate priors on $\mu$ and $\sigma^2$:
+    Priors for the static parameters are defined below with conjugate priors on $\mu$ and $\sigma^2$:
 
-        $$
-        \begin{aligned}
-        \mu \sim& \space normal(0, 10^2) \\
-        \sigma_{\eta}^2 \sim& \space IG(5/2, (0.01\times 5) / 2) \\
-        \phi^{\ast} \sim& \space beta(20, 1.5) \\
-        \phi &=  2\phi^{\ast} - 1
-        \end{aligned}
-        $$
+    $$
+    \begin{aligned}
+    \mu \sim& \space normal(0, 10^2) \\
+    \sigma_{\eta}^2 \sim& \space IG(5/2, (0.01\times 5) / 2) \\
+    \phi^{\ast} \sim& \space beta(20, 1.5) \\
+    \phi &=  2\phi^{\ast} - 1
+    \end{aligned}
+    $$
 
-        The prior on $\phi$ is a "stretched" beta distribution. This is a beta distribution (as defined on the parameter $\phi^*$) which has been transformed to have support (-1, 1).
+    The prior on $\phi$ is a "stretched" beta distribution. This is a beta distribution (as defined on the parameter $\phi^*$) which has been transformed to have support (-1, 1).
 
-    \subsection{Gaussian Mixture Approximation}
-        Kim, Shephard and Chib (KSC) sample the posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings and the Kalman Filter and smoother\footnote{In this research the exact software to apply the simulation smoother is unavailable, so a more recent simulation smoother is used which is based on the software written by the same author.} \citep{dejong1995}.
 
-        The standard Kalman Filter and smoother is used to compute the posterior distribution over the latent states. This requires the state and measurement equations to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring and taking the log of $y_t$.
+\subsection{Diagnostic limitations on real data}
+The stochastic volatility model can be estimated using a variety of sampling strategies and MCMC algorithms. A common set of metrics are used to check the convergence of the MCMC. This includes checking the effective sample size and the $\hat{R}$ calculations for estimated chains and parameters. These diagnostics check whether an MCMC has failed to converge onto the target posterior distribution (since we can never know with certainty that a sampler has converged). 
 
-        $$
-        \begin{aligned}
-        y_t^{*} &= log(y_t^2) \\ 
-        &= log((\epsilon_t exp(h_t/2))^2) \\
-        &=  log(exp(h_t)) + log(\epsilon_t^2) \\
-        &= h_t + log(\epsilon_t^2)  \\
-        &= h_t + z_t \\
-        \end{aligned}
-        $$
+These diagnostics are useful for identifying when Bayesian computation fail on real data. However, confounding issues may arrise when trying to diagnose the cause of computational problems. Real data is generated from an unknown data generating process. That is, the true parameter or model is unobservable. Therefore, failed diagnostic checks could arise from either incorrect model specification or issues in the sampling strategy (algorithm) or both.
 
-        Where $z_t = log(\epsilon_t^2)$ follows a log chi-squared distribution with mean -1.2704 and variance 4.93. The relationship between $y_t$ and $h_t$ is now linear; however, the error is not Gaussian. Since it is not simple to sample from this parameterisation of the model, KSC use a mixture of Gaussians to **approximate** the first 4 moments of the log chi squared distribution. This is defined by:
+Furthermore, different sampling strategies and MCMC tools could provide different estimates for the same model. Assuming no issues in computation, these diagnostic measures do not provide any evidence to which estimate is closer to the truth. 
 
-        $$
-        \begin{aligned}
-        f(z_t) = \sum_{i=1}^{K} q_if_N(z_i|m_i-1.2704, \nu_i^2)
-        \end{aligned}
-        $$
+To illustrate this problem, suppose we estimate this model with two different sampling strategies on real data. The data are the demeaned log returns of the 2019-2023 S\&P 500 Index. Below are the marginal posterior estimates for the static parameters $\mu$, $\phi$ and $\sigma^2$ and corresponding summary statistics.
 
-        Where K is the mixture of normal densities $f_N$, component probabilities $q_i$, mean $m_i-1.2704$ and variance $\nu_i^2$. These parameters were selected using moment matching where they found 7 normal densities with varying mean and variance parameters best approximated the log chi squared moments. These parameters and weights can be found in Appendix A.
+**Insert results here**
 
-        The model can be sampled via the Kalman Filter and simulation smoother since the model is now linear and conditionally gaussian. The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conjugate posterior distributions whereas $\phi$ is sampled via a Metropolis Hastings accept/reject procedure. The details can be around in Appendix B. 
+These particular estimates show the marginal posteriors of each parameter sharing similar shapes. $\phi$ and $\sigma^2$ possess slightly heavier right tails for SM1 compared to SM2. While in this particular example there is no major difference in the estimates, there is no certainty in whether SM1 or SM2 is consistently closer to the truth. There are other ways of model or algorithmic selection in this context (for example, out of sample predictive performance), but for parameter estimation it is unclear which one should be selected. 
 
-    \subsection{Hamiltonian Monte Carlo}
-        Since the paper was written, new MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Specifically, Hamiltonian Monte Carlo is a MCMC algorithm which has become widely available for efficiently sampling from sophisticated models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo, was developed in the physics literature \citep{duane1987hybrid} before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks \citep{neal1995bayesian} and statistical computing \citep{neal2011mcmc}. The algorithm has since become widely available through open source development projects such as Stan \citep{stan} and PyMC \citep{pymc2023}.
+\subsection{Diagnostic limitations on a single simulation}
 
-        The key innovation of Hamiltonian Monte Carlo is using the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. Unlike Random Walk Metropolis Hastings, it takes advantage of the geometry of the posterior to determine its next proposal step. A comprehensive explanation of the sampler is beyond the scope of this research and can be found in the above references. 
+Diagnosing computational problems on real data is difficult due to confounding factors. A strategy around this is to evaluate a model and sampling strategy on simulated data. One approach is to simulate data from the proposed model using known parameters. Then, fit the model on the simulated data and see if the model can recover the true parameters. This gives us the benefit of knowing or defining the data generating process to be estimated. If the model and algorithm cannot adequately capture the true parameter, then we cannot be confident that it will provide reliable estimates on real data.
 
-        The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler \citep{hoffman2014no}, allows for direct sampling of the specified stochastic volatility model. Hamiltonian Monte Carlo allows for sampling of the generative model and can flexibly handle complicated likelihood functions. This approach will also use the same priors as specified in the Gaussian mixture approximation.
+Furthermore, as discussed in cite"Bayesian workflow", fitting models on simulated data is the only way we can check inference on latent variables. This is critical in Stochastic Volatility since the underlying framework is a state space model with latent log volatility parameters. Latent variables are unobserved in real data and are only estimated in the context of the model. Simulation gives control over the data generation which governs the latent process and reveals what the model can infer about the latent variables. 
 
+While simulations enable us to check whether our models and algorithms can capture the true generating process, there are limitations to what can be learned from a single simulation. There is always a small probability that the true parameter is in the tails of any estimated posterior distribution. Or put differently, there is a 1\% chance the true parameter or any random draw exists outside a 99\% credible interval. cite"Talts et al" make the point that a single simulation does not provide sufficient information about the inference made by an algorithm. As discussed in their paper, a single simulation may conclude "that an incorrectly coded analysis worked as desired, while a correctly coded analysis failed". 
+
+The below results are from a single simulation where data is generated and sampled from the stochastic volatility model with known parameters.
+
+**Insert results here**
+
+The posteriors for x and y sufficiently cover the true parameter, however, the true parameter for z is deep in the tails. Such an analysis may incorrectly conclude that the model fails to adequately estimate the z parameter. However, it may be the case that the posterior distribution is correctly calculated using this algorithm and the results may be due to the nuances of this specific simulated dataset. 
+
+\subsection{Research Goal}
+The objective of this research is to design a simulation study to evaluate the calibration of algorithms used to sample Stochastic Volatility models. Indeed, there are limitations to evaluating MCMC algorithms based on fits to real data and single simulations. To check the calibration of an algorithm, simulations over multiple "true parameters" are required. This methodology is discussed in the next session. 
+
+Additionally, two sampling strategies will be assessed using the proposed simulation strategy as well as the performance of the samplers under different parameterisations of the stochastic volatility model. Not only will the calibration of any one algorithm be assessed, but also compared across sampling strategies to determine which MCMC approach is most suitable for estimating this model. 
 
 \section{Methodology}
 
@@ -185,7 +218,44 @@ right  = 1.0in]{geometry}
         $$
     
         Chi squared statistics can be used to test for uniformity and thus calibration of all the parameters in the model.
-    
+
+\section{MCMC Strategies}
+
+    \subsection{Sampling method 1}
+        Kim, Shephard and Chib (KSC) sample the posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings and the Kalman Filter and smoother\footnote{In this research the exact software to apply the simulation smoother is unavailable, so a more recent simulation smoother is used which is based on the software written by the same author.} \citep{dejong1995}.
+
+        The standard Kalman Filter and smoother is used to compute the posterior distribution over the latent states. This requires the state and measurement equations to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring and taking the log of $y_t$.
+
+        $$
+        \begin{aligned}
+        y_t^{*} &= log(y_t^2) \\ 
+        &= log((\epsilon_t exp(h_t/2))^2) \\
+        &=  log(exp(h_t)) + log(\epsilon_t^2) \\
+        &= h_t + log(\epsilon_t^2)  \\
+        &= h_t + z_t \\
+        \end{aligned}
+        $$
+
+        Where $z_t = log(\epsilon_t^2)$ follows a log chi-squared distribution with mean -1.2704 and variance 4.93. The relationship between $y_t$ and $h_t$ is now linear; however, the error is not Gaussian. Since it is not simple to sample from this parameterisation of the model, KSC use a mixture of Gaussians to **approximate** the first 4 moments of the log chi squared distribution. This is defined by:
+
+        $$
+        \begin{aligned}
+        f(z_t) = \sum_{i=1}^{K} q_if_N(z_i|m_i-1.2704, \nu_i^2)
+        \end{aligned}
+        $$
+
+        Where K is the mixture of normal densities $f_N$, component probabilities $q_i$, mean $m_i-1.2704$ and variance $\nu_i^2$. These parameters were selected using moment matching where they found 7 normal densities with varying mean and variance parameters best approximated the log chi squared moments. These parameters and weights can be found in Appendix A.
+
+        The model can be sampled via the Kalman Filter and simulation smoother since the model is now linear and conditionally gaussian. The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conjugate posterior distributions whereas $\phi$ is sampled via a Metropolis Hastings accept/reject procedure. The details can be around in Appendix B. 
+
+    \subsection{Sampling method 2}
+    % Need much more detail here about how it works
+        Since the paper was written, new MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Specifically, Hamiltonian Monte Carlo is a MCMC algorithm which has become widely available for efficiently sampling from sophisticated models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo, was developed in the physics literature \citep{duane1987hybrid} before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks \citep{neal1995bayesian} and statistical computing \citep{neal2011mcmc}. The algorithm has since become widely available through open source development projects such as Stan \citep{stan} and PyMC \citep{pymc2023}.
+
+        The key innovation of Hamiltonian Monte Carlo is using the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. Unlike Random Walk Metropolis Hastings, it takes advantage of the geometry of the posterior to determine its next proposal step. A comprehensive explanation of the sampler is beyond the scope of this research and can be found in the above references. 
+
+        The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler \citep{hoffman2014no}, allows for direct sampling of the specified stochastic volatility model. Hamiltonian Monte Carlo allows for sampling of the generative model and can flexibly handle complicated likelihood functions. This approach will also use the same priors as specified in the Gaussian mixture approximation.
+
     \subsection{Model Parameterisation}
 
         The parameterisation of a model can affect the performance of a MCMC algorithm when sampling from models with complex posterior geometries. An example of this is Neal's funnel \citep{neal2003slice} where the Hamiltonian Monte Carlo sampler encounters performance issues in hierarchical models and produces biased samples. 
@@ -285,6 +355,7 @@ right  = 1.0in]{geometry}
         % Emphasise here that different paramterisations of the models are the same model
         % Use a prior predictive check from both paramterisations show that the results are
         % the same
+
 
 \section{Results}
 
