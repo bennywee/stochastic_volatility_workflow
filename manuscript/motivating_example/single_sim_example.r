@@ -72,10 +72,11 @@ quantiles$name <- replace(quantiles$name, quantiles$name=="sigma", "sigma_sqd")
 
 ggplot(draws, aes(x = value)) +
   geom_histogram(aes(fill = name), alpha = 0.3) +
-  theme_minimal() +
+  theme_minimal(base_size = 18) +
   geom_vline(data = means, aes(xintercept=value, color=name), size = 1.5) +
   geom_vline(data = quantiles, aes(xintercept=value), linetype="dotted", size = 1) +
     facet_wrap(~name, scale = "free") + 
-    theme(legend.position="none")
+    theme(legend.position="none") +
+    labs(x = "Parameter value", y= "Count")
 
 ggsave("manuscript/motivating_example/single_sim.png", bg = "white")
