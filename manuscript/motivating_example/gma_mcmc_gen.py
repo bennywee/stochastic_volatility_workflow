@@ -20,7 +20,7 @@ np.random.seed(seed)
 # endog = (dta['USXUK'] - dta['USXUK'].mean()) * 100
 
 # df = pd.read_csv("data/preprocessed/GSPC/20190104_20230201.csv")
-df = pd.read_csv("data/preprocessed/GSPC/20230101_20230010.csv")
+df = pd.read_csv("data/preprocessed/GSPC/20230101_20230910.csv")
 dta = df[["log_return"]].iloc[1:]
 endog = (dta - dta.mean()) * 100
 

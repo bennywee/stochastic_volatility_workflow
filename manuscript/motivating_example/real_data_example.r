@@ -25,6 +25,8 @@ ggplot(df, aes(x = value)) +
     theme(legend.position="none") +
     labs(x = "Parameter value", y= "Count")
 
+ggsave("manuscript/motivating_example/real_data_ex.png", bg = "white")
+    
     # geom_vline(data = medians, aes(xintercept=med, colour=model))
 
 df %>% group_by(model, name) %>% 
