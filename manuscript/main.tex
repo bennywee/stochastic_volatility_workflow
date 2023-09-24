@@ -4,10 +4,14 @@
 \usepackage[parfill]{parskip} % Removes indent from new paragraphs
 \usepackage{amsmath, amssymb, amsfonts}
 \usepackage[colorlinks = true,
-			citecolor  = blue]{hyperref}
+			citecolor  = blue,
+            linkcolor = black]{hyperref}
 
-\usepackage[longnamesfirst,authoryear, round]{natbib}
-\bibliographystyle{unsrtnat}
+
+\usepackage[natbibapa]{apacite}
+\bibliographystyle{apacite}
+% \usepackage[longnamesfirst,authoryear, round]{natbib}
+% \bibliographystyle{unsrtnat}
 
 \usepackage[
 top    = 1.0in,
@@ -326,7 +330,7 @@ right  = 1.0in]{geometry}
         \end{aligned}
         $$
 
-        Generating 1000 samples of $h_2^{sim}$ from both centered and non-centered models gives samples from the same data generating process as shown in figure x. 
+        Generating 1000 samples of $h_2^{sim}$ from both centered and non-centered models gives samples from the same data generating process as shown in figure 3. 
 
 
         \begin{figure}[h]
@@ -356,7 +360,6 @@ right  = 1.0in]{geometry}
 
 \newpage
 
-% \bibliographystyle{apa} % Econometrica referencing
 \bibliography{references}
 
 \end{document}
