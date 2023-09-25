@@ -6,8 +6,8 @@
 \usepackage[colorlinks = true,
 			citecolor  = blue,
             linkcolor = black]{hyperref}
-\usepackage[font={small,it}]{caption}
-\usepackage[labelfont=bf]{caption}
+\usepackage[font={small,it}]{caption} % Figure caption font
+\usepackage[labelfont=bf]{caption} % Bold figure x.x
 
 \usepackage[natbibapa]{apacite}
 \bibliographystyle{apacite}
@@ -109,10 +109,10 @@ right  = 1.0in]{geometry}
     \begin{figure}[h]
         \centering
         \includegraphics[scale=0.1]{motivating_example/real_data_ex.png}
-        \caption{Posterior samples from two MCMC algorithms using S\&P 500 data}
+        \caption{Posterior samples from two MCMC algorithms using S\&P 500 data. While the shape of the distributions are similar, the modes of method 2 is much higher and the tails of method 1 are fatter for $\phi$ and $\sigma^2$. Convergence diagnostics do not tell us which estimate is "more correct" since we don't observe the true model or true data generating process.}
     \end{figure}
 
-    These estimates show the marginal posteriors of each parameter sharing similar shapes. $\phi$  has a fatter left tail for and $\sigma^2$ has heavier right tails for sampling method 1 (SM1). Furthermore, SM2 has higher peaks at their mode relative to SM1 with a tighter spread. Based on this information alone, there is no certainty in whether SM1 or SM2 is has a more correct estimate conditional on data and model. There are other methods for model or algorithmic selection in this context (for example, out of sample predictive performance), but for parameter estimation it is unclear which one should be selected. 
+    These estimates show the marginal posteriors of each parameter sharing similar shapes. $\phi$  has a fatter left tail for and $\sigma^2$ has heavier right tails for sampling method 1. Furthermore, sampling method 2 has higher peaks at their mode relative to method 1 with a tighter spread. Based on this information alone, there is no certainty in whether method 1 or method 2 is has a more correct estimate conditional on data and model. There are other methods for model or algorithmic selection in this context (for example, out of sample predictive performance), but for parameter estimation it is unclear which one should be selected. 
 
 \subsection{Diagnostic limitations on a single simulation}
     Diagnosing computational problems on real data is difficult due to confounding factors. A strategy around this is to evaluate a model and algorithm on simulated data. One approach is to simulate data from the proposed model using known parameters. Then, fit the model on the simulated data and see if the model can recover the true parameters. This gives us the benefit of defining the true parameters of the data generating process to be estimated. If the model and algorithm cannot adequately capture the true parameter, then we cannot be confident that it will provide reliable estimates on real data.
@@ -121,12 +121,12 @@ right  = 1.0in]{geometry}
 
     Simulations enable us to check whether our models and algorithms can estimate the true data generating process, however, there are limitations to what can be learned from a single simulation. There is always a small probability that the true parameter is in the tails of any estimated posterior distribution. Or put differently, there is a 1\% chance the true parameter or any random draw exists outside a 99\% credible interval. \cite{talts2018validating} make the point that a single simulation does not provide sufficient information about the inference made by an algorithm. As discussed in their paper, a single simulation may conclude "that an incorrectly coded analysis worked as desired, while a correctly coded analysis failed". 
 
-    The below results are from a single simulation where data is generated and sampled from the stochastic volatility model with known parameters.
+    Figure 2 show the posterior distributions of a single simulation where data is generated and sampled from the stochastic volatility model with known parameters.
 
     \begin{figure}[h]
         \centering
         \includegraphics[scale=0.1]{motivating_example/single_sim.png}
-        \caption{Posterior samples from known data genearting process. Vertical solid line represents true parameter and dotted lines are 95\% credible intervals around the mean}
+        \caption{Posterior samples from known data genearting process. Vertical solid line represents true parameter and dotted lines are 95\% credible intervals around the mean. The parameter $\phi$ falls outside the credible interval whereas $\mu$ and $\sigma^2$ stay inside. In any one simulation conditional on the correct model, there is a 5\% probability that the true parameter falls outside this interval by chance.}
     \end{figure}
 
     The 95\% credible intervals for $\mu$ and $\sigma^2$ cover the true parameter. The true parameter for $\phi$ however, is in the tails and outside the interval. Such an analysis may incorrectly conclude that the model fails to adequatly estimate the $\phi$ parameter. However, it may be the case that the posterior distribution is correctly calculated using this algorithm and the results may be due to the features of this specific simulated dataset.
@@ -347,15 +347,26 @@ right  = 1.0in]{geometry}
 
 \section{Results}
 
-    \subsection{Hamiltonian Monte Carlo}
+    \subsection{Centered paramterisation}
 
-    \subsection{Gaussian Mixture Approximation}
+    \subsubsection{Hamiltonian Monte Carlo}
+
+    \subsubsection{Gaussian Mixture Approximation}
+
+    \subsection{Reparameterised models}
+
+    \subsubsection{Hamiltonian Monte Carlo}
+
+    \subsubsection{Gaussian Mixture Approximation}
 
     \subsection{Reweigthing rank statistics of Gaussian Mixture}
 
 \section{Discussion}
 
 \subsection{Limitations}
+- SBC is computationally expensive. 
+
+- Datasets generated dependent on the priors. If priors are diffuse then can get a wide set of possible datasets which make it harder to get calibrated estimates of the true parameter.
 
 \section{Conclusion}
 
