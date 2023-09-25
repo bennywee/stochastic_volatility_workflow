@@ -29,9 +29,10 @@ facet_hist <- function(data, variables, nbins, expected_bin_count, rank_scales) 
         ggplot(.) +
         geom_histogram(aes(rank), bins = nbins, fill = "light blue", alpha = 0.7) +
         scale_x_continuous(labels = function(x) x * rank_scales/nbins) +
-        facet_wrap(~variable) +
-        theme_minimal(base_size = 22) +
-        geom_hline(yintercept = expected_bin_count, size = 0.5, alpha = 0.3) +
+        facet_wrap(~variable, labeller = label_parsed) +
+        theme_minimal(base_size = 20) +
+        theme(strip.text.x = element_text(size = 22)) +
+        geom_hline(yintercept = expected_bin_count, linewidth = 0.5, alpha = 0.3) +
         labs(title = "Distribution of Rank Statistics",
                 y = "Count",
                 x = "Ranks")
@@ -139,25 +140,59 @@ get_time <- function(rds_path, model_path) {
 }
 
 ess_boxplot <- function(data, variables, plot_title, ess_type) {
-    data %>%
+    plot <- data %>%
         filter(parameters %in% variables) %>% 
         ggplot(.) +
         geom_boxplot(aes(x = parameters, y = {{ess_type}})) +
-        theme_minimal() +
-        labs(title = plot_title)
+        theme_minimal(base_size = 22) +
+        labs(title = plot_title,
+             x = "Parameters",
+             y = "Count")
+
+    x_labs = ggplot_build(plot)$layout$panel_params[[1]]$x$get_labels()
+    plot <- plot + scale_x_discrete(labels = parse(text = x_labs))
+
+    return(plot)
 }
 
 rhat_boxplot <- function(data, variables, plot_title, rhat_type) {
-    data %>%
+    plot <- data %>%
         filter(parameters %in% variables) %>% 
         ggplot(.) +
         geom_boxplot(aes(x = parameters, y = {{rhat_type}})) +
-        theme_minimal() +
-        labs(title = plot_title)
+        theme_minimal(base_size = 22) +
+        labs(title = plot_title,
+             x = "Parameters",
+             y = "Count")
+
+     x_labs = ggplot_build(plot)$layout$panel_params[[1]]$x$get_labels()
+     plot <- plot + scale_x_discrete(labels = parse(text = x_labs))
+     
+     return(plot)
+
 }
 
 get_ess_weights <- function(rds_path, model_path) {
     data = readRDS(here::here(paste(model_path, rds_path, sep = "/")))
     results = data[["weights_ess"]]
     return(results)
+}
+
+latex_variables <- function(df){
+  df$parameters <- replace(df$parameters, df$parameters=="sigma_sqd", "~sigma^2")
+  df$parameters <- replace(df$parameters, df$parameters=="mu", "~mu")
+  df$parameters <- replace(df$parameters, df$parameters=="phi", "~phi")
+
+  return(df)
+}
+
+clean_variable_names <- function(dataframe){
+    result <- gsub("mu", "~mu",
+    gsub("phi", "~phi",
+    gsub("sigma_sqd", "~sigma^2",
+    gsub("\\.", "\\]",
+    gsub("h[.]", "h\\[",
+    names(dataframe))))))
+
+    return(result)
 }
