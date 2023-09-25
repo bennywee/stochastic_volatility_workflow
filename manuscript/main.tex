@@ -6,7 +6,8 @@
 \usepackage[colorlinks = true,
 			citecolor  = blue,
             linkcolor = black]{hyperref}
-
+\usepackage[font={small,it}]{caption}
+\usepackage[labelfont=bf]{caption}
 
 \usepackage[natbibapa]{apacite}
 \bibliographystyle{apacite}
@@ -128,7 +129,7 @@ right  = 1.0in]{geometry}
         \caption{Posterior samples from known data genearting process. Vertical solid line represents true parameter and dotted lines are 95\% credible intervals around the mean}
     \end{figure}
 
-    The 95\% credible intervals for $\sigma$ and $\phi$ cover the true parameter. The true parameter for $\mu$ however, is deep in the tails and outside the interval. Such an analysis may incorrectly conclude that the model fails to adequatly estimate the $\mu$ parameter. However, it may be the case that the posterior distribution is correctly calculated using this algorithm and the results may be due to the features of this specific simulated dataset.
+    The 95\% credible intervals for $\mu$ and $\sigma^2$ cover the true parameter. The true parameter for $\phi$ however, is in the tails and outside the interval. Such an analysis may incorrectly conclude that the model fails to adequatly estimate the $\phi$ parameter. However, it may be the case that the posterior distribution is correctly calculated using this algorithm and the results may be due to the features of this specific simulated dataset.
 
 \subsection{Research Goal}
     The objective of this research is to design a simulation study to evaluate the calibration of algorithms used to sample Stochastic Volatility models. Indeed, there are limitations to evaluating MCMC algorithms based on fits to real data and single simulations. To check the calibration of an algorithm, simulations over multiple "true parameters" are required. This methodology is discussed in the next section. 

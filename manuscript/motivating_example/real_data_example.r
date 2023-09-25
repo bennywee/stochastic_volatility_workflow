@@ -11,7 +11,13 @@ hmc$model <- "hmc"
 names(hmc) <- c("index", "name", "value", "model")
 names(gma) <- c("index", "name", "value", "chain", "model")
 
-hmc$name <- replace(hmc$name, hmc$name=="sigma", "sigma2")
+hmc$name <- replace(hmc$name, hmc$name=="sigma", "~sigma^2")
+hmc$name <- replace(hmc$name, hmc$name=="mu", "~mu")
+hmc$name <- replace(hmc$name, hmc$name=="phi", "~phi")
+
+gma$name <- replace(gma$name, gma$name=="sigma2", "~sigma^2")
+gma$name <- replace(gma$name, gma$name=="mu", "~mu")
+gma$name <- replace(gma$name, gma$name=="phi", "~phi")
 
 df <- rbind(gma %>% select(-chain), hmc)
 means <- df %>% group_by(model, name) %>% summarise(avg = mean(value))
@@ -19,13 +25,17 @@ medians <- df %>% group_by(model, name) %>% summarise(med = median(value))
 
 ggplot(df, aes(x = value)) +
     geom_histogram(position="identity", aes(fill = model), alpha =0.3) +
-    facet_wrap(~name, scale="free") +
+    facet_wrap(~name, scale="free", labeller = label_parsed) +
     # geom_vline(data =means, aes(xintercept=avg, colour=model), size = 1.2) +
-    theme_minimal(base_size = 18) +
-    theme(legend.position="none") +
-    labs(x = "Parameter value", y= "Count")
+    theme_minimal(base_size = 20) +
+    scale_fill_discrete(labels = c("Method 1", "Method 2")) +
+    labs(title = "Posterior distribution - S&P 500",
+         fill = "MCMC\nSamplers",
+         x = "Parameter value", 
+         y= "Count") + 
+       theme(strip.text.x = element_text(size = 22))
 
-ggsave("manuscript/motivating_example/real_data_ex.png", bg = "white")
+ggsave("manuscript/motivating_example/real_data_ex.png", bg = "white", width = 14, height = 9.42)
     
     # geom_vline(data = medians, aes(xintercept=med, colour=model))
 
@@ -36,10 +46,3 @@ df %>% group_by(model, name) %>%
 ggplot(df, aes(x = value)) +
     geom_histogram(aes(fill = model), alpha =0.4) +
     facet_grid(model~name, scale="free")
-
-
-dim(hmc)
-
-gma %>% filter(name=="mu") %>% dim
-hmc %>% filter(name=="mu") %>% dim
-

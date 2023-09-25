@@ -3,6 +3,7 @@ library(dplyr)
 library(cmdstanr)
 library(ggplot2)
 set.seed(630)
+set.seed(634)
 
 n_time_points <- 1000
 
@@ -38,7 +39,7 @@ gen_ncp_sv_dataset <- function(T){
 }
 
 data <- gen_ncp_sv_dataset(T = 1000)
-reuturns <- data$y_sim
+returns <- data$y_sim
 
 model_path <- "models/sv_user_guide_reparameterised_ksc_priors.stan"
 mod <- cmdstan_model(model_path, include_paths = here::here("models", "functions"))
@@ -57,8 +58,6 @@ draws <- model_fit$draws(variables = c("mu", "phi", "sigma"), format = "df") %>%
     select(-.chain, -.iteration, -.draw) %>% 
      pivot_longer(everything())
 
-draws$name <- replace(draws$name, draws$name=="sigma", "sigma_sqd")
-
 means = data.frame(value = rbind(data[['sigma_sqd']], data[['phi']], data[['mu']]),
            name = rbind('sigma_sqd', 'phi', 'mu'))
 
@@ -68,15 +67,37 @@ quantiles = model_fit$summary(variables = c("mu", "phi", "sigma")) %>%
               select(-name)
 
 names(quantiles) <- c("name", "value")
-quantiles$name <- replace(quantiles$name, quantiles$name=="sigma", "sigma_sqd")
+
+latex_variables <- function(df){
+  df$name <- replace(df$name, df$name=="sigma", "~sigma^2")
+  df$name <- replace(df$name, df$name=="sigma_sqd", "~sigma^2")
+  df$name <- replace(df$name, df$name=="mu", "~mu")
+  df$name <- replace(df$name, df$name=="phi", "~phi")
+
+  return(df)
+}
+
+draws <- latex_variables(draws)
+quantiles <- latex_variables(quantiles)
+means <- latex_variables(means)
+
+quantiles$name <- replace(quantiles$name, quantiles$name=="sigma", "~sigma^2")
+quantiles$name <- replace(quantiles$name, quantiles$name=="mu", "~mu")
+quantiles$name <- replace(quantiles$name, quantiles$name=="phi", "~phi")
+draws$name <- replace(draws$name, draws$name=="sigma_sqd", "~sigma^2")
+draws$name <- replace(draws$name, draws$name=="mu", "~mu")
+draws$name <- replace(draws$name, draws$name=="phi", "~phi")
 
 ggplot(draws, aes(x = value)) +
   geom_histogram(aes(fill = name), alpha = 0.3) +
-  theme_minimal(base_size = 18) +
+  theme_minimal(base_size = 20) +
   geom_vline(data = means, aes(xintercept=value, color=name), size = 1.5) +
   geom_vline(data = quantiles, aes(xintercept=value), linetype="dotted", size = 1) +
-    facet_wrap(~name, scale = "free") + 
+    facet_wrap(~name, scale = "free", labeller = label_parsed) +
     theme(legend.position="none") +
-    labs(x = "Parameter value", y= "Count")
+    labs(title = "Posterior distribution - simulated dataset",
+         x = "Parameter value", 
+         y= "Count") + 
+       theme(strip.text.x = element_text(size = 22))
 
-ggsave("manuscript/motivating_example/single_sim.png", bg = "white")
+ggsave("manuscript/motivating_example/single_sim.png", bg = "white", width = 14, height = 9.42)
