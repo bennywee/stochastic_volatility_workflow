@@ -81,13 +81,6 @@ draws <- latex_variables(draws)
 quantiles <- latex_variables(quantiles)
 means <- latex_variables(means)
 
-quantiles$name <- replace(quantiles$name, quantiles$name=="sigma", "~sigma^2")
-quantiles$name <- replace(quantiles$name, quantiles$name=="mu", "~mu")
-quantiles$name <- replace(quantiles$name, quantiles$name=="phi", "~phi")
-draws$name <- replace(draws$name, draws$name=="sigma_sqd", "~sigma^2")
-draws$name <- replace(draws$name, draws$name=="mu", "~mu")
-draws$name <- replace(draws$name, draws$name=="phi", "~phi")
-
 ggplot(draws, aes(x = value)) +
   geom_histogram(aes(fill = name), alpha = 0.3) +
   theme_minimal(base_size = 20) +

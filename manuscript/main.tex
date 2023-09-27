@@ -13,7 +13,7 @@
 \bibliographystyle{apacite}
 % \usepackage[longnamesfirst,authoryear, round]{natbib}
 % \bibliographystyle{unsrtnat}
-
+\usepackage{float}
 \usepackage[
 top    = 1.0in,
 bottom = 1.2in,
@@ -347,19 +347,43 @@ right  = 1.0in]{geometry}
 
 \section{Results}
 
-    \subsection{Centered paramterisation}
+    \subsection{Hamiltonian Monte Carlo}
 
-    \subsubsection{Hamiltonian Monte Carlo}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.1]{results/hmc_1k.png}
+        \caption{Distribution of rank statistics for centered and non centered Hamiltoninan Monte Carlo (static parameters). Non centered histograms look approximately uniform. The centered parameterisation struggles to estimate $\sigma^2$}
+    \end{figure}
 
-    \subsubsection{Gaussian Mixture Approximation}
 
-    \subsection{Reparameterised models}
+    \subsection{Gaussian Mixture Approximation}
 
-    \subsubsection{Hamiltonian Monte Carlo}
-
-    \subsubsection{Gaussian Mixture Approximation}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.1]{results/ksc_1k.png}
+        \caption{Distribution of rank statistics for centered and non centered Gaussian mixture model(static parameters). All parameters display a lack of calibration}
+    \end{figure}
 
     \subsection{Reweigthing rank statistics of Gaussian Mixture}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.1]{results/sir_1k.png}
+        \caption{Distribution of rank statistics for weighted resampled model (static parameters) with 1000 SBC iterations. All parameters display a lack of calibration}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.1]{results/sir_5k.png}
+        \caption{Distribution of rank statistics for weighted resampled model (static parameters) with 5000 SBC iterations. Increasing number of SBC parameters does not improve results}
+    \end{figure}
+
+    \subsection{All models and parameters}
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.1]{results/dist_chisq.png}
+        \caption{Distribution of chi squared statistics for all models.}
+    \end{figure}
 
 \section{Discussion}
 
