@@ -357,8 +357,21 @@ right  = 1.0in]{geometry}
 
     \begin{figure}[H]
         \centering
+        \includegraphics[scale=0.1]{results/hmc_states_1k.png}
+        \caption{Distribution of 1000 rank statistics for centered and non centered Hamiltoninan Monte Carlo (state parameters).}
+    \end{figure}
+
+
+    \begin{figure}[H]
+        \centering
         \includegraphics[scale=0.1]{results/hmc_5k.png}
         \caption{Distribution of 5000 rank statistics for centered and non centered Hamiltoninan Monte Carlo (static parameters). Non centered histograms look approximately uniform. The centered parameterisation struggles to estimate $\sigma^2$}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.1]{results/hmc_states_5k.png}
+        \caption{Distribution of 1000 rank statistics for centered and non centered Hamiltoninan Monte Carlo (state parameters).}
     \end{figure}
 
 
@@ -377,6 +390,13 @@ right  = 1.0in]{geometry}
         \caption{Distribution of 1000 rank statistics for centered and non centered Gaussian mixture model(static parameters). All parameters display a lack of calibration}
     \end{figure}
 
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.1]{results/ksc_5k.png}
+        \caption{Distribution of 5000 rank statistics for centered and non centered Gaussian mixture model(static parameters). All parameters display a lack of calibration}
+    \end{figure}
+
     \subsection{Reweigthing rank statistics of Gaussian Mixture}
 
     \begin{figure}[H]
@@ -390,6 +410,7 @@ right  = 1.0in]{geometry}
         \includegraphics[scale=0.1]{results/sir_5k.png}
         \caption{Distribution of 5000 rank statistics for weighted resampled model (static parameters) with 5000 SBC iterations. Increasing number of SBC parameters does not improve results}
     \end{figure}
+
 
     \subsection{All models and parameters}
     \begin{figure}[H]

@@ -51,6 +51,55 @@ x_labs = ggplot_build(plot)$layout$panel_params[[1]]$x$get_labels()
 plot <- plot + scale_x_discrete(labels = parse(text = x_labs))
 ggsave("manuscript/results/hmc_ess.png", bg = "white", width = 14, height = 9.42)
 
+# KSC results
+# 5000 iterations CP
+path <- "simulation_output/ksc/cp/sbc_cp_ksc_model_cp_dgf_10kmcmc_5000iter_r1"
+rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
+rds_path <- paste("output", rds_list, sep = "/")
+
+ksc_cp_ess_basic_5k <- future_lapply(rds_path,
+                           get_ess, 
+                           model_path = path, 
+                           ess_type = "ess_basic", 
+                           chains = "one_chain", 
+                           future.seed = NULL)
+
+ksc_cp_ess_basic_5k_df <- as.data.frame(do.call("rbind", ksc_cp_ess_basic_5k))
+ksc_cp_ess_basic_5k_df <- latex_variables(ksc_cp_ess_basic_5k_df)
+ksc_cp_ess_basic_5k_df$Type <- "Gaussian Mixture"
+
+
+# 5000 iterations NCP
+path <- "simulation_output/ksc/cp/sir_sbc_cp_ksc_model_cp_dgf_10kmcmc_5000iter_r1"
+rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
+rds_path <- paste("output", rds_list, sep = "/")
+
+sir_ncp_ess_basic_5k <- future_lapply(rds_path,
+                           get_ess, 
+                           model_path = path, 
+                           ess_type = "ess_basic", 
+                           chains = "one_chain", 
+                           future.seed = NULL)
+
+sir_ncp_ess_basic_5k_df <- as.data.frame(do.call("rbind", sir_ncp_ess_basic_5k))
+sir_ncp_ess_basic_5k_df <- latex_variables(sir_ncp_ess_basic_5k_df)
+sir_ncp_ess_basic_5k_df$Type <- "Importance Resampling"
+
+ksc_sir_df <- rbind(ksc_cp_ess_basic_5k_df, sir_ncp_ess_basic_5k_df) %>% 
+    filter(parameters %in% static_parameters)
+
+ksc_sir_df <- latex_variables(ksc_sir_df)
+
+plot <- ggplot(ksc_sir_df, aes(x = parameters, y = ess_basic, fill = Type)) +
+    geom_boxplot() +
+    theme_minimal(base_size = 22) +
+        labs(x = "Parameters",
+             y = "Count")
+
+x_labs = ggplot_build(plot)$layout$panel_params[[1]]$x$get_labels()
+plot <- plot + scale_x_discrete(labels = parse(text = x_labs))
+ggsave("manuscript/results/ksc_sir_ess.png", bg = "white", width = 14, height = 9.42)
+
 
 
 
