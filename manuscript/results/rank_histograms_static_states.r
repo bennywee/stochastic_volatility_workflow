@@ -34,18 +34,6 @@ hmc_ncp_onek_bin_long <- static_rank_bins(data = hmc_ncp_onek_bins,
 
 hmc_1k = rbind(hmc_cp_onek_bin_long, hmc_ncp_onek_bin_long)
 
-rank_hist <- function(dataframe){
-        ggplot(dataframe) +
-        geom_histogram(aes(rank), bins = 20, fill = "light blue", alpha = 0.7) +
-        scale_x_continuous(labels = function(x) x * (posterior_samples+1)/n_bins) +
-        facet_wrap(~factor(variable, levels = parameters), labeller = label_parsed) +
-        theme_minimal(base_size = 20) +
-        theme(strip.text.x = element_text(size = 22)) +
-        geom_hline(yintercept = expected_count, linewidth = 0.5, alpha = 0.3) +
-        labs(y = "Count",
-             x = "Ranks")
-}
-
 rank_hist(hmc_cp_onek_bin_long) # HMC CP 1k
 ggsave("manuscript/results/hmc_cp_1k.png", bg = "white", width = 14, height = 9.42)
 
@@ -76,10 +64,10 @@ hmc_ncp_fivek_bin_long <- static_rank_bins(data = hmc_ncp_fivek_bins,
                                           type = "NonCentered")
 
 # hmc_5k = rbind(hmc_cp_fivek_bin_long, hmc_ncp_fivek_bin_long)
-rank_hist(hmc_cp_fivek_bin_long) # HMC CP 1k
+rank_hist(hmc_cp_fivek_bin_long) # HMC NCP 1k
 ggsave("manuscript/results/hmc_cp_5k.png", bg = "white", width = 14, height = 9.42)
 
-rank_hist(hmc_ncp_fivek_bin_long) # HMC CP 1k
+rank_hist(hmc_ncp_fivek_bin_long) + ylim(0, 600) # HMC NCP 5k
 ggsave("manuscript/results/hmc_ncp_5k.png", bg = "white", width = 14, height = 9.42)
 
 # KSC 1k
