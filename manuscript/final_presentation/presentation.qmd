@@ -1,0 +1,78 @@
+# Introduce stochastic volatility model
+# Research question
+# Motivating example 1 (two posterior estimates from two MCMC algorithms)
+# Motivating example 2 (Limitations of single simulation)
+# Methodology (SBC)
+# What is HMC
+# HMC results
+# What was KSC approach 
+# KSC results
+# Reparameterisation (HMC)
+# Reparam results 
+# Reparameterisation (KSC)
+# Reparam results (KSC)
+# Importance sampling weights
+# Discussion/limitations
+# Future research
+
+- Stochastic Volatility model (Do i need to motivate this like last time?)
+- 2 Motivating examples. If two methods and they're different what do we do. 
+- Research Question
+- Methodology (how do we answer this. What iss a fair comparison? This is what we're going to do.)
+- HMC and KSC algorithms
+- Reparameterisation
+- Importance sampling reweighting (cut this? Yes)
+- Discussion and learnings
+- Limitations
+- Conclusion
+
+
+2 motivating examples: Don't have to get into nuts and bolts of diff algos. High level MCMC summary. General structure + bespoke. Stan can flexibly fit any model. It's a programming language. Bespoke only for SV model and how to best sample SV.
+
+In a simpler 
+ 
+ Start withmotivating example 1.
+ Then go to movtivating exmaple 2. In this example. 
+
+ When talking about SBC: remember motivating example, link it back. Thread the example through the presentation. Could even do distributions of posteriors vs true posteriors. Show results and link it back to the motivating example
+
+In presentation use talts copy the plots. Mkae sure cites.
+Reproduce Talts data viz. Replicating examples from this paper are shown in these figures. 
+
+Presentation: show results -> then show fig 4-6. Just say for convenience.
+
+
+Include a summary slide of extensions without going into detail. Give a sense of what else is in the paper. We explored different parameteirsations. 
+
+IS: Then they do an Importance Sampling. Wish i could talk about it but no time. 
+
+Audience: Give them the impression that you done more than talked about. Made careful decision about what was more important to present. Lot's of content - but you need to understand what's int he presetation first.Done more than minimum.
+
+Reparam: Don't go through steps or why they exist. There is a literature about MCMC efficiency if you reparam these models you can gain MCMC efficiency. Put the citations. There's lit but param is an issue. We look at a couple and these are results but don't go into detail.
+
+Make sure i explicit: I'm really interested in finding out about xyz in context abc. Rsearch is comparing ABC and XyZ. State it early on. Say close to methods? So they can mark you. 
+
+In motivating example: say a little bit about why people are interested in this model. This is a difficult model. Ppl are interested GARCH are easy to estimate but don't capture properties of data observwd.
+
+definitely harder on complicated model (not as intresting on simple model). Why we're looking at SV model in the first place. How to fit this model fast. **Check if its correct**. For this SV model in parrticular. Motivate this point. It's a hard model to fit.
+
+It could've gone either way. Might not have gone well stan. **Think about what a fair comparison is**
+
+Particle filtering. There are other approaches. PF within MCMC.
+
+Jump straight into motivating examples. If you're Bayes, -> 2 different approx solutions. So we run both of them. Kind of similar but also different. pointness and fantess. How do we know which one to use. 
+
+Then go into SV. And we use it to do this. This is the model. Trying to work out the difference.
+
+Get to movating example as soon as i can. 
+
+Start: What the example is. In title slide: prelim, title supervisors, slide gives a rough outline. Main sections of preso to set everyone. 
+Suppose i'm an analyst and I need to fit this model and estimate variance. Realise there's more than one way to do that. Check both and this is what i get. Then build onto SBC. Then confirm method. 
+
+
+At a higher level talk about the model (not all priors etc). Just cite the literature on the slide. This is from KSC (cite earlier shephard paper). People have worked with it. Estimate, lots of parameters hard to estimate. Some methods exist here are two of them. Talk in detail later. Reassure them what the thing is. THis is the output.
+
+
+
+
+Side by side histograms then full histgoram
