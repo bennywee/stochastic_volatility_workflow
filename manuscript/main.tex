@@ -279,9 +279,81 @@ right  = 1.0in]{geometry}
     % Need much more detail here about how it works
         Since the paper was written, new MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Specifically, Hamiltonian Monte Carlo is a MCMC algorithm which has become widely available for efficiently sampling from sophisticated models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo, was developed in the physics literature \citep{duane1987hybrid} before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks \citep{neal1995bayesian} and statistical computing \citep{neal2011mcmc}. The algorithm has since become widely available through open source development projects such as Stan \citep{stan} and PyMC \citep{pymc2023}.
 
-        The key innovation of Hamiltonian Monte Carlo is using the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. Unlike Random Walk Metropolis Hastings, it takes advantage of the geometry of the posterior to determine its next proposal step. A comprehensive explanation of the sampler is beyond the scope of this research and can be found in the above references. 
+
+        The key innovation of Hamiltonian Monte Carlo (HMC) is using the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. HMC is able to reach more distant points with higher acceptance probabilites since proposals are made with information about the target distribution. Random walk beahviour is more inefficient in higher dimensions since it is more difficult to randomly select a point with a higher joint density and therefore higher acceptance probability. The increasing complexity of high dimensions make it harder for a random walk sampler to explore regions over long distances, resulting in the sampler to become stuck and requiring a lot of iterations to converge onto the target distribution. 
+
+        A thorough conceptual and theoretical explanation of HMC can be found in BDA3 and Betancourt with further details found in the aforementioned literature. In summary, HMC builds upon the Metropolis Hastings algorithm through the introduction of Hamiltonian equations, the momentum variable $\phi$ and the gradients of the target log posterior distribtuion. The vector of model parameters $\theta$ is jointly sampled with a vector of momentum variables $\phi$. The momentum variables is also called auxiliary variables since they are required as part of the Hamiltonian equations to generate an efficient proposal but are not a quantity of interest for inference.
+
+        The sampled momentum variable sets out the proposal path for $\theta$ governed by the Hamiltonian dynamics (represented by a set of differential equations). These differential equations are solved using a discrete approximation algorithm, such as a leapfrog integrator, and is a function of the log posterior gradients for a given point $\theta$. The leapfrog integrator has a set of tuning parameters which determines the size and number of steps with the final step being the proposal value $(\theta^{\ast}, \phi^{\ast})$. Finally, the Metropolis Hastings accept/reject step is applied using the parameters at the beginning of the leapfrog process $(\theta^{t-1}, \phi^{t-1})$ and the proposal values $(\theta^{\ast}, \phi^{\ast})$. 
 
         The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler \citep{hoffman2014no}, allows for direct sampling of the specified stochastic volatility model. Hamiltonian Monte Carlo allows for sampling of the generative model and can flexibly handle complicated likelihood functions. This approach will also use the same priors as specified in the Gaussian mixture approximation.
+
+        \subsubsection{Algorithmic steps}
+        Let $\theta$ be a target parameter and $\phi$ be the auxiliary momemtum variable. The Hamiltonian is defined as:
+
+        $$
+        \begin{aligned}
+        H(\theta, \phi) \equiv - log \: \pi(\theta, \phi)
+        \end{aligned}
+        $$
+
+        This can be broken down into kinetic energy $K(\theta, \phi)$ (the density over the auxiliary momentum) and potential energy $V(\theta)$ (the density of the target distribution).
+
+        $$
+        \begin{aligned}
+        H(\theta, \phi) &= - log \: \pi(\phi | \theta) - log \: \pi(\theta) \\ 
+        &\equiv  K(\theta, \phi) + V(\theta)
+        \end{aligned}
+        $$
+
+         Starting with an initial draw of $\theta$ (user defined or randomly generated), the HMC iteration (or proposal path) is determined determined by 3 steps.
+
+        1) Randomly sample a momentum value
+
+        $$
+        \begin{aligned}
+        \phi\sim Multinormal(0, M)
+        \end{aligned}
+        $$
+
+        Where M is some diagnoal mass matrix (assuming independence between momentum variables).
+
+        2) Solve the set of Hamiltonian (differential) equations which generates a proposal $(\theta^{\ast}, \phi^{\ast})$
+
+        $$
+        \begin{aligned}
+        \frac{\partial \theta}{\partial t} &= \frac{\partial H}{\partial \phi} = \frac{\partial K}{\partial \phi} \\
+        \frac{\partial \phi}{\partial t} &= \frac{\partial H}{\partial \theta} = - \frac{\partial K}{\partial \theta} - \frac{\partial V}        {\partial \theta}
+        \end{aligned}
+        $$
+
+        Where $\frac{\partial V}{\partial \theta}$ is the gradient of the target density. Solving these differential equations using a Leapfrog integrator which gives a discrete approximate solution. The parameters which are tuned in this process are the number of steps $L$ and the size of the steps $\epsilon$. The Leapfrog algorithm performs a half step of $\phi$ and then a full step of the parameter $\theta$, and another half step of the momemtum variable $\phi$ and repeats this $L$ times. The final step is the proposal $(\theta^{\ast}, \phi^{\ast})$.
+
+        $$
+        \begin{aligned}
+        \phi &\leftarrow \phi - \frac{\epsilon}{2} \frac{\partial V}{\partial \theta} \\
+        \theta &\leftarrow \theta + \epsilon M^{-1} \phi \\
+        \phi &\leftarrow \phi - \frac{\epsilon}{2} \frac{\partial V}{\partial \theta}
+        \end{aligned}
+        $$
+
+        3) Metrpolis Hastings Accept/Reject
+        Let $(\theta^{t-1}, \phi^{t-1})$ be the values before the Leapfrog integrator.
+
+        $$
+        \begin{aligned}
+        r = \frac{\pi(\theta^{\ast} | y) \pi(\phi^{\ast})}{\pi(\theta^{t-1} | y) \pi(\phi^{t-1})}
+        \end{aligned}
+        $$
+
+        With sampled value
+
+        $$
+        \theta^t = \begin{cases}
+            \theta^{\ast},& \text{with probability } min(r,1)\\
+            \theta^{t-1}, & \text{otherwise}
+        \end{cases}
+        $$
 
     \subsection{Model Parameterisation}
 
