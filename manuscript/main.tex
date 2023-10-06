@@ -282,7 +282,7 @@ right  = 1.0in]{geometry}
 
         The key innovation of Hamiltonian Monte Carlo (HMC) is using the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. HMC is able to reach more distant points with higher acceptance probabilites since proposals are made with information about the target distribution. Random walk beahviour is more inefficient in higher dimensions since it is more difficult to randomly select a point with a higher joint density and therefore higher acceptance probability. The increasing complexity of high dimensions make it harder for a random walk sampler to explore regions over long distances, resulting in the sampler to become stuck and requiring a lot of iterations to converge onto the target distribution. 
 
-        A thorough conceptual and theoretical explanation of HMC can be found in BDA3 and Betancourt with further details found in the aforementioned literature. In summary, HMC builds upon the Metropolis Hastings algorithm through the introduction of Hamiltonian equations, the momentum variable $\phi$ and the gradients of the target log posterior distribtuion. The vector of model parameters $\theta$ is jointly sampled with a vector of momentum variables $\phi$. The momentum variables is also called auxiliary variables since they are required as part of the Hamiltonian equations to generate an efficient proposal but are not a quantity of interest for inference.
+        A thorough conceptual and theoretical explanation of HMC can be found in \citet{gelman2013bayesian} and \citet{betancourt2017conceptual} with further details found in the aforementioned literature. In summary, HMC builds upon the Metropolis Hastings algorithm through the introduction of Hamiltonian equations, the momentum variable $\phi$ and the gradients of the target log posterior distribtuion. The vector of model parameters $\theta$ is jointly sampled with a vector of momentum variables $\phi$. The momentum variables is also called auxiliary variables since they are required as part of the Hamiltonian equations to generate an efficient proposal but are not a quantity of interest for inference.
 
         The sampled momentum variable sets out the proposal path for $\theta$ governed by the Hamiltonian dynamics (represented by a set of differential equations). These differential equations are solved using a discrete approximation algorithm, such as a leapfrog integrator, and is a function of the log posterior gradients for a given point $\theta$. The leapfrog integrator has a set of tuning parameters which determines the size and number of steps with the final step being the proposal value $(\theta^{\ast}, \phi^{\ast})$. Finally, the Metropolis Hastings accept/reject step is applied using the parameters at the beginning of the leapfrog process $(\theta^{t-1}, \phi^{t-1})$ and the proposal values $(\theta^{\ast}, \phi^{\ast})$. 
 
@@ -297,7 +297,7 @@ right  = 1.0in]{geometry}
         \end{aligned}
         $$
 
-        This can be broken down into kinetic energy $K(\theta, \phi)$ (the density over the auxiliary momentum) and potential energy $V(\theta)$ (the density of the target distribution).
+        This can be broken down into kinetic energy $K(\theta, \phi)$, the density over the auxiliary momentum, and potential energy $V(\theta)$, the density of the target posterior distribution.
 
         $$
         \begin{aligned}
@@ -306,7 +306,7 @@ right  = 1.0in]{geometry}
         \end{aligned}
         $$
 
-         Starting with an initial draw of $\theta$ (user defined or randomly generated), the HMC iteration (or proposal path) is determined determined by 3 steps.
+         Starting with an initial draw of $\theta$ (user defined or randomly generated), the HMC iteration or proposal is determined by 3 steps.
 
         1) Randomly sample a momentum value
 
@@ -327,7 +327,7 @@ right  = 1.0in]{geometry}
         \end{aligned}
         $$
 
-        Where $\frac{\partial V}{\partial \theta}$ is the gradient of the target density. Solving these differential equations using a Leapfrog integrator which gives a discrete approximate solution. The parameters which are tuned in this process are the number of steps $L$ and the size of the steps $\epsilon$. The Leapfrog algorithm performs a half step of $\phi$ and then a full step of the parameter $\theta$, and another half step of the momemtum variable $\phi$ and repeats this $L$ times. The final step is the proposal $(\theta^{\ast}, \phi^{\ast})$.
+        Where $\frac{\partial V}{\partial \theta}$ is the gradient of the target posterior density. The solution to these differential equations is approximated using a Leapfrog integrator which gives a discrete approximate solution. The parameters which are tuned in this process are the number of steps $L$ and the size of the steps $\epsilon$. The Leapfrog algorithm performs a half step of $\phi$ and then a full step of the parameter $\theta$, and another half step of the momemtum variable $\phi$ and repeats this $L$ times. The final step is the proposal $(\theta^{\ast}, \phi^{\ast})$.
 
         $$
         \begin{aligned}
@@ -355,14 +355,27 @@ right  = 1.0in]{geometry}
         \end{cases}
         $$
 
+    \subsection{MCMC methods comparison}
+        The KSC sampling method and HMC are both MCMC strategies to genereate samples from the target joint posterior distribution of the stochastic volatility model. However, the two sampling approaches are conceptually different in their design and implementation, despite sharing the same objective.
+        
+        The KSC sampling method is a bespoke algorithm designed specifically for the sampling of the stochastic volatility model. It is a strategy built around how to sample the parameters from the state space model in this specific context. The implementation of this MCMC requires careful attention to the sampling of each parameter using different tools and requires these components to be programmed manually, such as the Metropolis Hastings step and conjugate posterior distributions. 
+    
+        HMC on the other hand is a more general approach to applying MCMC. The implementation of HMC is using the Stan programming language which allows for the specfication other generative or Bayesian models, not just stochastic volatility. The implementation details of HMC is abstracted away from the user, who only needs to focus on specifying the model using the Stan syntax. Any hyperparameter tuning and initialisation is automated away. Furthermore, Stan and HMC allows for the specification of different priors, whereas KSC's bespoke algorithm is dependent on the use of conjugate priors. 
+
+        The conceptual difference in both methods result in different tradeoffs. The abstraction of the MCMC implementation using the Stan programming language means users can focus more on the modelling and the applied research question. The algorithm is maintained by other developers and different models can be compared with each other without worrying about differences in MCMC implementations. However, the abstraction away from the details means there is less flexibility in MCMC design in the scenario where the current instance of Stan or HMC is insufficient for a specific model.
+        
     \subsection{Model Parameterisation}
 
-        The parameterisation of a model can affect the performance of a MCMC algorithm when sampling from models with complex posterior geometries. An example of this is Neal's funnel \citep{neal2003slice} where the Hamiltonian Monte Carlo sampler encounters performance issues in hierarchical models and produces biased samples. Efficiency improvements of MCMC algorithms for state space models under different parameterisations are also explored \citet{strickland2008parameterisation}.
+        The parameterisation of a model can affect the performance of a MCMC algorithm when sampling from models with complex posterior geometries. An example of this is Neal's funnel \citep{neal2003slice} where the Hamiltonian Monte Carlo sampler encounters performance issues in hierarchical models and produces biased samples. Efficiency improvements of MCMC algorithms for state space models under different parameterisations are also explored in \citet{strickland2008parameterisation}.
 
-        The stochastic volatility model as described in section 2.1 is follows a "centered" parameterisation. This describes the central location of the latent state parameters which are centered around the mean and lag of the log volatility $\mu +\phi(h_t - \mu)$. A model can be reparameterised such that the states are sampled on a distribution centered on 0 (i.e "non centered") which are later transformed to have the correct mean. The following re-parameterisations are explored as part of the simulation study.
+        The stochastic volatility model as described in section 2.1 is follows a "centered" parameterisation. This describes the central location of the latent state parameters which are centered around the mean and lag of the log volatility $\mu +\phi(h_t - \mu)$. A model can be reparameterised in a way that improves MCMC performance. Reparameterisation applies a transformation to the model which may change the interpretation of the parameters or the way they are sampled but remains mathematically equivalent to the original model. The reparametiersations available for a model is dependent on the MCMC approach. Some reparamterisations are available only to specific sampling strategies and may improve or impair a MCMC performance. 
+
+        SBC is applied to reparameteirsied versions of the stochastic volatility model available to see if there is any improvement in calibration and efficiency. 
         
-        \subsubsection{Non centered Hamiltonian Monte Carlo}
-        First sample from a standard normal distribuition and multiply by the variance of the log volatility. The state variable is sampled with mean centered on zero and variance equal to $\sigma_{\eta}^2$
+        \subsubsection{Reparameterised stochastic volatility for Hamiltonian Monte Carlo}
+        The reparameterisation for Hamiltonian Monte Carlo changes how the latent states are sampled. Specifically, the states are first sampled from a standard normal distribution and are transformed to be samples from the state equation. As noted above, the centered parametersation samples the states directly on a non zero mean. 
+
+        First sample from a standard normal distribuition and multiply by the variance of the log volatility. The state vector is sampled with mean centered on zero and variance equal to $\sigma_{\eta}^2$
 
         $$
         \begin{aligned}
@@ -390,8 +403,10 @@ right  = 1.0in]{geometry}
         \end{aligned}
         $$
 
-        \subsubsection{Non centered Gaussian Mixture}
-        The non centered model for the Gaussian approximation is expressed slightly differently due to the use of the Kalman Filter. Non centered HMC samples from the joint posterior directly with state vectors centered at zero and transformed to return the correct log volatility estimates. Applying the Kalman Filter requires the state equation to be a function of the state variable with the average log volatility parameter $\mu$ entering the measurement equation.
+        \subsubsection{Non centered Gaussian Mixture model}
+        The reparameterised model for the Gaussian approximation is expressed differently due to the use of the Kalman Filter. Reparameterised HMC samples from the joint posterior directly with state vectors centered at zero and transformed to return the correct log volatility estimates. Applying the Kalman Filter requires the state equation to be a function of the state variable with the average log volatility parameter $\mu$ entering the measurement equation.
+
+        The following parameterisation is described as non centered in location. This follows the methodology outlined in \citet{strickland2008parameterisation}.
         
         Starting with the log chi squared model:
 
@@ -424,9 +439,9 @@ right  = 1.0in]{geometry}
         The mean of the log volatility is now inside the measurement equation and de-meaned from the state equation.
     
     \subsubsection{Prior Predictive check}
-        It is worth noting that the centered and non-centered parameteristions are the same stochastic volatility model. Different parameteristions express the same mathematical models in ways that make it easier or harder for a given algorithm to sample. 
+        % Different parameteristions express the same mathematical models in ways that make it easier or harder for a given algorithm to sample. 
 
-        To demonstrate this, a prior predictive simulation of the second state parameter is performed for both a centered and non centered model (using the paramterisation described in section 3.3.1). This is the same as the first two steps of SBC, except instead of generating a dataset, generate the parameters implied by the prior draw. Let $\boldsymbol{\theta}$ be a vector of static parameters.
+        A prior predictive simulation of the second state parameter is performed for both a centered and reparameterised model using the approach described in section 3.3.1. This is to demonstrate that different parameteristions express the same underlying mathematical model. This is the same as the first two steps of SBC, except instead of generating a dataset, generate the parameters implied by the prior draw. Let $\boldsymbol{\theta}$ be a vector of static parameters.
 
         $$
         \begin{aligned}
@@ -442,18 +457,20 @@ right  = 1.0in]{geometry}
         \end{aligned}
         $$
 
-        Generating 1000 samples of $h_2^{sim}$ from both centered and non-centered models gives samples from the same data generating process as shown in figure 3. 
+        Generating 1000 samples of $h_2^{sim}$ from both centered and non-centered models gives samples from the same data generating process as shown in Figure \ref{fig:priorpred}. 
 
 
         \begin{figure}[h]
             \centering
             \includegraphics[scale=0.1]{figures/ppc_h2.png}
             \caption{Prior predictive samples of second state variable}
+            \label{fig:priorpred}
         \end{figure}
         
         % Emphasise here that different paramterisations of the models are the same model
         % Use a prior predictive check from both paramterisations show that the results are
         % the same
+
 
 
 \section{Results}
