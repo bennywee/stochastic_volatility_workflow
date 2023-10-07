@@ -291,7 +291,6 @@ right  = 1.0in]{geometry}
         Where K is the mixture of normal densities $f_N$, component probabilities $q_i$, mean $m_i-1.2704$ and variance $\nu_i^2$. These parameters were selected using moment matching where they found 7 normal densities with varying mean and variance parameters best approximated the log chi squared moments. These parameters and weights can be found in Appendix A.
 
         The model can be sampled via the Kalman Filter and simulation smoother since the model is now linear and conditionally gaussian. The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conjugate posterior distributions whereas $\phi$ is sampled via a Metropolis Hastings accept/reject procedure. The details can be around in Appendix B. 
-    
 
         \subsubsection*{Implementation}
         The code used to replicate the KSC algorithm was written by \citet{chad2018} and ammended for the purposes of this research. Additional code was developed to produce rank statistics, quantities of interest as well as integrated into the SBC framework. 
