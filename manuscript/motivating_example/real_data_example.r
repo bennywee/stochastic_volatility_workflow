@@ -28,7 +28,7 @@ ggplot(df, aes(x = value)) +
     facet_wrap(~name, scale="free", labeller = label_parsed) +
     # geom_vline(data =means, aes(xintercept=avg, colour=model), size = 1.2) +
     theme_minimal(base_size = 20) +
-    scale_fill_discrete(labels = c("Method 1", "Method 2")) +
+    scale_fill_discrete(labels = c("KSC", "HMC")) +
     labs(title = "Posterior distribution - S&P 500",
          fill = "MCMC\nSamplers",
          x = "Parameter value", 
@@ -41,7 +41,7 @@ ggsave("manuscript/motivating_example/real_data_ex.png", bg = "white", width = 1
 
 df %>% group_by(model, name) %>% 
   summarise(as_tibble(rbind(summary(value)))) %>% 
-  ungroup() %>% arrange(name)
+  ungroup() %>% arrange(model, name)
 
 ggplot(df, aes(x = value)) +
     geom_histogram(aes(fill = model), alpha =0.4) +

@@ -107,15 +107,32 @@ right  = 1.0in]{geometry}
 
     Furthermore, different sampling strategies and MCMC tools could provide different posterior estimates for the same model. Assuming no issues in computation, these diagnostic measures do not provide any evidence to which estimate is closer to the truth.
 
-    To illustrate this problem, the stochastic volatility model is estimated with two different MCMC algorithms on real data. The data are the de-meaned log returns of the 2023 January-September S\&P 500 Index. Below are the marginal posterior estimates for the static parameters $\mu$, $\phi$ and $\sigma^2$ and corresponding summary statistics.
+    To illustrate this problem, the stochastic volatility model is estimated with two different MCMC algorithms on real data. The data are the de-meaned log returns of the 2023 January-September S\&P 500 Index. Figure \ref{fig:realdataex} visualises the marginal posterior estimates for the static parameters $\mu$, $\phi$ and $\sigma^2$ with corresponding summary statistics in Tables \ref{tab:realdata}.
 
     \begin{figure}[h]
         \centering
         \includegraphics[scale=0.1]{motivating_example/real_data_ex.png}
-        \caption{Posterior samples from two MCMC algorithms using S\&P 500 data. While the shape of the distributions are similar, the modes of method 2 is much higher and the tails of method 1 are fatter for $\phi$ and $\sigma^2$. Convergence diagnostics do not tell us which estimate is "more correct" since we don't observe the true model or true data generating process.}
+        \caption{Posterior samples from the Hamiltonian Monte Carlo (HMC) and Kim Sherphard and Chib (KSC) MCMC samplers using S\&P 500 data. While the shape of the distributions are similar, the modes of method 2 is much higher and the tails of method 1 are fatter for $\phi$ and $\sigma^2$. Convergence diagnostics do not tell us which estimate is "more correct" since we don't observe the true model or true data generating process.}
+        \label{fig:realdataex}
     \end{figure}
 
-    These estimates show the marginal posteriors of each parameter sharing similar shapes. $\phi$  has a fatter left tail for and $\sigma^2$ has heavier right tails for sampling method 1. Furthermore, sampling method 2 has higher peaks at their mode relative to method 1 with a tighter spread. Based on this information alone, there is no certainty in whether method 1 or method 2 is has a more correct estimate conditional on data and model. There are other methods for model or algorithmic selection in this context (for example, out of sample predictive performance), but for parameter estimation it is unclear which one should be selected. 
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|c|c|c|c|c|c|} \hline 
+        Parameter&  MCMC&Min& q25&  Median& Mean & q75&Max\\ \hline 
+        $\mu$&  KSC&-2.03 & -0.472 & -0.354 & -0.355 & -0.231 & 1.31 \\
+     $\mu$&  HMC&-4.55 & -0.508 & -0.373 & -0.370 & -0.229 &2.86  \\\hline 
+     $\phi$&  KSC&0.384 & 0.875 & 0.928 & 0.902 & 0.958 & 0.997 \\
+     $\phi$&  HMC&0.438 & 0.910 & 0.953 & 0.929 & 0.977 &1.00  \\ \hline 
+     $\sigma^2$&  KSC&0.00237 & 0.00891 & 0.0138 & 0.0178 & 0.0210 & 0.130 \\ 
+     $\sigma^2$&  HMC&0.00209 & 0.00731 & 0.0105 & 0.0131 & 0.0159 &0.107 \\ \hline
+        \end{tabular}
+        \caption{Summary statistics for KSC sampler}
+        \label{tab:realdata}
+    \end{table}
+    
+
+    These estimates show the marginal posteriors of each parameter sharing similar shapes. $\phi$  has a fatter left tail for the KSC sampler and $\sigma^2$ has heavier right tails for HMC. This is evident in the quantiles with the 25th quantile for $\phi$ being smaller at 0.875 for KSC compared to 0.910 in HMC. Furthermore, sampling method 2 has higher peaks at their mode relative to method 1 with a tighter spread. Based on this information alone, there is no certainty in whether method 1 or method 2 is has a more correct estimate conditional on data and model. There are other methods for model or algorithmic selection in this context (for example, out of sample predictive performance), but for parameter estimation it is unclear which one should be selected. 
 
 \subsection{Diagnostic limitations on a single simulation}
     Diagnosing computational problems on real data is difficult due to confounding factors. A strategy around this is to evaluate a model and algorithm on simulated data. One approach is to simulate data from the proposed model using known parameters. Then, fit the model on the simulated data and see if the model can recover the true parameters. This gives us the benefit of defining the true parameters of the data generating process to be estimated. If the model and algorithm cannot adequately capture the true parameter, then we cannot be confident that it will provide reliable estimates on real data.
@@ -547,7 +564,7 @@ right  = 1.0in]{geometry}
         \label{fig:ncphmc5k}
     \end{figure}
 
-    Additionally, HMC struggles to generate efficient posterior samples from the centered parameterisation of the stochastic volatility model. Figure \ref{fig:hmcess} visualises the distribution of ESS for the static parameters after 5000 SBC iterations. The non centered model appears to generate independent samples much more efficiently than the centered model. This is consistent with HMC struggliing to sample overall from the posteriors of $\sigma^2$ and $\phi$.
+    Additionally, HMC struggles to generate efficient posterior samples from the centered parameterisation of the stochastic volatility model. Figure \ref{fig:hmcess} and Table \ref{tab:hmcess} summarises the distribution of ESS for the static parameters after 5000 SBC iterations. The non centered model appears to generate independent samples much more efficiently than the centered model. This is consistent with HMC struggliing to sample overall from the posteriors of $\sigma^2$ and $\phi$.
 
     \begin{figure}[H]
         \centering
@@ -555,6 +572,21 @@ right  = 1.0in]{geometry}
         \caption{Effective sample sizes for static parameters after 5000 iterations of SBC and 1000 post warmup samples for Hamiltoninan Monte Carlo. The centered parameterisation struggles to generate independent samples for $\sigma^2$ and $\phi$. Non parameterisation demonstrates much more efficient sampling behaviour.}
         \label{fig:hmcess}
     \end{figure}
+
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|c|c|c|c|c|c|} \hline 
+        Parameter &  Type&Min& q25&  Median& Mean & q75&Max\\ \hline 
+        $\mu$&  Centered&3.79 & 99.7 & 184. & 305. & 457. & 1997.  \\
+     $\mu$&  Reparam&14.5 & 738. & 1099. & 1143. & 1500. & 2993.  \\\hline 
+     $\phi$&  Centered&1.44 & 11.0 & 21.7 & 26.3 & 34.1 & 635.  \\
+     $\phi$&  Reparam&48.8 & 355. & 476. & 521. & 651. & 1445.   \\ \hline 
+     $\sigma^2$&  Centered& 1.17 & 2.99 & 7.04 & 8.05 & 11.3 & 90.7 \\ 
+     $\sigma^2$&  Reparam&46.1 & 403. & 553. & 585. & 734. & 1486. \\ \hline
+        \end{tabular}
+        \caption{HMC: ESS for centered and reparameterised stochastic volatility model.}
+        \label{tab:hmcess}
+    \end{table}
 
     \subsection{Gaussian Mixture Approximation}
     The Gaussian Mixture Approximation is run for 1000 and 5000 SBC iterations with the first 10,000 samples discarded as burnin (following the method of \citet{kim1998stochastic}). However, unlike KSC who take 750,000 posterior draws from the model, the number of posterior samples taken as part of the SBC procedure is 9,999. Taking 750,000 draws from the Gaussian mixture approximation would lead to issues due to disk space limitations and computational resources required to run SBC. Furthermore, the number of posterior samples is larger than the 999 taken for the SBC experiment run for Hamiltonian Monte Carlo. Earlier experiments attempted 999 post burn in draws for the Gaussian approximation, however there are concerns that such a short chain would not have converged onto the target posterior distribution. Therefore 9,999 draws was chosen as a compromise under both constraints. 
@@ -595,7 +627,7 @@ right  = 1.0in]{geometry}
         \label{fig:ncpksc5k}
     \end{figure}
 
-    The ESS estimates for this model indicate a high degree of autocorrelation and difficulty in generating independent samples from both parameterisations. The numerical results are summarised in table x. The estimate for $\mu$ in the reparameterised model exhibits a long right tail (longer than the 10,000 posterior draws suggesting the presence of negatively autocorrelated draws). Overall, the bespoke MCMC is quite insufficient at sampling the static parameters. 
+    The ESS estimates for this model indicate a high degree of autocorrelation and difficulty in generating independent samples from both parameterisations. The numerical results are summarised in Figure \ref{kscess} and Table \ref{tab:kscess}. The estimate for $\mu$ in the reparameterised model exhibits a long right tail (longer than the 10,000 posterior draws suggesting the presence of negatively autocorrelated draws). Overall, the bespoke MCMC is quite insufficient at sampling the static parameters. 
     
     % The median ESS for $\mu$, $\phi$ and $\sigma^2$ are 559, 103, 39.5 respectively for 10,000 post burn in draws. Despite having 10 times the number of draws, the number of effectively independent samples is much smaller relative to HMC, suggesting that this bespoke sampling strategy is highly inefficient. 
 
@@ -607,6 +639,21 @@ right  = 1.0in]{geometry}
         \caption{Effective sample sizes for static parameters after 5000 iterations of SBC and 1000 post burnin samples for the Gaussian Mixture model. The bespoke sampling strategy struggles to generate independent samples for all static parameters, suggesting a high degree of autocorrelation in the Markkov Chain.}
         \label{fig:kscess}
     \end{figure}
+
+    \begin{table}[H]
+        \centering
+        \begin{tabular}{|c|c|c|c|c|c|c|c|} \hline 
+        Parameter &  Type&Min& q25&  Median& Mean & q75&Max\\ \hline 
+        $\mu$&  Centered&9.57 & 352. & 559. & 1482. & 1552. & 9907.\\
+     $\mu$&  Reparam&1.99 & 205. & 569. & 4174. & 6384. & 34055.\\\hline 
+     $\phi$&  Centered&2.47 & 74.0 & 103. & 112. & 130. & 1222.\\
+     $\phi$&  Reparam&1.03 & 83.4 & 132. & 325. & 419. & 1907. \\ \hline 
+     $\sigma^2$&  Centered&2.33 & 29.0 & 39.5 & 44.2 & 52.8 & 384. \\ 
+     $\sigma^2$&  Reparam&1.25 & 47.4 & 73.4 & 399. & 591. & 6618. \\ \hline
+        \end{tabular}
+        \caption{KSC: ESS for centered and reparameterised stochastic volatility model.}
+        \label{tab:kscess}
+    \end{table}
 
     Overall the results from the KSC algorithm indicates some issues with calibration. The centered parameterastion appears to be more favourable for this sampling approach. Other avenues to improve the sampling of this model could be to consider a different bespoke sampling method or another parameterisation such as non centered in scale.
 
@@ -727,6 +774,20 @@ This study only considered a handful of potential algorithms, sampling strategie
 \newpage
 
 \section{Appendix A: Mixture Gaussian weights}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lccc} 
+          $\omega$ &$Pr(\omega = i)$&  $m_i$&  $\nu^2_i$\\ 
+          1&0.00730  &  -10.12999&  5.79596\\ 
+          2&0.10556  &   -3.97281 &  2.61369\\ 
+          3&0.00002 &  -8.56686 &   5.17950\\ 
+          4&0.04395 &  2.77786  &   0.16735 \\ 
+          5&0.34001&   0.61942    &  0.64009\\ 
+          6&0.24566 &  1.79518    &  0.34023 \\ 
+          7&0.25750 &  -1.08819    &  1.26261\\ 
+    \end{tabular} 
+\end{table}
 
 \newpage
 

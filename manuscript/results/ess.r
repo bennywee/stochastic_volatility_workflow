@@ -53,6 +53,10 @@ x_labs = ggplot_build(plot)$layout$panel_params[[1]]$x$get_labels()
 plot <- plot + scale_x_discrete(labels = parse(text = x_labs))
 ggsave("manuscript/results/hmc_ess.png", bg = "white", width = 14, height = 9.42)
 
+hmc_ess_df %>% group_by(Type, parameters) %>% 
+      summarise(as_tibble(rbind(summary(ess_basic)))) %>% 
+      ungroup() %>% arrange(Type, parameters)
+
 # KSC results
 # 5000 iterations CP
 path <- "simulation_output/ksc/cp/sbc_cp_ksc_model_cp_dgf_10kmcmc_5000iter_r1"
@@ -101,6 +105,9 @@ x_labs = ggplot_build(plot)$layout$panel_params[[1]]$x$get_labels()
 plot <- plot + scale_x_discrete(labels = parse(text = x_labs))
 ggsave("manuscript/results/ksc_ess.png", bg = "white", width = 14, height = 9.42)
 
+ksc_ess_df %>% group_by(Type, parameters) %>% 
+      summarise(as_tibble(rbind(summary(ess_basic)))) %>% 
+      ungroup() %>% arrange(parameters, Type)
 
 # 5000 iterations NCP
 # path <- "simulation_output/ksc/cp/sir_sbc_cp_ksc_model_cp_dgf_10kmcmc_5000iter_r1"
