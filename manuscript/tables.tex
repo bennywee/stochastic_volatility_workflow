@@ -1,60 +1,131 @@
 \documentclass{article}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{amsmath} 
-
 \begin{document}
-        \begin{algorithm}[H]
-            \caption{KSC MCMC Algorithm}\label{alg:ksc}
-            \begin{algorithmic}
-            \Require $s_0 = 4$, $\mu_0 = 0$, $\phi_0 = 0.95$, $\sigma^{2}_{\eta,0} = 0.02$
-            \For{\texttt{i in} $1:n_{draws}$}
-                    \State \text{Sample states (Kalman Filter and Smoother): } $\boldsymbol{h}_i \sim h|y^{\ast}, s_{i-1}, \phi_{i-1}, \sigma^{2}_{\eta,i-1}, \mu^{i-1}$ 
-                    \State \text{Sample mixture density: } $s_i \sim s|y^{\ast}, \boldsymbol{h}_{i-1}$
-                    \State \text{Sample conjugate density $\mu$: } $\mu_i \sim \mu|y_{\ast}, s_{i-1}, \phi_{i-1}, \sigma^{2}_{\eta, i-1}, \boldsymbol{h}_{i-1}$
-                    \State \text{Sample conjugate density $\sigma^2_{\eta}$: } $\mu_i \sim \mu|y^{\ast}, s_{i-1}, \phi_{i-1}, \mu_{i-1}, \boldsymbol{h}_{i-1}$
-                    \State \text{Metrpolis Hastings step $\phi$: } $\phi_i \sim \phi|y^{\ast}, s_{i-1}, \mu_{i-1}, \sigma^{2}_{\eta, i-1}, \boldsymbol{h}_{i-1}$
-                  \EndFor
-            \end{algorithmic}
-            \end{algorithm}
 
-\begin{algorithm}
-\caption{SBC Algorithm}\label{alg:sbc}
-\begin{algorithmic}
-\For{\texttt{i in} $1:1000$}
-        \State \text{Draw from joint prior: } $\boldsymbol{\theta}^{sim}_i \sim\pi (\boldsymbol{\theta})$
-        \State \text{Simulate dataset with 1000 observations: } $\boldsymbol{y}^{sim}_i \sim p(y|\boldsymbol{\theta}^{sim}_i)$
-        \State \text{Draw 999 posterior samples post burn in:} $\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_i \sim p(\theta | \boldsymbol{y}^{sim}_i)$
-        \State \text{Compute rank statistics:} $r = rank(\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_i, \boldsymbol{\theta}^{sim}_i)$
-      \EndFor
-\end{algorithmic}
-\end{algorithm}
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|} \hline 
+    Parameter&  MCMC&Min& q25&  Median& Mean & q75&Max\\ \hline 
+    $\mu$&  KSC&-2.03 & -0.472 & -0.354 & -0.355 & -0.231 & 1.31 \\
+ $\mu$&  HMC&-4.55 & -0.508 & -0.373 & -0.370 & -0.229 &2.86  \\\hline 
+ $\phi$&  KSC&0.384 & 0.875 & 0.928 & 0.902 & 0.958 & 0.997 \\
+ $\phi$&  HMC&0.438 & 0.910 & 0.953 & 0.929 & 0.977 &1.00  \\ \hline 
+ $\sigma^2$&  KSC&0.00237 & 0.00891 & 0.0138 & 0.0178 & 0.0210 & 0.130 \\ 
+ $\sigma^2$&  HMC&0.00209 & 0.00731 & 0.0105 & 0.0131 & 0.0159 &0.107 \\ \hline
+    \end{tabular}
+    \caption{Summary statistics for KSC sampler}
+    \label{tab:kscex}
+\end{table}
 
-    1) for sim in 1000 iterations:
-        2) Draw from prior: $\theta^{sim}\sim\pi (\theta)$
-        3) Simulate dataset with 1000 observations: $y^{sim} \sim p(y|\theta^{sim})$
-        4) Draw 999 posterior samples (post warmup) $\{\theta_1,\dots , \theta_{L}\} \sim p(\theta | y^{sim})$
-        5) Compute rank statistics $r = rank(\{\theta_1,\dots , \theta_{L}\}, \theta^{sim})$
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|} \hline 
+    Parameter &  Type&Min& q25&  Median& Mean & q75&Max\\ \hline 
+    $\mu$&  Centered&3.79 & 99.7 & 184. & 305. & 457. & 1997.  \\
+ $\mu$&  Reparam&14.5 & 738. & 1099. & 1143. & 1500. & 2993.  \\\hline 
+ $\phi$&  Centered&1.44 & 11.0 & 21.7 & 26.3 & 34.1 & 635.  \\
+ $\phi$&  Reparam&48.8 & 355. & 476. & 521. & 651. & 1445.   \\ \hline 
+ $\sigma^2$&  Centered& 1.17 & 2.99 & 7.04 & 8.05 & 11.3 & 90.7 \\ 
+ $\sigma^2$&  Reparam&46.1 & 403. & 553. & 585. & 734. & 1486. \\ \hline
+    \end{tabular}
+    \caption{HMC: ESS for centered and reparameterised stochastic volatility model.}
+    \label{tab:hmcess}
+\end{table}
+%   Type            parameters  Min. `1st Qu.`  Median    Mean `3rd Qu.`   Max.
+%   <chr>           <chr>      <dbl>     <dbl>   <dbl>   <dbl>     <dbl>  <dbl>
+% 1 Centered        ~mu         3.79     99.7   184.    305.       457.  1997. 
+% 2 Reparameterised ~mu        14.5     738.   1099.   1143.      1500.  2993. 
+% 3 Centered        ~phi        1.44     11.0    21.7    26.3       34.1  635. 
+% 4 Reparameterised ~phi       48.8     355.    476.    521.       651.  1445. 
+% 5 Centered        ~sigma^2    1.17      2.99    7.04    8.05      11.3   90.7
+% 6 Reparameterised ~sigma^2   46.1     403.    553.    585.       734.  1486. 
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|} \hline 
+    Parameter& Min& q25&  Median& Mean & q75&Max\\ \hline 
+    $\mu$&  -4.55 & -0.508 & -0.373 & -0.370 & -0.229 & 2.86  \\ \hline 
+ $\phi$& 0.438 & 0.910 & 0.953 & 0.929 & 0.977 & 1.00  \\ \hline 
+ $\sigma^2$& 0.00209 & 0.00731 & 0.0105 & 0.0131 & 0.0159 & 0.107 \\ \hline 
+    \end{tabular}
+    \caption{Summary statistics for HMC sampler}
+    \label{tab:HMCex}
+\end{table}
 
-% \begin{algorithm}
-% \caption{KSC MCMC Algorithm}\label{alg:cap}
-% \begin{algorithmic}
-% \Require $n \geq 0$
-% \Ensure $y = x^n$
-% \State $y \gets 1$
-% \State $X \gets x$
-% \State $N \gets n$
-% \While{$N \neq 0$}
-% \If{$N$ is even}
-%     \State $X \gets X \times X$
-%     \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
-% \ElsIf{$N$ is odd}
-%     \State $y \gets y \times X$
-%     \State $N \gets N - 1$
-% \EndIf
-% \EndWhile
-% \end{algorithmic}
-% \end{algorithm}
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|} \hline 
+    Parameter & Min& q25&  Median& Mean & q75&Max\\ \hline 
+    $\mu$&  3.79 & 99.7 & 184. & 305. & 457. & 1997.  \\
+ & & & & & &\\\hline \hline 
+ $\phi$& 1.44 & 11.0 & 21.7 & 26.3 & 34.1 & 635.  \\
+ & & & & & &\\ \hline 
+ $\sigma^2$ & 1.17 & 2.99 & 7.04 & 8.05 & 11.3 & 90.7 \\ \hline 
+    \end{tabular}
+    \caption{HMC: ESS for centered stochastic volatility model.}
+    \label{tab:HMCex}
+\end{table}
+
+\begin{table}
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|} \hline 
+    Parameter & Min& q25&  Median& Mean & q75&Max\\ \hline 
+    $\mu$&  14.5 & 738. & 1099. & 1143. & 1500. & 2993.  \\ \hline 
+ $\phi$& 48.8 & 355. & 476. & 521. & 651. & 1445.  \\ \hline 
+ $\sigma^2$ & 46.1 & 403. & 553. & 585. & 734. & 1486.\\ \hline 
+    \end{tabular}
+    \caption{HMC: ESS for reparameterised stochastic volatility model.}
+    \label{tab:HMCex}
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|c|c|} \hline 
+    Parameter &  Type&Min& q25&  Median& Mean & q75&Max\\ \hline 
+    $\mu$&  Centered&9.57 & 352. & 559. & 1482. & 1552. & 9907.\\
+ $\mu$&  Reparam&1.99 & 205. & 569. & 4174. & 6384. & 34055.\\\hline 
+ $\phi$&  Centered&2.47 & 74.0 & 103. & 112. & 130. & 1222.\\
+ $\phi$&  Reparam&1.03 & 83.4 & 132. & 325. & 419. & 1907. \\ \hline 
+ $\sigma^2$&  Centered&2.33 & 29.0 & 39.5 & 44.2 & 52.8 & 384. \\ 
+ $\sigma^2$&  Reparam&1.25 & 47.4 & 73.4 & 399. & 591. & 6618. \\ \hline
+    \end{tabular}
+    \caption{KSC: ESS for centered and reparameterised stochastic volatility model.}
+    \label{tab:hmcess}
+\end{table}
 
 
+
+\begin{table}
+    \centering
+    \begin{tabular}{lccc} 
+          $\omega$ &$Pr(\omega = i)$&  $m_i$&  $\nu^2_i$\\ 
+          1&0.00730  &  -10.12999&  5.79596\\ 
+          2&0.10556  &   -3.97281 &  2.61369\\ 
+          3&0.00002 &  -8.56686 &   5.17950\\ 
+          4&0.04395 &  2.77786  &   0.16735 \\ 
+          5&0.34001&   0.61942    &  0.64009\\ 
+          6&0.24566 &  1.79518    &  0.34023 \\ 
+          7&0.25750 &  -1.08819    &  1.26261\\ 
+    \end{tabular}
+    \caption{Caption}
+    \label{tab:my_label}
+\end{table}
+% | $\omega$ | $Pr(\omega = i)$ | $m_i$ | $\nu^2_i$ |
+% |------|------|------|------|
+% | 1    | 0.00730    | -10.12999   | 5.79596 | 
+% | 2    | 0.10556    | -3.97281    | 2.61369 | 
+% | 3    | 0.00002    | -8.56686    | 5.17950 | 
+% | 4    | 0.04395    | 2.77786    | 0.16735 | 
+% | 5    | 0.34001    | 0.61942    | 0.64009 | 
+% | 6    | 0.24566    | 1.79518    | 0.34023 | 
+% | 7    | 0.25750    | -1.08819    | 1.26261 |
+
+%   Type            parameters  Min. `1st Qu.` Median   Mean `3rd Qu.`   Max. `NA's`
+%   <chr>           <chr>      <dbl>     <dbl>  <dbl>  <dbl>     <dbl>  <dbl>  <dbl>
+% 1 Centered        ~mu         9.57     352.   559.  1482.     1552.   9907.     NA
+% 2 Reparameterised ~mu         1.99     205.   569.  4174.     6384.  34055.     NA
+% 3 Centered        ~phi        2.47      74.0  103.   112.      130.   1222.     NA
+% 4 Reparameterised ~phi        1.03      83.4  132.   325.      419.   1907.     23
+% 5 Centered        ~sigma^2    2.33      29.0   39.5   44.2      52.8   384.     NA
+% 6 Reparameterised ~sigma^2    1.25      47.4   73.4  399.      591.   6618.     NA
 \end{document}
