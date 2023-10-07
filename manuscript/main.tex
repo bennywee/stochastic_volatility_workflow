@@ -24,7 +24,7 @@ left   = 1.0in,
 right  = 1.0in]{geometry}
 \linespread{1.5}
 
-\title{Comparison of MCMC algorithms in Stochastic Volatility Models}
+\title{Comparing MCMC algorithms in Stochastic Volatility Models using Simulation Based Calibration}
 \author{Benjamin Wee}
 \date{October 2023}
 
@@ -251,7 +251,7 @@ right  = 1.0in]{geometry}
     \subsection{Sampling method 1}
         (KSC) sample the posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings and the Kalman Filter and smoother\footnote{In this research the exact software to apply the simulation smoother is unavailable, so a more recent simulation smoother is used which is based on the software written by the same author.} \citep{dejong1995}.
 
-        The standard Kalman Filter and smoother is used to compute the posterior distribution over the latent states. This requires the state and measurement equations to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring and taking the log of $y_t$.
+        The standard Kalman Filter and simulation smoother is used to compute the posterior distribution over the latent states. This requires the state and measurement equations to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring and taking the log of $y_t$.
 
         $$
         \begin{aligned}
@@ -275,8 +275,26 @@ right  = 1.0in]{geometry}
 
         The model can be sampled via the Kalman Filter and simulation smoother since the model is now linear and conditionally gaussian. The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conjugate posterior distributions whereas $\phi$ is sampled via a Metropolis Hastings accept/reject procedure. The details can be around in Appendix B. 
 
+        \subsubsection*{Implementation}
+        The code used to replicate the KSC algorithm was written by \citet{chad2018} and ammended for the purposes of this research. Additional code was developed to produce rank statistics, quantities of interest as well as integrated into the SBC framework. 
+        
+        The steps in the MCMC process is desribed in Algorithm \ref{alg:ksc}. The initial values are set to the values outlined in \citet{kim1998stochastic}, except for the mixing indicator which is unspecified. This is arbitrarily set at the 4th Gaussian density found in Appendix A.
+
+        \begin{algorithm}[H]
+            \caption{KSC MCMC Algorithm}\label{alg:ksc}
+            \begin{algorithmic}
+            \Require $s_0 = 4$, $\mu_0 = 0$, $\phi_0 = 0.95$, $\sigma^{2}_{\eta,0} = 0.02$
+            \For{\texttt{i in} $1:n_{draws}$}
+                    \State \text{Sample states (Kalman Filter and Smoother): } $\boldsymbol{h}_i \sim h|y^{\ast}, s_{i-1}, \phi_{i-1}, \sigma^{2}_{\eta,i-1}, \mu^{i-1}$ 
+                    \State \text{Sample mixture density: } $s_i \sim s|y^{\ast}, \boldsymbol{h}_{i-1}$
+                    \State \text{Sample conjugate density $\mu$: } $\mu_i \sim \mu|y_{\ast}, s_{i-1}, \phi_{i-1}, \sigma^{2}_{\eta, i-1}, \boldsymbol{h}_{i-1}$
+                    \State \text{Sample conjugate density $\sigma^2_{\eta}$: } $\mu_i \sim \mu|y^{\ast}, s_{i-1}, \phi_{i-1}, \mu_{i-1}, \boldsymbol{h}_{i-1}$
+                    \State \text{Metrpolis Hastings step $\phi$: } $\phi_i \sim \phi|y^{\ast}, s_{i-1}, \mu_{i-1}, \sigma^{2}_{\eta, i-1}, \boldsymbol{h}_{i-1}$
+                  \EndFor
+            \end{algorithmic}
+            \end{algorithm}
+
     \subsection{Sampling method 2}
-    % Need much more detail here about how it works
         Since the paper was written, new MCMC algorithms have been developed and enabled the estimation of richer and more complicated models. Specifically, Hamiltonian Monte Carlo is a MCMC algorithm which has become widely available for efficiently sampling from sophisticated models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo, was developed in the physics literature \citep{duane1987hybrid} before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks \citep{neal1995bayesian} and statistical computing \citep{neal2011mcmc}. The algorithm has since become widely available through open source development projects such as Stan \citep{stan} and PyMC \citep{pymc2023}.
 
 
@@ -286,9 +304,9 @@ right  = 1.0in]{geometry}
 
         The sampled momentum variable sets out the proposal path for $\theta$ governed by the Hamiltonian dynamics (represented by a set of differential equations). These differential equations are solved using a discrete approximation algorithm, such as a leapfrog integrator, and is a function of the log posterior gradients for a given point $\theta$. The leapfrog integrator has a set of tuning parameters which determines the size and number of steps with the final step being the proposal value $(\theta^{\ast}, \phi^{\ast})$. Finally, the Metropolis Hastings accept/reject step is applied using the parameters at the beginning of the leapfrog process $(\theta^{t-1}, \phi^{t-1})$ and the proposal values $(\theta^{\ast}, \phi^{\ast})$. 
 
-        The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler \citep{hoffman2014no}, allows for direct sampling of the specified stochastic volatility model. Hamiltonian Monte Carlo allows for sampling of the generative model and can flexibly handle complicated likelihood functions. This approach will also use the same priors as specified in the Gaussian mixture approximation.
+        \subsubsection{Implementation}
+        The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler \citep{hoffman2014no}, allows for direct sampling of the specified stochastic volatility model. Hamiltonian Monte Carlo allows for sampling of the generative model and can flexibly handle complicated likelihood functions. This approach will also use the same priors as specified in the Gaussian mixture approximation. A general description of the Hamltonian Monte Carlo algorithm is given below.
 
-        \subsubsection{Algorithmic steps}
         Let $\theta$ be a target parameter and $\phi$ be the auxiliary momemtum variable. The Hamiltonian is defined as:
 
         $$
@@ -474,13 +492,19 @@ right  = 1.0in]{geometry}
 
 
 \section{Results}
-    1000 and 5000 SBC iterations are run for centered and reparameterised versions of the stochastic volatility model. Rank statistic histograms are constructed with 20 bins for the static parameters and the 1st, 500th and 1000th latent state variables. The black horizontal line represents uniformity conditional on the number of bins and SBC iterations. The $\chi^2$ statistic is used to summarise the deviations from uniformity for all parameters since it is unrealistic to visually inspect all the histograms. The SBC algorithm is summarised below:
+    1000 and 5000 SBC iterations are run for centered and reparameterised versions of the stochastic volatility model using simulated datasets of 1000 observations. Rank statistic histograms are constructed with 20 bins for the static parameters and the 1st, 500th and 1000th latent state variables. The black horizontal line represents uniformity conditional on the number of bins and SBC iterations. The $\chi^2$ statistic is used to summarise the deviations from uniformity for all parameters since it is unrealistic to visually inspect all the histograms. The SBC algorithm is summarised Algorithm \ref{alg:sbc}:
 
-    1) for sim in 1000 iterations:
-        2) Draw from prior: $\theta^{sim}\sim\pi (\theta)$
-        3) Simulate dataset with 1000 observations: $y^{sim} \sim p(y|\theta^{sim})$
-        4) Draw 999 posterior samples (post warmup) $\{\theta_1,\dots , \theta_{L}\} \sim p(\theta | y^{sim})$
-        5) Compute rank statistics $r = rank(\{\theta_1,\dots , \theta_{L}\}, \theta^{sim})$
+    \begin{algorithm}
+        \caption{SBC}\label{alg:sbc}
+        \begin{algorithmic}
+        \For{\texttt{i in} $1:1000$}
+                \State \text{Draw from joint prior: } $\boldsymbol{\theta}^{sim}_i \sim\pi (\boldsymbol{\theta})$
+                \State \text{Simulate dataset with 1000 observations: } $\boldsymbol{y}^{sim}_i \sim p(y|\boldsymbol{\theta}^{sim}_i)$
+                \State \text{Draw 999 posterior samples post burn in:} $\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_i \sim p(\theta | \boldsymbol{y}^{sim}_i)$
+                \State \text{Compute rank statistics:} $\boldsymbol{r} = rank(\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_i, \boldsymbol{\theta}^{sim}_i)$
+              \EndFor
+        \end{algorithmic}
+        \end{algorithm}
         
     \subsection{Hamiltonian Monte Carlo}
     Figure \ref{fig:cphmc1k} and Figure \ref{fig:ncphmc1k} show the SBC results for the centered and reparameterisd model for HMC respectively. Both sets of results display relatively noisy rank statistic estimates with variation around the discrete uniform distribution.
@@ -699,5 +723,68 @@ This study only considered a handful of potential algorithms, sampling strategie
 \newpage
 
 \bibliography{references}
+
+\newpage
+
+\section{Appendix A: Mixture Gaussian weights}
+
+\newpage
+
+\section{Appendix B: Sampling from mixture of Gaussians}
+
+\subsection*{Conjugate posterior distributions}
+
+\textbf{Sampling} $\boldsymbol{\sigma_{\eta}^2}$
+
+Inverse gamma conjugate posterior distribution:
+
+$$
+\sigma^2_{\eta} | y,h,\phi,\mu \sim IG \Bigl\{\frac{n+\sigma_r}{2}, \frac{0.05 + (h_1 - \mu)^2 (1 - \phi^2) + \sum_{t=1}^{n-1}((h_{t+1} - \mu) - \phi(h_t - \mu))^2}{2}\Bigr\}
+$$
+
+\textbf{Sampling}  $\boldsymbol{\mu}$
+
+Gaussian conjugate posterior distribution:
+
+$$
+\mu | h,\phi,\sigma^2_{\eta}  \sim N(\hat{\mu}, \sigma^2_{\mu})
+$$
+
+Where
+
+$$
+\begin{aligned}
+\hat{\mu} &= \sigma^2_{\mu} \Bigl\{\frac{(1-\phi^2)}{\sigma_{\eta}^2}h_1 +\frac{(1-\phi^2)}{\sigma_{\eta}^2} \sum_{t=1}^{n-1} (h_{t+1} - \phi h_t)\Bigr\} \\
+\sigma^2_{\mu} &= \sigma^2_{\eta} \{(n-1)(1-\phi)^2 + (1-\phi^2)\}^{-1}
+\end{aligned}
+$$
+
+\subsection*{Metropolis Hastings Step}
+\textbf{Sampling}  $\boldsymbol{\phi}$
+
+Metropolis Hastings accept/reject procedure:
+
+1) Generate proposal $\phi^\ast$ from $N(\hat{\phi}, V_{\phi})$ where $\hat{\phi} = \frac{\sum_{t=1}^{n-1} (h_{t+1} - \mu)(h_t - \mu)}{\sum_{t=1}^{n-1} (h_t - \mu)^2}$ and $V_{\phi} = \sigma^2_{\eta} \{\sum_{t=1}^{n-1} (h_t - \mu)^2\}^{-1}$
+
+2) Accept proposal as $\phi^{(i)}$ with probability $e^{\{g(\phi^\ast) - g(\phi^{(i-1)}\}}$ such that $g(\phi) = log (\pi (\phi)) - \frac {(h_t - \mu)^2 (1-\phi^2)}{2 \sigma_{\eta}^2} + \frac{1}{2} log (1-\phi^2)$
+
+\subsection*{Sampling mixture density}
+
+Rewrite mixture density with respect to a indicator variable $s_t$
+
+$$
+\begin{aligned}
+&z_t | s_t = i \sim N(m_i - 1.2704, \nu^2) \\
+&Pr(s_t = i) = q_i
+\end{aligned}
+$$
+
+Sample $s_t$ from probability mass function: 
+
+$$
+\begin{aligned}
+Pr(s_t = i | y_t^{\ast}, h_t) \propto q_i f_N(y_t^{\ast} | h_t + m_t - 1.2704, \nu^2)
+\end{aligned}
+$$
 
 \end{document}

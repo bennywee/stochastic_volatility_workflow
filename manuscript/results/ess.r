@@ -1,4 +1,6 @@
 library(tidyverse)
+library(future.apply)
+plan(multicore, workers = 9)
 source("R/sbc.r")
 static_parameters <- c("~mu", "~sigma^2", "~phi")
 
@@ -34,7 +36,7 @@ hmc_ncp_ess_basic_5k <- future_lapply(rds_path,
 
 hmc_ncp_ess_basic_5k_df <- as.data.frame(do.call("rbind", hmc_ncp_ess_basic_5k))
 hmc_ncp_ess_basic_5k_df <- latex_variables(hmc_ncp_ess_basic_5k_df)
-hmc_ncp_ess_basic_5k_df$Type <- "Non Centered"
+hmc_ncp_ess_basic_5k_df$Type <- "Reparameterised"
 
 hmc_ess_df <- rbind(hmc_cp_ess_basic_5k_df, hmc_ncp_ess_basic_5k_df) %>% 
     filter(parameters %in% static_parameters)
@@ -66,31 +68,30 @@ ksc_cp_ess_basic_5k <- future_lapply(rds_path,
 
 ksc_cp_ess_basic_5k_df <- as.data.frame(do.call("rbind", ksc_cp_ess_basic_5k))
 ksc_cp_ess_basic_5k_df <- latex_variables(ksc_cp_ess_basic_5k_df)
-ksc_cp_ess_basic_5k_df$Type <- "Gaussian Mixture"
-
+ksc_cp_ess_basic_5k_df$Type <- "Centered"
 
 # 5000 iterations NCP
-path <- "simulation_output/ksc/cp/sir_sbc_cp_ksc_model_cp_dgf_10kmcmc_5000iter_r1"
+path <- "simulation_output/ksc/ncp/sbc_ncp_ksc_model_ncp_dgf_10kmcmc_5000iter_r1"
 rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
 rds_path <- paste("output", rds_list, sep = "/")
 
-sir_ncp_ess_basic_5k <- future_lapply(rds_path,
+ksc_ncp_ess_basic_5k <- future_lapply(rds_path,
                            get_ess, 
                            model_path = path, 
                            ess_type = "ess_basic", 
                            chains = "one_chain", 
                            future.seed = NULL)
 
-sir_ncp_ess_basic_5k_df <- as.data.frame(do.call("rbind", sir_ncp_ess_basic_5k))
-sir_ncp_ess_basic_5k_df <- latex_variables(sir_ncp_ess_basic_5k_df)
-sir_ncp_ess_basic_5k_df$Type <- "Importance Resampling"
+ksc_ncp_ess_basic_5k_df <- as.data.frame(do.call("rbind", ksc_ncp_ess_basic_5k))
+ksc_ncp_ess_basic_5k_df <- latex_variables(ksc_ncp_ess_basic_5k_df)
+ksc_ncp_ess_basic_5k_df$Type <- "Reparameterised"
 
-ksc_sir_df <- rbind(ksc_cp_ess_basic_5k_df, sir_ncp_ess_basic_5k_df) %>% 
+ksc_ess_df <- rbind(ksc_cp_ess_basic_5k_df, ksc_ncp_ess_basic_5k_df) %>% 
     filter(parameters %in% static_parameters)
 
-ksc_sir_df <- latex_variables(ksc_sir_df)
+ksc_ess_df <- latex_variables(ksc_ess_df)
 
-plot <- ggplot(ksc_sir_df, aes(x = parameters, y = ess_basic, fill = Type)) +
+plot <- ggplot(ksc_ess_df, aes(x = parameters, y = ess_basic, fill = Type)) +
     geom_boxplot() +
     theme_minimal(base_size = 22) +
         labs(x = "Parameters",
@@ -98,9 +99,45 @@ plot <- ggplot(ksc_sir_df, aes(x = parameters, y = ess_basic, fill = Type)) +
 
 x_labs = ggplot_build(plot)$layout$panel_params[[1]]$x$get_labels()
 plot <- plot + scale_x_discrete(labels = parse(text = x_labs))
-ggsave("manuscript/results/ksc_sir_ess.png", bg = "white", width = 14, height = 9.42)
+ggsave("manuscript/results/ksc_ess.png", bg = "white", width = 14, height = 9.42)
 
 
+# 5000 iterations NCP
+# path <- "simulation_output/ksc/cp/sir_sbc_cp_ksc_model_cp_dgf_10kmcmc_5000iter_r1"
+# rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
+# rds_path <- paste("output", rds_list, sep = "/")
+
+# sir_ncp_ess_basic_5k <- future_lapply(rds_path,
+#                            get_ess, 
+#                            model_path = path, 
+#                            ess_type = "ess_basic", 
+#                            chains = "one_chain", 
+#                            future.seed = NULL)
+
+# sir_ncp_ess_basic_5k_df <- as.data.frame(do.call("rbind", sir_ncp_ess_basic_5k))
+# sir_ncp_ess_basic_5k_df <- latex_variables(sir_ncp_ess_basic_5k_df)
+# sir_ncp_ess_basic_5k_df$Type <- "Importance Resampling"
+
+# ksc_sir_df <- rbind(ksc_cp_ess_basic_5k_df, sir_ncp_ess_basic_5k_df) %>% 
+#     filter(parameters %in% static_parameters)
+
+# ksc_sir_df <- latex_variables(ksc_sir_df)
+
+plot <- ggplot(ksc_cp_ess_basic_5k_df %>% filter(parameters %in% static_parameters), 
+                aes(x = parameters, y = ess_basic, fill = Type)) +
+    geom_boxplot() +
+    theme_minimal(base_size = 22) +
+        labs(x = "Parameters",
+             y = "Count")
+
+x_labs = ggplot_build(plot)$layout$panel_params[[1]]$x$get_labels()
+plot <- plot + scale_x_discrete(labels = parse(text = x_labs))
+ggsave("manuscript/results/ksc_ess.png", bg = "white", width = 14, height = 9.42)
+
+ksc_cp_ess_basic_5k_df %>% 
+    filter(parameters %in% static_parameters) %>% 
+    group_by(parameters) %>% 
+    summarise(as_tibble(rbind(summary(ess_basic))))
 
 
 
