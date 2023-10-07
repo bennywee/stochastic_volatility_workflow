@@ -1,0 +1,60 @@
+\documentclass{article}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{amsmath} 
+
+\begin{document}
+        \begin{algorithm}[H]
+            \caption{KSC MCMC Algorithm}\label{alg:ksc}
+            \begin{algorithmic}
+            \Require $s_0 = 4$, $\mu_0 = 0$, $\phi_0 = 0.95$, $\sigma^{2}_{\eta,0} = 0.02$
+            \For{\texttt{i in} $1:n_{draws}$}
+                    \State \text{Sample states (Kalman Filter and Smoother): } $\boldsymbol{h}_i \sim h|y^{\ast}, s_{i-1}, \phi_{i-1}, \sigma^{2}_{\eta,i-1}, \mu^{i-1}$ 
+                    \State \text{Sample mixture density: } $s_i \sim s|y^{\ast}, \boldsymbol{h}_{i-1}$
+                    \State \text{Sample conjugate density $\mu$: } $\mu_i \sim \mu|y_{\ast}, s_{i-1}, \phi_{i-1}, \sigma^{2}_{\eta, i-1}, \boldsymbol{h}_{i-1}$
+                    \State \text{Sample conjugate density $\sigma^2_{\eta}$: } $\mu_i \sim \mu|y^{\ast}, s_{i-1}, \phi_{i-1}, \mu_{i-1}, \boldsymbol{h}_{i-1}$
+                    \State \text{Metrpolis Hastings step $\phi$: } $\phi_i \sim \phi|y^{\ast}, s_{i-1}, \mu_{i-1}, \sigma^{2}_{\eta, i-1}, \boldsymbol{h}_{i-1}$
+                  \EndFor
+            \end{algorithmic}
+            \end{algorithm}
+
+\begin{algorithm}
+\caption{SBC Algorithm}\label{alg:sbc}
+\begin{algorithmic}
+\For{\texttt{i in} $1:1000$}
+        \State \text{Draw from joint prior: } $\boldsymbol{\theta}^{sim}_i \sim\pi (\boldsymbol{\theta})$
+        \State \text{Simulate dataset with 1000 observations: } $\boldsymbol{y}^{sim}_i \sim p(y|\boldsymbol{\theta}^{sim}_i)$
+        \State \text{Draw 999 posterior samples post burn in:} $\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_i \sim p(\theta | \boldsymbol{y}^{sim}_i)$
+        \State \text{Compute rank statistics:} $r = rank(\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_i, \boldsymbol{\theta}^{sim}_i)$
+      \EndFor
+\end{algorithmic}
+\end{algorithm}
+
+    1) for sim in 1000 iterations:
+        2) Draw from prior: $\theta^{sim}\sim\pi (\theta)$
+        3) Simulate dataset with 1000 observations: $y^{sim} \sim p(y|\theta^{sim})$
+        4) Draw 999 posterior samples (post warmup) $\{\theta_1,\dots , \theta_{L}\} \sim p(\theta | y^{sim})$
+        5) Compute rank statistics $r = rank(\{\theta_1,\dots , \theta_{L}\}, \theta^{sim})$
+
+% \begin{algorithm}
+% \caption{KSC MCMC Algorithm}\label{alg:cap}
+% \begin{algorithmic}
+% \Require $n \geq 0$
+% \Ensure $y = x^n$
+% \State $y \gets 1$
+% \State $X \gets x$
+% \State $N \gets n$
+% \While{$N \neq 0$}
+% \If{$N$ is even}
+%     \State $X \gets X \times X$
+%     \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
+% \ElsIf{$N$ is odd}
+%     \State $y \gets y \times X$
+%     \State $N \gets N - 1$
+% \EndIf
+% \EndWhile
+% \end{algorithmic}
+% \end{algorithm}
+
+
+\end{document}
