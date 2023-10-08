@@ -2,7 +2,6 @@ old_simulations/
 writeups/proposal_presentation/prompts.md
 writeups/reweight_samples/reweight.qmd
 */week1.qmd
-*.png
 *.jpg
 *.pdf
 writeups/proposal_presentation/prompts_files
@@ -79,3 +78,29 @@ vignettes/*.pdf
 renv/Icon
 */Icon\r"
 "Icon\r"
+analysis/gauss_mix/results/results_real_data.rds
+manuscript/main.aux
+manuscript/main.bbl
+manuscript/main.blg
+manuscript/main.fls
+manuscript/main.fdb_latexmk
+manuscript/main.run.xml
+manuscript/main.log
+manuscript/main.synctex.gz
+manuscript/main (1).aux
+.gitignore
+manuscript/main (1).log
+manuscript/main.toc
+.gitignore
+writeups/new_ncp/
+.luarc.json
+manuscript/main (1).fdb_latexmk
+.gitignore
+.gitignore
+*.csv
+main*
+*.js
+*.css
+*.parquet
+*.woff
+/.luarc.json
