@@ -131,6 +131,67 @@ ggsave("manuscript/results/ksc_cp_5k.png", bg = "white", width = 14, height = 9.
 rank_hist(ksc_ncp_fivek_bins_long) # KSC NCP 5k
 ggsave("manuscript/results/ksc_ncp_5k.png", bg = "white", width = 14, height = 9.42)
 
+# REWEIGHTED KSC 1k
+n_iterations <- 1000
+posterior_samples <- 9999 # Posterior samples. m+1 possible ranks. So want (m+1)/J = expected samples for uniform dist.
+n_bins <- 20 # Bins
+expected_count <- n_iterations / n_bins # Chi sqd stat
+
+ksc_cp_onek_bins <- rank_bins_f(path = "simulation_output/ksc/cp/sbc_cp_ksc_model_cp_dgf_10kmcmc_1000iter_r2", 
+                                    rank_type = "weighted_ranks", 
+                                    posterior_samples = posterior_samples, 
+                                    n_bins= n_bins)
+
+
+ksc_ncp_onek_bins <- rank_bins_f(path = "simulation_output/ksc/ncp/sbc_ncp_ksc_model_ncp_dgf_10kmcmc_1000iter_r1", 
+                                    rank_type = "weighted_ranks", 
+                                    posterior_samples = posterior_samples, 
+                                    n_bins= n_bins)
+
+ksc_cp_onek_bins_long <- static_rank_bins(data = ksc_cp_onek_bins, 
+                                         variables = parameters, 
+                                         type = "Centered")
+
+ksc_ncp_onek_bins_long <- static_rank_bins(data = ksc_ncp_onek_bins, 
+                                         variables = parameters, 
+                                         type = "Centered")
+
+rank_hist(ksc_cp_onek_bins_long) # Reweighted KSC CP 1k
+ggsave("manuscript/results/weighted_ksc_cp_1k.png", bg = "white", width = 14, height = 9.42)
+
+rank_hist(ksc_ncp_onek_bins_long) # Reweighted KSC NCP 1k
+ggsave("manuscript/results/weighted_ksc_ncp_1k.png", bg = "white", width = 14, height = 9.42)
+
+# REWEIGHTED KSC 5k
+n_iterations <- 5000
+posterior_samples <- 9999 # Posterior samples. m+1 possible ranks. So want (m+1)/J = expected samples for uniform dist.
+n_bins <- 20 # Bins
+expected_count <- n_iterations / n_bins # Chi sqd stat
+
+ksc_cp_fivek_bins <- rank_bins_f(path = "simulation_output/ksc/cp/sbc_cp_ksc_model_cp_dgf_10kmcmc_5000iter_r1", 
+                                    rank_type = "weighted_ranks", 
+                                    posterior_samples = posterior_samples, 
+                                    n_bins= n_bins)
+
+ksc_ncp_fivek_bins <- rank_bins_f(path = "simulation_output/ksc/ncp/sbc_ncp_ksc_model_ncp_dgf_10kmcmc_5000iter_r1", 
+                                    rank_type = "weighted_ranks", 
+                                    posterior_samples = posterior_samples, 
+                                    n_bins= n_bins)
+
+ksc_cp_fivek_bins_long <- static_rank_bins(data = ksc_cp_fivek_bins, 
+                                         variables = parameters, 
+                                         type = "Centered")
+
+ksc_ncp_fivek_bins_long <- static_rank_bins(data = ksc_ncp_fivek_bins, 
+                                         variables = parameters, 
+                                         type = "Centered")
+
+rank_hist(ksc_cp_fivek_bins_long) # KSC CP 5k
+ggsave("manuscript/results/weighted_ksc_cp_5k.png", bg = "white", width = 14, height = 9.42)
+
+rank_hist(ksc_ncp_fivek_bins_long) # KSC NCP 5k
+ggsave("manuscript/results/weighted_ksc_ncp_5k.png", bg = "white", width = 14, height = 9.42)
+
 
 # SIR 1k
 n_iterations <- 1000
@@ -151,7 +212,7 @@ rank_hist(sir_ksc_cp_onek_bins_long) # KSC CP 5k
 ggsave("manuscript/results/sir_cp_1k.png", bg = "white", width = 14, height = 9.42)
 
 
-# SIR 5k
+# SIR CP 5k
 n_iterations <- 5000
 posterior_samples <- 9999 # Posterior samples. m+1 possible ranks. So want (m+1)/J = expected samples for uniform dist.
 n_bins <- 20 # Bins
@@ -195,5 +256,4 @@ facet_hist(data = rank_bins,
            nbins = n_bins,
            rank_scales = (posterior_samples+1)
            )
-    
 

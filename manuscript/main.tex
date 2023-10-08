@@ -33,7 +33,7 @@ right  = 1.0in]{geometry}
 \maketitle 
 
 \begin{abstract}
-    This research compares the computational methods used to estimate Bayesian stochastic volatility models. The estimation strategies outlined in the stochastic volatility literature and Hamiltoninan Monte Carlo are assesssed in their ability to sample from the model's posterior distribution. Specifically, Simulation Based Calibration (SBC) is used to check whether these MCMC algorithm are returning efficient and well calibrated posterior estimates. Key metrics of interest are the effective sample size to check the efficiency of the algorithm and tests of uniformity to assess the calibration of the posteriors. This will determine which method is better at estimating stochastic volatility models based on the efficiency and accuracy of the sampling strategy. Results reveal that Hamiltonian Monte Carlo provides more efficient and calibrated posterior estimates conditional on the non centered paramterisation of the stochastic volatility model. 
+    This research compares the computational methods used to estimate Bayesian stochastic volatility models. The MCMC approaches outlined in the stochastic volatility literature and Hamiltoninan Monte Carlo are assesssed in their ability to sample from the model's posterior distribution. Specifically, Simulation Based Calibration (SBC) is used to check whether these MCMC algorithms are returning efficient and calibrated posterior estimates. Key metrics of interest are the effective sample size to check the efficiency of the algorithm and tests of uniformity to assess the calibration of the posteriors. This will determine which method is better at estimating stochastic volatility models based on the efficiency and accuracy of the sampling strategy. Results reveal that Hamiltonian Monte Carlo provides more efficient and calibrated posterior estimates of the stochastic volatility model conditional on model paramterisation. 
 \end{abstract}
 
 \newpage
@@ -41,9 +41,9 @@ right  = 1.0in]{geometry}
 \tableofcontents{\protect\newpage}
 
 \section{Introduction}
-    The stochastic volatility model is used in financial econometrics to model the behaviour of financial instruments. It explicitly treats the variance as a latent random variable. These are typically expressed as non linear Gaussian state space models and are difficult to estimate using classical methods. The likelihood is unavailable in closed form and there are at least as many variables as data points. Bayesian approaches to estimating these models rely on  Markov Chain Monte Carlo (MCMC) techniques to sample from the target joint posterior of these high dimensional latent parameter spaces. 
+    The stochastic volatility model is used in financial econometrics to model the behaviour of financial assets. They are typically expressed as non linear Gaussian state space models where the variance is treated as a latent random variable. Stochastic volatility is difficult to estimate since the likelihood is unavailable in closed form and there are at least as many variables as data points. Bayesian methods can be used to estimate these models which rely on Markov Chain Monte Carlo (MCMC) techniques to sample from the target joint posterior of these high dimensional parameter spaces.
 
-    \citet{kim1998stochastic} propose a method for sampling this model using a combination of Kalman Filters, Gibbs sampler, and Metropolis Hastings over 20 years ago.  Since then, there have been many advances in statistical computing to estimate complex, high dimensional Bayesian models. In particular, the recent availability of Hamiltonian Monte Carlo, a variant of the Metropolis Hastings algorithm, is an advancement of MCMC for efficient sampling of complex probabilistic models. The adoption of such new techniques have been made widely available through the development of various open source libraries such as the Stan programming language \citep{stan} and the PyMC library \citep{pymc2023}. Other algorithms have also improved the speed of estimating high dimensional models using approximations of the posterior such as integrated nested Laplace approximation \citep{rue2009approximate}.
+    \citet{kim1998stochastic} proposed a sampling strategy for stochastic volatility through a combination of conjugate posterior distributions, a Kalman filter, and Metropolis Hastings over 20 years ago. Since then, there have been many advances in statistical computing to estimate complex, high dimensional Bayesian models. In particular, the recent availability of Hamiltonian Monte Carlo, a variant of the Metropolis Hastings algorithm, is an advancement of MCMC for efficient sampling of complex probabilistic models. The adoption of such new techniques have been made widely available through the development of various open source libraries such as the Stan programming language \citep{stan} and the PyMC library \citep{pymc2023}. Other algorithms have also improved the speed of estimating high dimensional models using approximations of the posterior such as integrated nested Laplace approximation \citep{rue2009approximate}.
 
     These conceptually and practically different techniques to estimate complex models did not exist 20 years ago (or perhaps more accurately, were not easily accessible or implemented 20 years ago). As the development of new algorithms rapidly increase, so does the need to develop new methods to assess their output. Developments in our statistical workfow are required to test new algorithms as well as compare computational strategies used to estimate increasingly complex models.
 
@@ -58,7 +58,7 @@ right  = 1.0in]{geometry}
 \section{Resarch Context}
 
 \subsection{Stochastic Volatility}
-    The model of interest is the discrete time, univariate stochastic volatility model estimated by \citet{kim1998stochastic} using Bayesian methods. $y_t$ is the mean corrected returns of some asset for equally spaced intervals t. $\beta$ is a constant scaling factor which is also defined as $exp(\mu / 2)$ representing instantaneous volatility. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$. This autoregressive parameter represents the persistence or "stickiness" of log volatility and the dispersion parameter $\sigma_{\eta}$ is the constant variance of the states. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks and are uncorrelated with each other. 
+    The model of interest is the discrete time, univariate stochastic volatility model estimated by \citet{kim1998stochastic} using Bayesian methods. $y_t$ is the mean corrected returns of some asset for equally spaced intervals t. $\beta$ is a constant scaling factor which is also defined as $exp(\mu / 2)$ representing instantaneous volatility. $h_t$ is log volatility, where $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the autoregressive parameter $\phi$ such that $|\phi|<1$. This autoregressive parameter represents the persistence or stickiness of log volatility and the dispersion parameter $\sigma_{\eta}$ is the constant variance of the states. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks and are uncorrelated with each other. 
 
     $$
     \begin{aligned}
@@ -97,7 +97,7 @@ right  = 1.0in]{geometry}
     \end{aligned}
     $$
 
-    The prior on $\phi$ is a "stretched" beta distribution. This is a beta distribution (as defined on the parameter $\phi^*$) which has been transformed to have support (-1, 1).
+    The prior on $\phi$ is a stretched beta distribution. This is a beta distribution (as defined on the parameter $\phi^*$) which has been transformed to have support (-1, 1).
 
 
 \subsection{Diagnostic limitations on real data}
@@ -112,7 +112,7 @@ right  = 1.0in]{geometry}
     \begin{figure}[h]
         \centering
         \includegraphics[scale=0.1]{motivating_example/real_data_ex.png}
-        \caption{Posterior samples from the Hamiltonian Monte Carlo (HMC) and Kim Sherphard and Chib (KSC) MCMC samplers using S\&P 500 data. While the shape of the distributions are similar, the modes of method 2 is much higher and the tails of method 1 are fatter for $\phi$ and $\sigma^2$. Convergence diagnostics do not tell us which estimate is "more correct" since we don't observe the true model or true data generating process.}
+        \caption{Posterior samples from the Hamiltonian Monte Carlo (HMC) and Kim Sherphard and Chib (KSC) MCMC samplers using S\&P 500 data. While the shape of the distributions are similar, the modes of method 2 is much higher and the tails of method 1 are fatter for $\phi$ and $\sigma^2$. Convergence diagnostics do not tell us which estimate is ``more correct'' since we don't observe the true model or true data generating process.}
         \label{fig:realdataex}
     \end{figure}
 
@@ -139,7 +139,7 @@ right  = 1.0in]{geometry}
 
     Furthermore, as discussed in \citet{gelman2020bayesian}, fitting models on simulated data is the only way we can check inference on latent variables. This is critical in Stochastic Volatility since the underlying framework is a state space model with latent log volatility parameters. Latent variables are unobserved in real data and are only estimated in the context of the model. Simulation gives control over the data generating process which reveals what the model can infer about the latent variables. 
 
-    Simulations enable us to check whether our models and algorithms can estimate the true data generating process, however, there are limitations to what can be learned from a single simulation. There is always a small probability that the true parameter is in the tails of any estimated posterior distribution. Or put differently, there is a 1\% chance the true parameter or any random draw exists outside a 99\% credible interval. \cite{talts2018validating} make the point that a single simulation does not provide sufficient information about the inference made by an algorithm. As discussed in their paper, a single simulation may conclude "that an incorrectly coded analysis worked as desired, while a correctly coded analysis failed". 
+    Simulations enable us to check whether our models and algorithms can estimate the true data generating process, however, there are limitations to what can be learned from a single simulation. There is always a small probability that the true parameter is in the tails of any estimated posterior distribution. Or put differently, there is a 1\% chance the true parameter or any random draw exists outside a 99\% credible interval. \cite{talts2018validating} make the point that a single simulation does not provide sufficient information about the inference made by an algorithm. As discussed in their paper, a single simulation may conclude ``that an incorrectly coded analysis worked as desired, while a correctly coded analysis failed''. 
 
     Figure 2 show the posterior distributions of a single simulation where data is generated and sampled from the stochastic volatility model with known parameters.
 
@@ -152,7 +152,7 @@ right  = 1.0in]{geometry}
     The 95\% credible intervals for $\mu$ and $\sigma^2$ cover the true parameter. The true parameter for $\phi$ however, is in the tails and outside the interval. Such an analysis may incorrectly conclude that the model fails to adequatly estimate the $\phi$ parameter. However, it may be the case that the posterior distribution is correctly calculated using this algorithm and the results may be due to the features of this specific simulated dataset.
 
 \subsection{Research Goal}
-    The objective of this research is to design a simulation study to evaluate the calibration of algorithms used to sample Stochastic Volatility models. Indeed, there are limitations to evaluating MCMC algorithms based on fits to real data and single simulations. To check the calibration of an algorithm, simulations over multiple "true parameters" are required. This methodology is discussed in the next section. 
+    The objective of this research is to design a simulation study to evaluate the calibration of algorithms used to sample Stochastic Volatility models. Indeed, there are limitations to evaluating MCMC algorithms based on fits to real data and single simulations. To check the calibration of an algorithm, simulations over multiple true parameters are required. This methodology is discussed in the next section. 
 
     Additionally, two sampling strategies will be assessed using the proposed simulation design as well as the performance of the samplers under different parameterisations of the stochastic volatility model. Not only will the calibration of any one algorithm be assessed, but also compared across sampling strategies to determine which MCMC approach is most suitable for estimating this model. 
 
@@ -250,7 +250,7 @@ right  = 1.0in]{geometry}
             \end{aligned}
             $$
             
-            A perfectly discrete uniform distribution will return a $\chi^2$ statistic of zero. That is, the number of rank statistics in each bin is equal to the expected number conditional on the number of bins and observations. Instead of performing multiple hypothesis tests for each parameter, the distribution of $\chi^2$ statistics is compared across all parameters and simulations. This will give a high level summary of calibration and overall performance of the algorithms.
+            A perfectly discrete uniform distribution will return a $\chi^2$ statistic of zero. That is, the number of rank statistics in each bin is equal to the expected count under a discrete uniform distribution conditional on the number of bins and observations. Instead of performing multiple hypothesis tests for each parameter, the distribution of $\chi^2$ statistics is compared across all parameters and simulations. This will give a high level summary of calibration and overall performance of the algorithms.
 
             \subsubsection{Effective sample size}
             ESS measures the efficiency of the MCMC sampler. It calculates the number of effectively independent draws generated by a MCMC to estimate a target parameter. A poor ESS can arise from high autocorrelation in the Markov chain which leads to highly dependent samples. An efficient MCMC algorithm takes less resources (for example, time and number of draws) to get a representative sample of the target distribution. If a MCMC algorithm possesses higher ESS for the majority of its parameters (relative to another strategy), then there is evidence that this method is a more efficient sampler.
@@ -266,7 +266,7 @@ right  = 1.0in]{geometry}
 \section{MCMC Strategies}
 
     \subsection{Sampling method 1}
-        (KSC) sample the posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings and the Kalman Filter and smoother\footnote{In this research the exact software to apply the simulation smoother is unavailable, so a more recent simulation smoother is used which is based on the software written by the same author.} \citep{dejong1995}.
+        (KSC) sample the posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings and the Kalman Filter and smoother\footnote{In this research the exact software to apply the simulation smoother is unavailable. So a more recent simulation smoother is used which is written by the same author of the original software.} \citep{dejong1995}.
 
         The standard Kalman Filter and simulation smoother is used to compute the posterior distribution over the latent states. This requires the state and measurement equations to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring and taking the log of $y_t$.
 
@@ -403,7 +403,7 @@ right  = 1.0in]{geometry}
 
         The parameterisation of a model can affect the performance of a MCMC algorithm when sampling from models with complex posterior geometries. An example of this is Neal's funnel \citep{neal2003slice} where the Hamiltonian Monte Carlo sampler encounters performance issues in hierarchical models and produces biased samples. Efficiency improvements of MCMC algorithms for state space models under different parameterisations are also explored in \citet{strickland2008parameterisation}.
 
-        The stochastic volatility model as described in section 2.1 is follows a "centered" parameterisation. This describes the central location of the latent state parameters which are centered around the mean and lag of the log volatility $\mu +\phi(h_t - \mu)$. A model can be reparameterised in a way that improves MCMC performance. Reparameterisation applies a transformation to the model which may change the interpretation of the parameters or the way they are sampled but remains mathematically equivalent to the original model. The reparametiersations available for a model is dependent on the MCMC approach. Some reparamterisations are available only to specific sampling strategies and may improve or impair a MCMC performance. 
+        The stochastic volatility model as described in section 2.1 is follows a centered parameterisation. This describes the central location of the latent state parameters which are centered around the mean and lag of the log volatility $\mu +\phi(h_t - \mu)$. A model can be reparameterised in a way that improves MCMC performance. Reparameterisation applies a transformation to the model which may change the interpretation of the parameters or the way they are sampled but remains mathematically equivalent to the original model. The reparametiersations available for a model is dependent on the MCMC approach. Some reparamterisations are available only to specific sampling strategies and may improve or impair a MCMC performance. 
 
         SBC is applied to reparameteirsied versions of the stochastic volatility model available to see if there is any improvement in calibration and efficiency. 
         
@@ -509,7 +509,7 @@ right  = 1.0in]{geometry}
 
 
 \section{Results}
-    1000 and 5000 SBC iterations are run for centered and reparameterised versions of the stochastic volatility model using simulated datasets of 1000 observations. Rank statistic histograms are constructed with 20 bins for the static parameters and the 1st, 500th and 1000th latent state variables. The black horizontal line represents uniformity conditional on the number of bins and SBC iterations. The $\chi^2$ statistic is used to summarise the deviations from uniformity for all parameters since it is unrealistic to visually inspect all the histograms. The SBC algorithm is summarised Algorithm \ref{alg:sbc}:
+    1000 and 5000 SBC iterations are run for centered and reparameterised versions of the stochastic volatility model using simulated datasets of 1000 observations. Rank statistic histograms are constructed with 20 bins for the static parameters and the 1st, 500th and 1000th latent state variables. The black horizontal line represents uniformity conditional on the number of bins and SBC iterations. The $\chi^2$ statistic is used to summarise the deviations from uniformity for all state variables since it is unrealistic to visually inspect all the histograms. The SBC algorithm is summarised Algorithm \ref{alg:sbc}:
 
     \begin{algorithm}
         \caption{SBC}\label{alg:sbc}
@@ -664,7 +664,7 @@ right  = 1.0in]{geometry}
 
     Importance weights are defined as the ratio of the joint posterior from the stochastic volatility model and the posterior distribution of the approximation. A weight is produced for each posterior sample generated by MCMC. These weights correct the samples from the approximate distribution by increasing or decreasing the contribution of that sample in the calculation of the expectation. 
 
-    These weights can be applied in an additional sampling step using Metropolis Hastings or Importance Resampling (also known as sampling-importance resampling or SIR) to produce samples from the target posterior. However, the rank statistic can also be written as a function of the weighted expectation of the indicator random variable. This reweighting step is applied to the calculation of the rank statistics to see if the correction improves the calibration of the MCMC sampler.
+    These weights can be applied in an additional sampling step using Metropolis Hastings or Importance Resampling (also known as sampling-importance resampling or SIR) to produce samples from the target posterior. However, the rank statistic can also be written as a function of the weighted expectation of the indicator random variable. This reweighting step is applied to the calculation of the rank statistics to see if the correction improves the calibration of the MCMC sampler.\footnote{Efficiency estimates of the reweighted posterior samples are omitted. It was unclear at the time of writing whether the ESS could be written as a function of the expectation or whether the ESS from resampled posterior samples using the importance weights were valid.}
 
     \subsubsection{Reweigthing rank statistics of the Gaussian Mixture Model}
     Let $v(\theta, h)$ be the log weights defined as the log difference between the posterior densities of the true model with log chi squared errors $log\: g(\theta, h | y^{\ast}_t)$ and the Gaussian mixture model $log\:  k(\theta, h_t | y^{\ast}_t)$.
@@ -705,40 +705,39 @@ right  = 1.0in]{geometry}
 
     $$
     \begin{aligned}
-    r = \sum_{l=1}^{L}1[\theta_{l} < \theta^{sim}] \approx  L\times E[S(\hat{\theta})] = L\times \sum_l^L S(\theta_l)w_l
+    r = \sum_{l=1}^{L}1[\theta_{l} < \theta^{sim}] \approx  L\times E[S(\hat{\theta})] = L\times \sum_l^L S(\hat{\theta}_l)w_l
     \end{aligned}
     $$
 
-    The results from applying this reweighting step to the rank statistics of the centered model are given on Figure \ref{fig:reweight1k}. There are no major improvements to the uniformity of rank statistics. Increasing the SBC iterations to 5000 as seen in Figure \ref{fig:reweight5k} also results in no major improvements. The shape of both sets of histograms is consistent with the shape of the unweighted rank statistics. The reweighted rank statistics for the reparameterised model exhibit the same behaviour and can be found in Appendix X. 
+    The results from applying this reweighting step to the rank statistics of the centered model are given on Figure \ref{fig:reweight1k}. There are no major improvements to the uniformity of rank statistics. In fact, there are now large peaks on the left side of the 1st and 500th state variables and a right peak for $\sigma^2$. Increasing the SBC iterations to 5000 as seen in Figure \ref{fig:reweight5k} also does not improve the results, with the left peak appearing to be larger for all state variables. Applying the reweighting step to the rank statistics appears to have weighted the posterior estimates to the right of the prior distribution. Overall the reweighting of the posterior samples from the approximate model did not improve the calibration results. The reweighted rank statistics for the reparameterised model also did not improve and can be found in Appendix C.
 
     \begin{figure}[H]
         \centering
-        \includegraphics[scale=0.1]{results/sir_cp_1k.png}
+        \includegraphics[scale=0.1]{results/weighted_ksc_cp_1k.png}
         \caption{1000 SBC iterations for reweighted rank statistics from the Gaussian mixture approximation model. The shape of the histogram is consistent with the unweighted rank statistics.}
         \label{fig:reweight1k}
     \end{figure}
 
     \begin{figure}[H]
         \centering
-        \includegraphics[scale=0.1]{results/sir_cp_5k.png}
+        \includegraphics[scale=0.1]{results/weighted_ksc_cp_5k.png}
         \caption{5000 SBC iterations for reweighted rank statistics from the Gaussian mixture approximation model. No major improvements are observed to the uniformity of rank statistics.}
         \label{fig:reweight5k}
     \end{figure}
 
-    \subsection{Evaluating all models and parameters}
-    As discussed, it is not practical to visually inspect the histograms of all parameters in the stochastic volatility model. Instead, the Chi squared statistic can be used to summarise the shape of the distribution and if desired, be used for hypothesis testing. However, instead of performing hypothesis tests, another visual approach is taken to compare the calibration of the algorithms and parameters. 
-    % However, performing all these tests suffers from the same overcommunication as presenting all the histograms at once.
+    \subsection{Evaluating SBC for state parameters}
+    As discussed, it is not practical to inspect the histograms of all parameters and states in the stochastic volatility model. Instead, the Chi squared statistic can is used to summarise the shape of the rank statistic distribution. This will be used to summarise the state variables only since the static parameters can be compared across simulations individually. 
 
-    The distribution of chi squared statistics across all simulations and all parameters are plotted as histograms on Figure \ref{fig:allchisq}. A chi squared statistic of 0 implies the sample is exactly uniformly distributed. Any value away from 0 captures any variation or deviation away from uniformity. This provides a high level view of all parammeters - how close they are to uniformity and how close or far away they are relative to the other SBC results for other algorithms and parameterisations. 
+    The state variable chi squared statistics for centered and reparamterised HMC, centered KSC and centered importance weighted KSC are reported as histograms in Figure \ref{fig:allchisq} (using results from 5000 SBC iterations). Reparameterised KSC is omitted as its poor SBC performance simply adds noise to the results. A chi squared statistic of 0 implies the sample is exactly uniformly distributed. Any value away from 0 captures any variation or deviation away from uniformity. This provides a high level summary of the state variables - how close their rank statistics are to being uniformly distributed and their distance relative to the other algorithms and parameterisations. 
+    
+    The HMC results are relatively close to zero. Both KSC and the importance weighted ranks on the other hand are far from zero suggesting major deviations from uniformity. There is a large gap between the HMC and KSC chi squared statistics implying the distribution of state variable ranks are much less uniform for KSC relative to the HMC. Combined with the results in the previous section, there is a strong evidence that HMC outperforms KSC where it comes to calibration across all parmeters and latent state variables.
 
     \begin{figure}[H]
         \centering
-        \includegraphics[scale=0.1]{results/dist_chisq.png}
-        \caption{Distribution of chi squared statistics for all models (5000 SBC iterations).}
+        \includegraphics[scale=0.1]{results/dist_chisq_all.png}
+        \caption{Distribution of chi squared statistics for latent state variables. Results from 5000 SBC iterations are used. Values closer to 0 are more consistent with a discrete uniform distribution. Both HMC simulations are much closer to zero than KSC. This suggests that the HMC algorithm overall produces more calibrated posterior estimates for the state variables}
         \label{fig:allchisq}
     \end{figure}
-
-    The distribution for HMC are clustered very closely to zero. Both results for the bespoke sampling method are distributed far from zero which suggests strong evidence of a lack of uniformity across all parameters. This is consistent with the distribution of rank statistics in the previous sections. 
 
 \section{Discussion}
 Overall, Hamiltonian Monte Carlo applied on the reparameterised model performed best based on the calibration and efficiency evaluation criteria. Centered parameterisation using HMC performed moderately well but struggled to produce calibrated posterior estimates for $\sigma^2$ and $\phi$ as well as generate independent samples for these parameters. Gaussian mixture approximation struggled to return calibrated posterior estimates and efficient samples for both parameteristions. However, the centered parameteristion results for the Gaussian mixture model may improve if we increased the length of the Markov chain. This is discussed later in the limitations section. 
@@ -749,7 +748,7 @@ The priors chosen for this study came directly from \citet{kim1998stochastic}. T
 
 Other parameterisaions of the stochastic volatility model are available as outlined in \citet{strickland2008parameterisation}, namely non centered in scale or both non centered in scale and location. The failure of non centered parameterisaion in location for the Gaussian mixture model could be due to a variety of reasons. This may be due to a particular software implementation when it comes to the Kalman Filter and Simulation Smoother (in which a specific software package was applied) that was not designed to handle the non centered parameterisations. Or perhaps this particular parameterisation doesn't suit the sampling strategy applied by KSC and another approach (e.g. HMC) might be more successful. Lots of different design and implementation details could be explored further. Pinpointing the reason why this model parameterisation failed as well as exploring other configurations and MCMC algorithms in this context is left to future research.
 
-It is worth noting that there are many ways of "comparing" MCMC approaches. Other features that may be of interest is the speed in which a MCMC can converge onto the target distribution and generate samples for inference. However, "speed" is diffiuclt to define and is subject to a variety of different factors such as hardware, operating system, etc. The purpose of this research is to compare algorithms based on calibration and efficiency. Additionally, this simulation study does not provide any advice on the appropriateness of the stochastic volatility model on real data. Whether the stochastic volatility model is appropriate for modelling a particular financial time series requires further study into the data generating process, domain expertise and a suite of other diagnostic checks. Examples of this are posterior predictive checking and out of sample predictive performance. Rather, ths SBC approach gives insight into how well calibrated a sampling strategy is conditional on a known data generating process which is important in all applied contexts.  
+It is worth noting that there are many ways of comparing MCMC approaches. Other features that may be of interest is the speed in which a MCMC can converge onto the target distribution and generate samples for inference. However, speed is diffiuclt to define and is subject to a variety of different factors such as hardware, operating system, etc. The purpose of this research is to compare algorithms based on calibration and efficiency. Additionally, this simulation study does not provide any advice on the appropriateness of the stochastic volatility model on real data. Whether the stochastic volatility model is appropriate for modelling a particular financial time series requires further study into the data generating process, domain expertise and a suite of other diagnostic checks. Examples of this are posterior predictive checking and out of sample predictive performance. Rather, ths SBC approach gives insight into how well calibrated a sampling strategy is conditional on a known data generating process which is important in all applied contexts.  
 
 % (other implementations exist as well but left for future research. lots of different design and implementation details could be explored. Let alone choice of algos.)
 
@@ -758,7 +757,7 @@ A limitation to applying SBC in all modelling contexts is that it is computation
 
 Developing diagnostic tools for evaluating SBC results and models with many parameters is an area for improvement. As discussed, inspecting many histograms for highly parameterised models is unrealistic. Other summary statistics and visualisations can be applied for a high level comparison, such as the chi squared statistics applied in this research. Furthermore, it is not always straightforward to understand why any any one parameter may produce poor calibration results, for example, an arbitrary state parameter. SBC may tell us some information about the miscalibration based on the histogram shape (e.g. under or over dispersed relative to the prior distribution), but understanding why this occurs may not be straight forward. Although, diagnosing sampling problems with complicated posterior geometries speaks more generally to the difficulty of understanding complex models in the first place as opposed to a limitation of SBC.
 
-Lastly, it is unclear what constitutes a "fair comparison" between algorithms when comparing SBC results. In particular, the number of post burnin or warmup samples differed between algorithms (999 post burn-in for HMC, 9999 for the bespoke algorithm). An argument could be made that the poor results for the bespoke algorithm may be due to the chain not converging onto the target distribution. Indeed, the authors of this approach extended their Markov chain to 750,000 posterior draws. A farier comparison may be to have roughly similar number of ESS for most of the estimated parameters, although this is difficult to get right with multiple parameters. However, given how well Hamiltoninan Monte Carlo performed with the reparamterised model, any improvement to the Gaussian mixture model by increasing the length of the Markov chain would make calibration just as good, but not better due to the inefficiency of the sampler. 
+Lastly, it is unclear what constitutes a fair comparison between algorithms when comparing SBC results. In particular, the number of post burnin or warmup samples differed between algorithms (999 post burn-in for HMC, 9999 for the bespoke algorithm). An argument could be made that the poor results for the bespoke algorithm may be due to the chain not converging onto the target distribution. Indeed, the authors of this approach extended their Markov chain to 750,000 posterior draws. A farier comparison may be to have roughly similar number of ESS for most of the estimated parameters, although this is difficult to get right with multiple parameters. However, given how well Hamiltoninan Monte Carlo performed with the reparamterised model, any improvement to the Gaussian mixture model by increasing the length of the Markov chain would make calibration just as good, but not better due to the inefficiency of the sampler. 
 
 \section{Conclusion}
 This research evaluated and compared different MCMC algorithms for fitting stochastic volatility models. As our models and algorithms for estimating these models become more complicated, so does the need for principled ways of checking that they are returning correct posterior estimates. SBC provides a general simulation design for generative models to check whether a modelling strategy is producing the correct posterior estimates. 
@@ -847,5 +846,23 @@ $$
 Pr(s_t = i | y_t^{\ast}, h_t) \propto q_i f_N(y_t^{\ast} | h_t + m_t - 1.2704, \nu^2)
 \end{aligned}
 $$
+
+\newpage
+
+\section{Appendix C: Importance weighted rank statistics for reparameterised model}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.09]{results/weighted_ksc_ncp_1k.png}
+    \caption{1000 SBC iterations for reweighted rank statistics from the reparameterised Gaussian mixture approximation model. The shape of the histogram is consistent with the unweighted rank statistics.}
+    \label{fig:reweight1k}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.09]{results/weighted_ksc_ncp_5k.png}
+    \caption{5000 SBC iterations for reweighted rank statistics from the reparameterised Gaussian mixture approximation model. No major improvements are observed to the uniformity of rank statistics.}
+    \label{fig:reweight5k}
+\end{figure}
 
 \end{document}
