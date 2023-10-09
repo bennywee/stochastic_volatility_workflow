@@ -1,78 +1,194 @@
-# Introduce stochastic volatility model
-# Research question
-# Motivating example 1 (two posterior estimates from two MCMC algorithms)
-# Motivating example 2 (Limitations of single simulation)
-# Methodology (SBC)
-# What is HMC
-# HMC results
-# What was KSC approach 
-# KSC results
-# Reparameterisation (HMC)
-# Reparam results 
-# Reparameterisation (KSC)
-# Reparam results (KSC)
-# Importance sampling weights
-# Discussion/limitations
-# Future research
+---
+title: "Comparison of MCMC algorithms in Stochastic Volatility Models using Simulation Based Calibration"
+format: 
+    beamer:
+        classoption:
+            - '`xcolor={dvipsnames}`{=latex}' 
+        header-includes: |
+            \setbeamertemplate{itemize items}[circle]
+author: "By Benjamin Wee"
+institute: "Supervised by Catherine Forbes and Lauren Kennedy"
+---
 
-- Stochastic Volatility model (Do i need to motivate this like last time?)
-- 2 Motivating examples. If two methods and they're different what do we do. 
-- Research Question
-- Methodology (how do we answer this. What iss a fair comparison? This is what we're going to do.)
-- HMC and KSC algorithms
-- Reparameterisation
-- Importance sampling reweighting (cut this? Yes)
-- Discussion and learnings
-- Limitations
-- Conclusion
+## Research Outline
+- Stochastic Volatility model
+- MCMC
+    
+    + Hamiltonian Monte Carlo
+        
+    + Kim Shephard & Chib (1998) bespoke MCMC strategy
 
+- Compare performance of MCMC
+        
+    + Simulation based Calibration: check correct posterior estimates from known data generating process
 
-2 motivating examples: Don't have to get into nuts and bolts of diff algos. High level MCMC summary. General structure + bespoke. Stan can flexibly fit any model. It's a programming language. Bespoke only for SV model and how to best sample SV.
+    + \color{gray}{Efficiency: Effective sample size}
 
-In a simpler 
+- Model reparameterisation - improving MCMC performance
+
+- \color{gray}{Kim Shephard \& Chib Importance Weights - correcting approximation error}
+
+## Log returns S&P 500
+![]("returns.png")
+
+<!-- Suppose you're an analyst looking at this time series. Notice hetero behaviour/volatility clustering. Could try to model with SV -->
+
+## Stochastic Volatility model
+KSC (1998) estimate a univariate discrete time SV model which models the variance as a latent stochastic process.
+
+$$
+\begin{aligned}
+y_t =& \space \beta e^{h_t/2} \epsilon_t \\
+h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t  \\
+h_1 \sim&  N\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right) \\
+\epsilon_t \sim& N(0,1) \quad \eta_t \sim N(0,1) \\
+\end{aligned}
+$$
+
+- State space model
+- Complex! More parameters/unknowns then data points
+- Estimate Using Bayesian methods
+
+## Estimating the model on real data
  
- Start withmotivating example 1.
- Then go to movtivating exmaple 2. In this example. 
+. . .
 
- When talking about SBC: remember motivating example, link it back. Thread the example through the presentation. Could even do distributions of posteriors vs true posteriors. Show results and link it back to the motivating example
+<!-- Keen analyst wants to estimate the model straight away. 2 MCMC methods.-->
+<!-- These are your posterior estimates. Which one is correct?-->
+<!-- Don't care about prediction yet. Care about accurate parameter estimates -->
 
-In presentation use talts copy the plots. Mkae sure cites.
-Reproduce Talts data viz. Replicating examples from this paper are shown in these figures. 
+![]("../motivating_example/real_data_ex.png")
 
-Presentation: show results -> then show fig 4-6. Just say for convenience.
+## Estimate model on simulated data
+ 
+. . .
 
+<!--Benefit of Bayesian model is that they're generative. Model can simulate data based on known parameter values.-->
+<!-- Pick a value for parameteres, simulate the data, estimate the model on simulated data. See if you can capture true parameters -->
+<!-- Phi not good! The model/algorithm doesn't estimate phi very well. -->
+<!-- Not true. 5% chance that any random draw from the true probabiltiy dist will fall outside the 95% interval.-->
 
-Include a summary slide of extensions without going into detail. Give a sense of what else is in the paper. We explored different parameteirsations. 
+![]("../motivating_example/single_sim.png")
 
-IS: Then they do an Importance Sampling. Wish i could talk about it but no time. 
+## Research goal
+- Real data
+    + Don't know much posterior estimate is correct
+    + Confounding causes if convergence diagnostics fail (incorrect model, poor MCMC choice)
 
-Audience: Give them the impression that you done more than talked about. Made careful decision about what was more important to present. Lot's of content - but you need to understand what's int he presetation first.Done more than minimum.
+. . .
 
-Reparam: Don't go through steps or why they exist. There is a literature about MCMC efficiency if you reparam these models you can gain MCMC efficiency. Put the citations. There's lit but param is an issue. We look at a couple and these are results but don't go into detail.
+- Single simulation
+    + Incorrect analysis may produce correct result by chance
+    + Correct analysis may produce poor result by chance
 
-Make sure i explicit: I'm really interested in finding out about xyz in context abc. Rsearch is comparing ABC and XyZ. State it early on. Say close to methods? So they can mark you. 
+. . .
 
-In motivating example: say a little bit about why people are interested in this model. This is a difficult model. Ppl are interested GARCH are easy to estimate but don't capture properties of data observwd.
+**Research objective**
 
-definitely harder on complicated model (not as intresting on simple model). Why we're looking at SV model in the first place. How to fit this model fast. **Check if its correct**. For this SV model in parrticular. Motivate this point. It's a hard model to fit.
+- Validate the computational methods used to estimate Bayesian stochastic volatility (SV) models
 
-It could've gone either way. Might not have gone well stan. **Think about what a fair comparison is**
+- Design a simulation study to check of correct posterior estimates are returned
 
-Particle filtering. There are other approaches. PF within MCMC.
+- Compare Hamiltonian Monte Carlo with KSC (1998), which MCMC returns calibrated estimates?
 
-Jump straight into motivating examples. If you're Bayes, -> 2 different approx solutions. So we run both of them. Kind of similar but also different. pointness and fantess. How do we know which one to use. 
-
-Then go into SV. And we use it to do this. This is the model. Trying to work out the difference.
-
-Get to movating example as soon as i can. 
-
-Start: What the example is. In title slide: prelim, title supervisors, slide gives a rough outline. Main sections of preso to set everyone. 
-Suppose i'm an analyst and I need to fit this model and estimate variance. Realise there's more than one way to do that. Check both and this is what i get. Then build onto SBC. Then confirm method. 
-
-
-At a higher level talk about the model (not all priors etc). Just cite the literature on the slide. This is from KSC (cite earlier shephard paper). People have worked with it. Estimate, lots of parameters hard to estimate. Some methods exist here are two of them. Talk in detail later. Reassure them what the thing is. THis is the output.
-
-
+# Simulation Based Calibration
 
 
-Side by side histograms then full histgoram
+
+## Simulation Based Calibration (SBC)
+Let $\theta$ be a parameter and $y$ represent the dataset. Start with draw a sample from the prior distribution:
+$$
+\begin{aligned}
+\theta^{sim} \sim \pi(\theta)
+\end{aligned}
+$$
+
+. . .
+
+Generate a dataset given by the prior draws.
+
+$$
+\begin{aligned}
+y^{sim} \sim \pi (y|\theta^{sim})
+\end{aligned}
+$$
+
+. . .
+
+Then take draws from the posterior distribution generated by a MCMC algorithm or estimation strategy (Hamiltonian Monte Carlo or Gaussian approximation in our case).
+
+$$
+\begin{aligned}
+\{\theta_1,\dots , \theta_{L}\} \sim \pi (\theta | y^{sim})
+\end{aligned}
+$$
+
+
+## Simulation Based Calibration (SBC)
+The rank statistic for a given parameter and simulation follows a discrete uniform distribution (proven in Talts et al. (2018)).
+
+$$
+\begin{aligned}
+r = rank(\{\theta_1,\dots , \theta_{L}\}, \theta^{sim}) = \sum_{l=1}^{L}1[\theta_{l} < \theta^{sim}]
+\end{aligned}
+$$
+
+. . .
+
+Therefore, if the distribution of rank statistics deviates from a discrete uniform distribution, there may be evidence that our analysis or computation is not returning the correct posteriors (not calibrated). 
+
+. . .
+
+If Bayesian computation is well calibrated, then the posterior (credible) intervals will have sufficient coverage. That is, for any percentage interval selected (for example 90%) then 90\% of these constructed intervals will contain $\theta^{sim}$.
+
+# Markov Chain Monte Carlo (MCMC) algorithms
+
+## Kim, Shephard, Chib (1998)
+
+$$
+\begin{aligned}
+y_t^{*} &= log(y_t^2) \\ 
+&= log((\epsilon_t exp(h_t/2))^2) \\
+&=  log(exp(h_t)) + log(\epsilon_t^2) \\
+&= h_t + log(\epsilon_t^2)  \\
+&= h_t + z_t \\
+\end{aligned}
+$$
+
+Where $z_t = log(\epsilon_t^2)$ follows a log chi-squared distribution with mean -1.2704 and variance 4.93.
+
+- Gaussian Mixture model
+- Kalman Filter
+- Conjugate posteriors
+- Metropolis Hastings
+
+## Hamiltonian Monte Carlo
+- The Stan programming language's implementation of Hamiltonian Monte Carlo, the No-U-Turn Sampler (Hoffman & Gelman 2014), will be compared with KSC's strategy.
+
+- Key innovations: 
+
+    + Uses the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. 
+
+    + Allows for direct sampling of the specified stochastic volatility model
+
+    + Own programming language. Flexibly estimate any model
+
+# Results
+
+## HMC (1000 Iterations)
+
+## HMC (5000 Iterations)
+
+## KSC (1000 Iterations)
+
+## KSC (5000 Iterations)
+
+# Model reparameterisation
+
+## Reparameterised HMC (5000 Iterations)
+
+## Reparameterised KSC (5000 Iterations)
+
+# Discussion
+
+# Conclusion
