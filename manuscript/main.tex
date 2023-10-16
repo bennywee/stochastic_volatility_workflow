@@ -58,8 +58,8 @@ right  = 1.0in]{geometry}
 \subsection{Stochastic Volatility}
     The model of interest is the discrete time, uni-variate stochastic volatility model estimated by \citet{kim1998stochastic} using Bayesian framework. SV is expressed as a state space model which links the observed mean corrected (logarithmic) return of a given asset to the latent conditional variance. 
     \begin{align}
-    y_t =& \space \exp(h_t/2) \varepsilon_t, \\
-    h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t,  \\
+    y_t =& \space \,\exp(h_t/2) \varepsilon_t, \\
+    h_{t+1} =& \space \, \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t,  \\
     h_1 \sim& \space \,\mathrm{N}\left(\mu, \frac{\sigma_{\eta}^2}{1-\phi^2}\right), \\
     \varepsilon_t \sim& \space \,\mathrm{N}(0,1), \\
     \eta_t \sim& \space \,\mathrm{N}(0,1).
@@ -71,7 +71,7 @@ right  = 1.0in]{geometry}
     \mu \sim& \space \,\mathrm{N}(0, 10^2) \\
     \sigma_{\eta}^2 \sim& \space \, \mathrm{IG}(shape=5/2, scale=(0.01\times 5) / 2) \\
     \phi^{\ast} \sim& \space \,\mathrm{Beta}(20, 1.5) \\
-    \phi =&  2\phi^{\ast} - 1
+    \phi =& \space \, 2\phi^{\ast} - 1
     \end{align}
     The prior distribution for $\phi$ is referred to as a stretched beta distribution, as it corresponds to a transformed beta random variable, $\phi^*$, with support (-1, 1).
     
@@ -148,7 +148,7 @@ right  = 1.0in]{geometry}
 
         \citet{talts2018validating} prove that the sample of rank statistics for a given parameter, produced from replicate posteriors, follow a uniform distribution if the posterior samples follow the same distribution as the prior on average. The rank statistic for $\theta$ produced by the $k^{\mathrm{th}}$ replicate posterior sample, is defined as
         \begin{align}
-        r^{(k)} = rank(\{\theta_1^{(k)},\dots , \theta_{L}^{(k)}\}, \theta^{sim}) = \sum_{b=1}^{B}1[\theta_{b}^{(k)} < \theta^{sim}].
+        r^{(k)} = rank(\{\theta_1^{(k)},\dots , \theta_{B}^{(k)}\}, \theta^{sim}) = \sum_{b=1}^{B}1[\theta_{b}^{(k)} < \theta^{sim}].
         \end{align}
 
         This completes one iteration of SBC. To complete the algorithm, multiple iterations are run and the rank statistics are calculated for each parameter. The resulting rank statistics are compared to the uniform distribution to determine if the algorithm is calibrated and returning the correct posteriors.
@@ -180,9 +180,9 @@ right  = 1.0in]{geometry}
 
             The shape of the distribution of rank statistics gives insight into how an MCMC may be miscalibrated. Specifically, it gives information about the type of bias in a marginal posterior estimate of a given parameter. Figures \ref{fig:underestimation} and \ref{fig:underdispersed} are recreated from \citet{talts2018validating} for convenience. In these we display examples of posterior sampling bias and the corresponding non-uniform rank statistics.
 
-            Figure \ref{fig:underestimation} shows a distribution of rank statistics with a large right peak. This distribution is consistent with posterior samples that tend to under estimate the true parameter on average. The sum of indicator random variables (see equation (13)) is large since a large proportion of posterior draws are smaller than the true value, resulting in a large rank statistic and hence a larger relative frequency on the right side of the histogram. The converse is true if the peak of the histogram is on the left hand side (i.e the average posterior over the SBC iterations is biased towards the right hand side of the prior). 
+            Figure \ref{fig:underestimation} shows a distribution of rank statistics with a large right peak. This distribution is consistent with posterior samples that tend to underestimate the true parameter on average. The sum of indicator random variables (see equation (13)) is large since a large proportion of posterior draws are smaller than the true value, resulting in a large rank statistic and hence a larger relative frequency on the right side of the histogram. The converse is true if the peak of the histogram is on the left hand side (i.e the average posterior over the SBC iterations is biased towards the right hand side of the prior). 
 
-            Figure \ref{fig:underdispersed} has large peaks on both ends of the histogram. \citet{talts2018validating} describe this bias as under-dispersion of the posterior relative to the prior distribution on average. The estimated posterior is too narrow relative to the spread of the prior resulting in oversampling on both ends of the rank statistic distribution. 
+            Figure \ref{fig:underdispersed} has large peaks on both ends of the histogram resulting in a `U-shape'. \citet{talts2018validating} describe this bias as under-dispersion of the posterior relative to the prior distribution on average. The estimated posterior is too narrow relative to the spread of the prior resulting in oversampling on both ends of the rank statistic distribution. 
 
             % \begin{figure}[H]
             %     \centering
@@ -206,7 +206,7 @@ right  = 1.0in]{geometry}
             \end{figure}
 
             \subsubsection{Chi squared statistics}
-            One difficulty of relying on the visualisation of rank statistic distributions for SV models, is there are a very large number of unknowns in the model to consider. An alternative to visually checking for uniformity of a given parameter is to calculate a chi-squared statistic based on the counts in each histogram bin. Suppose the histogram has $J$ bins, where for each $j^{th}$ bin, $b_j$ is the number of counts and $e_j$ the expected count in bin $j$, where the expected count is the ratio of the number of data points and bins $e_j\frac{T}{J}$. The corresponding chi- squared statistic is given by:
+            One difficulty of relying on the visualisation of rank statistic distributions for SV models, is there are a very large number of unknowns in the model to consider. An alternative to visually checking for uniformity of a given parameter is to calculate a chi-squared statistic based on the counts in each histogram bin. Suppose the histogram has $J$ bins, where for each $j^{th}$ bin, $b_j$ is the number of counts and $e_j$ the expected count in bin $j$, where the expected count is the ratio of K rank statistics and J bins, $e_j=\frac{K}{J}$. The corresponding chi- squared statistic is given by:
             \begin{align}
             \chi^2 = \sum_{j=1}^J \frac{(b_{j} - e_{j})^2}{e_j}.\end{align}
             
@@ -215,18 +215,18 @@ right  = 1.0in]{geometry}
             \subsubsection{Effective sample size}
             Another univariate summary of a marginal posterior distribution is its effective sample size (ESS), which provides a measure of the efficiency of the MCMC sampler. ESS estimates the number of effectively independent draws generated by a MCMC to estimate a target parameter. A poor ESS generally arises from high auto-correlation in the Markov chain, and thus is an indication of a highly dependent posterior sample. A more efficient MCMC algorithm will take a relatively lower level of resources (for example, time and number of draws) to get a representative sample from the target distribution when compared to a less efficient algorithm. If a MCMC algorithm possesses higher ESS for the majority of its parameters (relative to another strategy), this is seen as evidence of greater efficiency.
             
-            The ESS is denoted as $n_{\text{eff}}$. When more than one chain is generated from the target posterior, then the ESS quantity is a function of the number of chains $M$, the number of samples per chain $N$ and the auto-correlation at lag t $\rho_t$ \citep{vehtari2021rank}. $T$ is a truncation lag chosen such that the sum of any two consecutive auto-correlation lags is negative \citep{geyer1992practical}. This truncation (or some kind of down-weighting) is required because a large number of lags leads to noisier auto-correlation estimates. Note that this is only one approach to calculating the ESS. Details about this ESS formula, the calculation of the auto-correlation and other ESS calculations can be found in \citet{vehtari2021rank} and \citet{geyer1992practical}.
+            The ESS is denoted as $n_{\text{eff}}$. When more than one chain is generated from the target posterior, then the ESS quantity is a function of the number of chains $M$, the number of samples per chain $N$ and the auto-correlation at lag $l$ $\rho_l$ \citep{vehtari2021rank}. $L$ is a truncation lag chosen such that the sum of any two consecutive auto-correlation lags is negative \citep{geyer1992practical}. This truncation (or some kind of down-weighting) is required because a large number of lags leads to noisier auto-correlation estimates. Note that this is only one approach to calculating the ESS. Details about this ESS formula, the calculation of the auto-correlation and other ESS calculations can be found in \citet{vehtari2021rank} and \citet{geyer1992practical}.
 
             $$
             \begin{aligned}
-                n_{\text{eff}} = \frac{NM}{1+2 \sum_{t=1}^T \hat{\rho}_t}
+                n_{\text{eff}} = \frac{NM}{1+2 \sum_{l=1}^L \hat{\rho}_l}
             \end{aligned}
             $$
 
 \section{MCMC Strategies}
 
     \subsection{Sampling method 1: Mixture off-set MCMC}
-        KSC sample the conditional posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings within Gibbs algorithms and an implementation of the Kalman Filter and smoother used to sample from the conditional posterior distribution of the latent states \citep{dejong1995}.\footnote{In this research the exact software to apply the simulation smoother is unavailable. So a more recent simulation smoother is used which is written by the same author of the original software.} Note that for the simulation smoother to produce an appropriate posterior sample draw of the latent state vector, the state and measurement equations are required to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring and taking the log of $y_t$, resulting in
+        \citet{kim1998stochastic} sample the conditional posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings within Gibbs algorithms and an implementation of the Kalman Filter and smoother used to sample from the conditional posterior distribution of the latent states \citep{dejong1995}.\footnote{In this research the exact software to apply the simulation smoother is unavailable. So a more recent simulation smoother is used which is written by the same author of the original software.} Note that for the simulation smoother to produce an appropriate posterior sample draw from the latent state vector, the state and measurement equations are required to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring and taking the log of $y_t$, resulting in
         \begin{align}
         y_t^{*} &= log(y_t^2) \notag\\ 
         &= log((\epsilon_t exp(h_t/2))^2) \notag\\
@@ -236,52 +236,29 @@ right  = 1.0in]{geometry}
         \end{align}
         Where $z_t = log(\epsilon_t^2)$ has a distribution that is like that of the logarithm of a chi-squared random variable. It is known that the error $z_t$ has mean -1.2704 and variance 4.93, however its distribution is not Gaussian. However, by transforming the entire measurement equation, as in (\ref{eqn:transform}), the relationship between $y_t$ and $h_t$ is now linear; however, the error is not Gaussian. Since it is not simple to sample from this parameterisation of the model, KSC use a mixture of seven Gaussian distributions to approximate the distribution of $z_t$, with the mixture selected to match the first 4 moments of the log chi squared distribution. The mixture distribution is defined by:
         \begin{align}
-        f(z_t) = \sum_{i=1}^{K} q_if_N(z_i|m_i-1.2704, \nu_i^2),
+        f(z_t) = \sum_{i=1}^{I} q_if_N(z_t|m_i-1.2704, \nu_i^2),
         \end{align}
-        where $K=7$, $f_N(z|m_i-1.2704, \nu_i^2)$ denotes the density of the normal distribution with mean $m_i-1.2704$ and variance $v_i^2$, and  component probabilities $q_i$, for $k=1,2,\ldots, K=7$.  The values of these hyperparameters and component weights are reported in Appendix A.
+        where $K=7$, $f_N(z_t|m_i-1.2704, \nu_i^2)$ denotes the density of the normal distribution with mean $m_i-1.2704$ and variance $v_i^2$, and  component probabilities $q_i$, for $i=1,2,\ldots, I=7$.  The values of these hyperparameters and component weights are reported in Appendix A.
 
-        Given a set of $T$ mixture component indicator variables, which are added to the MCMC scheme in order to use the approximating Gaussian mixture error distribution, the latent state vector may be sampled via the Kalman Filter and simulation smoother, since the model is now conditionally linear and Gaussian. The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conjugate posterior distributions whereas $\phi$ is sampled via a Metropolis Hastings accept/reject procedure. Details of the full sampling algorithm are found in Appendix B. 
+        Given a set of $T$ mixture component indicator variables, which are added to the MCMC scheme in order to use the approximating Gaussian mixture error distribution, the latent state vector may be sampled via the Kalman Filter and simulation smoother, since the model is now conditionally linear and Gaussian. The static parameters $\mu$ and $\sigma^2$ are sampled directly from their conjugate posterior distributions whereas $\phi$ is sampled via a Metropolis Hastings accept/reject procedure.
 
-        \subsubsection*{Implementation}
-        The code used to replicate the KSC algorithm was written by \citet{chad2018} and amended for the purposes of this research. Additional code was developed to produce rank statistics, quantities of interest as well as to integrate the sampling method into the SBC framework. 
+        Since the mixture of Gaussians only approximates the distribution of $\log \epsilon_t$ up to its first four moments, \citet{kim1998stochastic} also recommend using a post-sampling importance sampling step to correct for approximation error. The importance weights used in this step are also applied in the context of SBC and can be found in Section 5.3. 
         
-        The steps in the MCMC process is described in Algorithm \ref{alg:ksc}. The initial values are set to the values outlined in \citet{kim1998stochastic}, except for the mixing indicator which is unspecified. This is arbitrarily set at the 4th Gaussian density found in Appendix A.
+        \subsubsection*{Implementation}
+        The code used to replicate the KSC algorithm was written by \citet{chad2018} and amended for the purposes of this research. Additional code was developed to produce rank statistics, quantities of interest as well as to integrate the sampling method into the SBC framework. Details of the full sampling algorithm are found in Appendix B. 
 
-        For sampling the mixture model the Gaussian mixture density is rewritten with respect to a indicator variable $s_t$
-        \begin{align}
-        &z_t | s_t = i \sim N(m_i - 1.2704, \nu^2) \\
-        &Pr(s_t = i) = q_i.
-        \end{align}
-        $s_t$ is then sampled from probability mass function: 
-        \begin{align}
-        Pr(s_t = i | y_t^{\ast}, h_t) \propto q_i f_N(y_t^{\ast} | h_t + m_t - 1.2704, \nu^2).
-        \end{align}
-
-        \begin{algorithm}[H]
-            \caption{KSC MCMC Algorithm}\label{alg:ksc}
-            \begin{algorithmic}
-            \Require $s_0 = 4$, $\mu_0 = 0$, $\phi_0 = 0.95$, $\sigma^{2}_{\eta,0} = 0.02$
-            \For{\texttt{i in} $1:n_{draws}$}
-                    \State \text{Sample states (Kalman Filter and Smoother): } $\boldsymbol{h}_i \sim h|y^{\ast}, s_{i-1}, \phi_{i-1}, \sigma^{2}_{\eta,i-1}, \mu^{i-1}$ 
-                    \State \text{Sample mixture indicators: } $s_i \sim s|y^{\ast}, \boldsymbol{h}_{i-1}$
-                    \State \text{Sample from conjugate density $\mu$: } $\mu_i \sim \mu|y_{\ast}, s_{i-1}, \phi_{i-1}, \sigma^{2}_{\eta, i-1}, \boldsymbol{h}_{i-1}$
-                    \State \text{Sample from conjugate density $\sigma^2_{\eta}$: } $\mu_i \sim \mu|y^{\ast}, s_{i-1}, \phi_{i-1}, \mu_{i-1}, \boldsymbol{h}_{i-1}$
-                    \State \text{Sample via Metropolis-Hastings $\phi$: } $\phi_i \sim \phi|y^{\ast}, s_{i-1}, \mu_{i-1}, \sigma^{2}_{\eta, i-1}, \boldsymbol{h}_{i-1}$
-                  \EndFor
-            \end{algorithmic}
-            \end{algorithm}
-
-    \subsection{Sampling method 2: Stan's HMC with No-U-Turn Sampler}
+        
+    \subsection{Sampling method 2: Stan's Hamiltonian Monte Carlo with No-U-Turn Sampler}
         Hamiltonian Monte Carlo (HMC) is a  general MCMC algorithm used to efficiently sample posterior draws  high associated with high-dimensional and complex stochastic models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo, was developed in the physics literature \citep{duane1987hybrid} before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks \citep{neal1995bayesian} and statistical computing \citep{neal2011mcmc}. Versions of this algorithm have since become widely available through open source development projects, including Stan \citep{stan} and PyMC \citep{pymc2023}.
 
         The key innovation of HMC is that it uses the gradients of the target posterior distribution to generate an efficient path for the sampler to explore. HMC is able to reach more distant points with higher acceptance probabilities than many bespoke MCMC algorithms since its  proposal draws are made using information about the target distribution. Random walk samplers (such as Random Walk Metropolis Hastings) tend to be inefficient in higher dimensions since it becomes more difficult to randomly select a point with a high acceptance probability. The increasing complexity of high dimensions make it harder for a random walk sampler to explore regions over long distances, and thus the sampler tends to become stuck and will require many iterations to converge to the target distribution. 
 
-        A thorough conceptual and theoretical explanation of HMC can be found in \citet{gelman2013bayesian} and \citet{betancourt2017conceptual}. HMC builds upon the Metropolis Hastings algorithm through the introduction of Hamiltonian equations, auxiliary momentum variables $\phi$, and the gradients of the target log posterior distribution. The vector of model parameters $\theta$ is jointly sampled with a vector of momentum variables $\phi$. The momentum variables are also called auxiliary variables since they are required as part of the Hamiltonian equations to generate an efficient proposal but are not a quantity of interest for inference.
+        A thorough conceptual and theoretical explanation of HMC can be found in \citet{gelman2013bayesian} and \citet{betancourt2017conceptual}. HMC builds upon the Metropolis Hastings algorithm through the introduction of Hamiltonian equations, auxiliary momentum variables $\alpha$, and the gradients of the target log posterior distribution. The vector of model parameters $\theta$ is jointly sampled with a vector of momentum variables $\alpha$. The momentum variables are also called auxiliary variables since they are required as part of the Hamiltonian equations to generate an efficient proposal but are not a quantity of interest for inference.
 
-        The sampled momentum variable sets out the proposal path for $\theta$ governed by the Hamiltonian dynamics (represented by a set of differential equations). These differential equations are solved using a discrete approximation algorithm, such as a leapfrog integrator, and is a function of the log posterior gradients for a given point $\theta$. The leapfrog integrator has a set of tuning parameters which determines the size and number of steps to be taken along the Hamiltonian path with the final step being the proposal value $(\theta^{\ast}, \phi^{\ast})$. Finally, the Metropolis Hastings accept/reject step is applied using the parameters at the beginning of the leapfrog process $(\theta^{t-1}, \phi^{t-1})$ and the proposal values $(\theta^{\ast}, \phi^{\ast})$. A formal description of the HMC algorithm is provided in Appendix C.
+        The sampled momentum variable sets out the proposal path for $\theta$ governed by the Hamiltonian dynamics (represented by a set of differential equations). These differential equations are solved using a discrete approximation algorithm, such as a leapfrog integrator, and is a function of the log posterior gradients for a given point $\theta$. The leapfrog integrator has a set of tuning parameters which determines the size and number of steps to be taken along the Hamiltonian path with the final step being the proposal value $(\theta^{\ast}, \alpha^{\ast})$. Finally, the Metropolis Hastings accept/reject step is applied using the parameters at the beginning of the leapfrog process $(\theta^{n-1}, \alpha^{n-1})$ and the proposal values $(\theta^{\ast}, \alpha^{\ast})$. A formal description of the HMC algorithm is provided in Appendix C.
 
         \subsubsection{Implementation}
-        The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler \citep{hoffman2014no}, allows for direct sampling of the specified stochastic volatility model. The No-U-Turn Sampler (NUTS) proposes the final parameter using multinomial sampling biased towards the second half of the trajectory steps instead of applying the Metrpolis-Hastings step \citep{betancourt2016identifying}. Stan allows for sampling of the generative model and can flexibly handle complicated likelihood functions. 
+        The Stan programming language's implementation of Hamiltonian Monte Carlo will be used for this study. Stan's default algorithm, the No-U-Turn Sampler \citep{hoffman2014no}, allows for direct sampling of the specified stochastic volatility model. The No-U-Turn Sampler (NUTS) proposes the final parameter using multinomial sampling biased towards the second half of the trajectory steps instead of applying the Metropolis-Hastings step \citep{betancourt2016identifying}. Stan allows for sampling of the generative model and can flexibly handle complicated likelihood functions. 
         
         This approach will also use the same priors as specified in the KSC's Gaussian mixture approximation so that HMC is sampling from the same model (although other priors could be chosen). 
 
@@ -309,8 +286,8 @@ right  = 1.0in]{geometry}
 
         $$
         \begin{aligned}
-        h_{std} \sim & \space normal(0,1) \\
-        h =& h_{std} \times \sigma_{\eta}
+        h_{std} \sim&\space \,\mathrm{N}(0,1) \\
+        h =& \space \, h_{std} \times \sigma_{\eta}
         \end{aligned}
         $$
         
@@ -318,8 +295,8 @@ right  = 1.0in]{geometry}
         
         $$
         \begin{aligned}
-        h_1 =& \space \frac{h_{std, 1}\times \sigma_{\eta}} {\sqrt{1 - \phi^2}} + \mu \\
-        h_{t+1} =& \space h_{std, t+1}\times \sigma_{\eta} + \mu  + \phi(h_{t} - \mu),\space t\neq 1
+        h_1 =& \space \,\frac{h_{std, 1}\times \sigma_{\eta}} {\sqrt{1 - \phi^2}} + \mu \\
+        h_{t+1} =& \space \,h_{std, t+1}\times \sigma_{\eta} + \mu  + \phi(h_{t} - \mu),\space \, t\neq 1
         \end{aligned}
         $$
         
@@ -334,8 +311,8 @@ right  = 1.0in]{geometry}
 
         $$
         \begin{aligned}
-        y^{\ast}_t =& h_t + z_t \\
-        h_{t+1} =& \space \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t
+        y^{\ast}_t =& \space \, h_t + z_t \\
+        h_{t+1} =& \space \, \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t
         \end{aligned}
         $$
         
@@ -344,8 +321,8 @@ right  = 1.0in]{geometry}
 
         $$
         \begin{aligned}
-        g_t =& h_t - \mu \\
-        g_{t+1} =& \phi g_t + \sigma_{\eta}\eta_{t}
+        g_t =& \space \, h_t - \mu \\
+        g_{t+1} =& \space \, \phi g_t + \sigma_{\eta}\eta_{t}
         \end{aligned}
         $$
 
@@ -353,8 +330,8 @@ right  = 1.0in]{geometry}
 
         $$
         \begin{aligned}
-        y^{\ast}_t =& g_t + \mu + z_t \\
-        g_{t+1} =& \phi g_t + \sigma_{\eta}\eta_{t}
+        y^{\ast}_t =& \space \, g_t + \mu + z_t \\
+        g_{t+1} =& \space \, \phi g_t + \sigma_{\eta}\eta_{t}
         \end{aligned}
         $$
 
@@ -400,11 +377,11 @@ right  = 1.0in]{geometry}
     \begin{algorithm}
         \caption{SBC}\label{alg:sbc}
         \begin{algorithmic}
-        \For{\texttt{i in} $1:1000$}
-                \State \text{Draw from joint prior: } $\boldsymbol{\theta}^{sim}_i \sim\pi (\boldsymbol{\theta})$
-                \State \text{Simulate dataset with 1000 observations: } $\boldsymbol{y}^{sim}_i \sim p(y|\boldsymbol{\theta}^{sim}_i)$
-                \State \text{Draw 999 posterior samples post burn in:} $\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_i \sim p(\theta | \boldsymbol{y}^{sim}_i)$
-                \State \text{Compute rank statistics:} $\boldsymbol{r} = rank(\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_i, \boldsymbol{\theta}^{sim}_i)$
+        \For{\texttt{k in} $1:1000$}
+                \State \text{Draw from joint prior: } $\boldsymbol{\theta}^{sim}_k \sim\pi (\boldsymbol{\theta})$
+                \State \text{Simulate data set with 1000 observations: } $\boldsymbol{y}^{sim}_k \sim p(\boldsymbol{y}|\boldsymbol{\theta}^{sim}_k)$
+                \State \text{Draw 999 posterior samples post burn in:} $\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_k \sim p(\boldsymbol{\theta} | \boldsymbol{y}^{sim}_k)$
+                \State \text{Compute rank statistics:} $\boldsymbol{r} = rank(\{\boldsymbol{\theta}_1,\dots , \boldsymbol{\theta}_{999}\}_k, \boldsymbol{\theta}^{sim}_k)$
               \EndFor
         \end{algorithmic}
         \end{algorithm}
@@ -412,7 +389,7 @@ right  = 1.0in]{geometry}
     \subsection{Hamiltonian Monte Carlo}
     Figure \ref{fig:cphmc1k} and Figure \ref{fig:ncphmc1k} show the SBC results for the centered and re-parameterised model for HMC respectively. Both sets of results display relatively noisy rank statistic estimates with variation around the discrete uniform distribution.
 
-    The centered parameterisation in particular displays a lack of uniformity for $\phi$ and $\sigma^2$. Rank statistics for $\sigma^2$ and $\phi$ show two peaks of either end of the histogram. The posterior estimates of $\sigma^2$ and $\phi$ are \textit{under-dispersed} relative to the prior distribution. This implies the posterior geometry of these parameters may be difficult to sample for the HMC algorithm.
+    The centered parameterisation in particular displays a lack of uniformity for $\phi$ and $\sigma^2$ which indicates the MCMC algorithm is not returning calibrated estimates for these parameters. Rank statistics for $\sigma^2$ and $\phi$ show two peaks of either end of the histogram. The posterior estimates of $\sigma^2$ and $\phi$ are \textit{under-dispersed} relative to the prior distribution. This implies the posterior geometry of these parameters may be difficult to sample for the HMC algorithm.
 
     \begin{figure}[H]
         \centering
@@ -553,19 +530,19 @@ right  = 1.0in]{geometry}
     These weights can be applied in an additional sampling step using Metropolis Hastings or Importance Re-sampling (also known as sampling-importance re-sampling or SIR \citep{gelman2013bayesian}) to produce samples from the target posterior. However, the rank statistic can also be written as a function of the weighted expectation of the indicator random variable. This re-weighting step is applied to the calculation of the rank statistics to see if the correction improves the calibration of the MCMC sampler.\footnote{Efficiency estimates of the re-weighted posterior samples are omitted. It was unclear at the time of writing whether the ESS could be written as a function of the expectation or whether the ESS from re-sampled posterior samples using the importance weights are valid.}
 
     \subsubsection{Re-weighting rank statistics of the Gaussian Mixture Model}
-    Let $v(\theta, h)$ be the log weights defined as the log difference between the posterior densities of the true model with log chi squared errors $log\: g(\theta, h | y^{\ast}_t)$ and the Gaussian mixture model $log\:  k(\theta, h_t | y^{\ast}_t)$.
+    Let $v(\theta, h)$ be the log weights defined as the log difference between the posterior densities of the true model with log chi squared errors $log\: c(\theta, h | y^{\ast})$ and the Gaussian mixture model $log\:  d(\theta, h | y^{\ast})$.
 
     $$
     \begin{aligned}
-        v(\theta, h) = log\: g(\theta, h | y^{\ast}_t) - log\:  k(\theta, h_t | y^{\ast}_t) = \text{const} + log\: g(y|h) - log\: k(y^{\ast} | h)
+        v(\theta, h) = log\: c(\theta, h | y^{\ast}) - log\:  d(\theta, h | y^{\ast}) = \text{const} + log\: c(y|h) - log\: d(y^{\ast} | h)
     \end{aligned}
     $$
 
-    Take the exponential and normalise the weights for the $l^{th}$ posterior draw (note the constants cancel out):
+    Take the exponential and normalise the weights for the $b^{th}$ posterior draw (note the constants cancel out):
     
     $$
     \begin{aligned}
-    w^l = \frac{exp(v(\theta, h)_l)}{\sum_i exp(v(\theta, h)_i)}
+    w^b = \frac{exp(v(\theta, h)_b)}{\sum_z exp(v(\theta, h)_z)}
     \end{aligned}
     $$
 
@@ -573,9 +550,9 @@ right  = 1.0in]{geometry}
 
     $$
     \begin{aligned}
-    S(\theta) &= 1[\theta_l < \theta^{sim}] \\
-    E[S(\theta) | y] &= \int s(\theta) g(\theta | y) d\theta\\ 
-    &= \frac{\int s(\theta)\times exp(v(\theta, h)) * k(\theta, h_t | y^{\ast}_t)d\theta d h}{\int exp(v(\theta, h)) * k(\theta, h_t | y^{\ast}_t)d\theta d h} 
+    S(\theta) &= 1[\theta_b < \theta^{sim}] \\
+    E[S(\theta) | y] &= \int s(\theta) c(\theta | y) d\theta\\ 
+    &= \frac{\int s(\theta)\times exp(v(\theta, h)) * d(\theta, h | y^{\ast})d\theta d h}{\int exp(v(\theta, h)) * d(\theta, h | y^{\ast})d\theta d h} 
     \end{aligned}
     $$
 
@@ -583,7 +560,7 @@ right  = 1.0in]{geometry}
 
     $$
     \begin{aligned}
-    E[S(\hat{\theta}) | y^{\ast}] = \sum_l^L S(\hat{\theta}_l)w_l
+    E[S(\hat{\theta}) | y^{\ast}] = \sum_b^B S(\hat{\theta}_b)w_b
     \end{aligned}
     $$
 
@@ -591,7 +568,7 @@ right  = 1.0in]{geometry}
 
     $$
     \begin{aligned}
-    r = \sum_{l=1}^{L}1[\theta_{l} < \theta^{sim}] \approx  L\times E[S(\hat{\theta})] = L\times \sum_l^L S(\hat{\theta}_l)w_l
+    r = \sum_{b=1}^{B}1[\theta_{b} < \theta^{sim}] \approx  B\times E[S(\hat{\theta})] = B\times \sum_b^B S(\hat{\theta}_b)w_b
     \end{aligned}
     $$
 
@@ -677,6 +654,20 @@ This study only considered a handful of potential algorithms, sampling strategie
 \newpage
 
 \section{Appendix B: Sampling from mixture of Gaussian's}
+    The steps in the MCMC process is described in Algorithm \ref{alg:ksc}. The initial values are set to the values outlined in \citet{kim1998stochastic}, except for the mixing indicator which is unspecified. This is arbitrarily set at the 4th Gaussian density found in Appendix A.
+        
+    \subsection*{Sampling mixture density}
+    For sampling the mixture model the Gaussian mixture density is rewritten with respect to a indicator variable $s_t$
+        \begin{align}
+        &z_t | s_t = i \sim N(m_i - 1.2704, \nu^2) \\
+        &Pr(s_t = i) = q_i.
+        \end{align}
+        The vector $s$ indexes the seven mixture of Gaussians and a component indicator variable for each t, $s_t$, is sampled from probability mass function: 
+        \begin{align}
+        Pr(s_t = i | y_t^{\ast}, h_t) \propto q_i f_N(y_t^{\ast} | h_t + m_t - 1.2704, \nu^2).
+        \end{align}
+
+
 
 \subsection*{Conjugate posterior distributions}
 
@@ -714,91 +705,88 @@ Metropolis Hastings accept/reject procedure:
 
 2) Accept proposal as $\phi^{(i)}$ with probability $e^{\{g(\phi^\ast) - g(\phi^{(i-1)}\}}$ such that $g(\phi) = log (\pi (\phi)) - \frac {(h_t - \mu)^2 (1-\phi^2)}{2 \sigma_{\eta}^2} + \frac{1}{2} log (1-\phi^2)$
 
-\subsection*{Sampling mixture density}
 
-Rewrite mixture density with respect to a indicator variable $s_t$
-
-$$
-\begin{aligned}
-&z_t | s_t = i \sim N(m_i - 1.2704, \nu^2) \\
-&Pr(s_t = i) = q_i
-\end{aligned}
-$$
-
-Sample $s_t$ from probability mass function: 
-
-$$
-\begin{aligned}
-Pr(s_t = i | y_t^{\ast}, h_t) \propto q_i f_N(y_t^{\ast} | h_t + m_t - 1.2704, \nu^2)
-\end{aligned}
-$$
+        \begin{algorithm}[H]
+            \caption{KSC MCMC Algorithm}\label{alg:ksc}
+            \begin{algorithmic}
+            \Require $s_0 = 4$, $\mu_0 = 0$, $\phi_0 = 0.95$, $\sigma^{2}_{\eta,0} = 0.02$
+            \For{\texttt{b in} $1:B_{draws}$}
+                    \State \text{Sample states (Kalman Filter and Smoother): } $\boldsymbol{h}_b \sim h|y^{\ast}, s_{b-1}, \phi_{b-1}, \sigma^{2}_{\eta,b-1}, \mu_{b-1}$ 
+                    \State \text{Sample mixture indicators: } $s_b \sim s|y^{\ast}, \boldsymbol{h}_{b-1}$
+                    \State \text{Sample from conjugate density $\mu$: } $\mu_b \sim \mu|y_{\ast}, s_{b-1}, \phi_{b-1}, \sigma^{2}_{\eta, b-1}, \boldsymbol{h}_{b-1}$
+                    \State \text{Sample from conjugate density $\sigma^2_{\eta}$: } $\mu_b \sim \mu|y^{\ast}, s_{b-1}, \phi_{b-1}, \mu_{b-1}, \boldsymbol{h}_{b-1}$
+                    \State \text{Sample via Metropolis-Hastings $\phi$: } $\phi_b \sim \phi|y^{\ast}, s_{b-1}, \mu_{b-1}, \sigma^{2}_{\eta, b-1}, \boldsymbol{h}_{b-1}$
+                  \EndFor
+            \end{algorithmic}
+            \end{algorithm}
 
 \newpage
 
 \section{Appendix C: Hamiltonian Monte Carlo algorithm description}
-Let $\theta$ be a target parameter and $\phi$ be the auxiliary momentum variable. The Hamiltonian is defined as:
+Let $\theta$ be a target parameter and $\alpha$ be the auxiliary momentum variable. The Hamiltonian is defined as:
 
 $$
 \begin{aligned}
-H(\theta, \phi) \equiv - log \: \pi(\theta, \phi)
+H(\theta, \alpha) \equiv - log \: \pi(\theta, \alpha)
 \end{aligned}
 $$
 
-This can be broken down into kinetic energy $K(\theta, \phi)$, the density over the auxiliary momentum, and potential energy $V(\theta)$, the density of the target posterior distribution.
+This can be broken down into kinetic energy $K(\theta, \alpha)$, the density over the auxiliary momentum, and potential energy $V(\theta)$, the density of the target posterior distribution.
 
 $$
 \begin{aligned}
-H(\theta, \phi) &= - log \: \pi(\phi | \theta) - log \: \pi(\theta) \\ 
-&\equiv  K(\theta, \phi) + V(\theta)
+H(\theta, \alpha) &= - log \: \pi(\alpha | \theta) - log \: \pi(\theta) \\ 
+&\equiv  K(\theta, \alpha) + V(\theta)
 \end{aligned}
 $$
 
  Starting with an initial draw of $\theta$ (user defined or randomly generated), the HMC iteration or proposal is determined by 3 steps.
 
-1) Randomly sample a momentum value
+\textbf{1) Randomly sample a momentum value}
 
 $$
 \begin{aligned}
-\phi\sim Multinormal(0, M)
+\alpha\sim Multinormal(0, M)
 \end{aligned}
 $$
 
 Where M is some diagonal mass matrix (assuming independence between momentum variables).
 
-2) Solve the set of Hamiltonian (differential) equations which generates a proposal $(\theta^{\ast}, \phi^{\ast})$
+\textbf{2) Solve the set of Hamiltonian (differential) equations which generates a proposal} $(\theta^{\ast}, \alpha^{\ast})$
 
 $$
 \begin{aligned}
-\frac{\partial \theta}{\partial t} &= \frac{\partial H}{\partial \phi} = \frac{\partial K}{\partial \phi} \\
-\frac{\partial \phi}{\partial t} &= \frac{\partial H}{\partial \theta} = - \frac{\partial K}{\partial \theta} - \frac{\partial V}        {\partial \theta}
+\frac{\partial \theta}{\partial t} &= \frac{\partial H}{\partial \alpha} = \frac{\partial K}{\partial \alpha} \\
+\frac{\partial \alpha}{\partial t} &= \frac{\partial H}{\partial \theta} = - \frac{\partial K}{\partial \theta} - \frac{\partial V}        {\partial \theta}
 \end{aligned}
 $$
 
-Where $\frac{\partial V}{\partial \theta}$ is the gradient of the target posterior density. The solution to these differential equations is approximated using a Leapfrog integrator which gives a discrete approximate solution. The parameters which are tuned in this process are the number of steps $L$ and the size of the steps $\epsilon$. The Leapfrog algorithm performs a half step of $\phi$ and then a full step of the parameter $\theta$, and another half step of the momentum variable $\phi$ and repeats this $L$ times. The final step is the proposal $(\theta^{\ast}, \phi^{\ast})$.
+Where $\frac{\partial V}{\partial \theta}$ is the gradient of the target posterior density. The solution to these differential equations is approximated using a Leapfrog integrator which gives a discrete approximate solution. The parameters which are tuned in this process are the number of steps $G$ and the size of the steps $\epsilon$. The Leapfrog algorithm performs a half step of $\alpha$ and then a full step of the parameter $\theta$, and another half step of the momentum variable $\alpha$ and repeats this $G$ times. The final step is the proposal $(\theta^{\ast}, \alpha^{\ast})$.
 
 $$
 \begin{aligned}
-\phi &\leftarrow \phi - \frac{\epsilon}{2} \frac{\partial V}{\partial \theta} \\
-\theta &\leftarrow \theta + \epsilon M^{-1} \phi \\
-\phi &\leftarrow \phi - \frac{\epsilon}{2} \frac{\partial V}{\partial \theta}
+\alpha &\leftarrow \alpha - \frac{\epsilon}{2} \frac{\partial V}{\partial \theta} \\
+\theta &\leftarrow \theta + \epsilon M^{-1} \alpha \\
+\alpha &\leftarrow \alpha - \frac{\epsilon}{2} \frac{\partial V}{\partial \theta}
 \end{aligned}
 $$
 
-3) Metrpolis Hastings Accept/Reject
-Let $(\theta^{t-1}, \phi^{t-1})$ be the values before the Leapfrog integrator.
+\textbf{3) Metropolis Hastings Accept/Reject}
+
+Let $(\theta^{n-1}, \alpha^{n-1})$ be the values before the Leapfrog integrator.
 
 $$
 \begin{aligned}
-r = \frac{\pi(\theta^{\ast} | y) \pi(\phi^{\ast})}{\pi(\theta^{t-1} | y) \pi(\phi^{t-1})}
+a = \frac{\pi(\theta^{\ast} | y) \pi(\alpha^{\ast})}{\pi(\theta^{n-1} | y) \pi(\alpha^{n-1})}
 \end{aligned}
 $$
 
 With sampled value
 
 $$
-\theta^t = \begin{cases}
-    \theta^{\ast},& \text{with probability } min(r,1)\\
-    \theta^{t-1}, & \text{otherwise}
+\theta^n = \begin{cases}
+    \theta^{\ast},& \text{with probability } min(a,1)\\
+    \theta^{n-1}, & \text{otherwise}
 \end{cases}
 $$
 
@@ -808,14 +796,14 @@ $$
     \centering
     \includegraphics[scale=0.09]{results/weighted_ksc_ncp_1k.png}
     \caption{1000 SBC iterations for re-weighted rank statistics from the re-parameterised Gaussian mixture approximation model. The shape of the histogram is consistent with the unweighted rank statistics.}
-    \label{fig:reweight1k}
+    \label{fig:ncpreweight1k}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.09]{results/weighted_ksc_ncp_5k.png}
     \caption{5000 SBC iterations for re-weighted rank statistics from the re-parameterised Gaussian mixture approximation model. No major improvements are observed to the uniformity of rank statistics.}
-    \label{fig:reweight5k}
+    \label{fig:ncpreweight5k}
 \end{figure}
 
 \end{document}
