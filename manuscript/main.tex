@@ -380,7 +380,9 @@ right  = 1.0in]{geometry}
 
 
 \section{Results}
-    1000 and 5000 SBC iterations are run for centered and re parameterised versions of the stochastic volatility model using simulated data sets of 1000 observations. Rank statistic histograms are constructed with 20 bins for the static parameters and the 1st, 500th and 1000th latent state variables. The black horizontal line represents uniformity conditional on the number of bins and SBC iterations. The $\chi^2$ statistic is used to summarise the deviations from uniformity for all state variables since it is unrealistic to visually inspect all the histograms. The SBC algorithm is summarised Algorithm \ref{alg:sbc}:
+    SBC is conducted for each MCMC sampling method and corresponding parameterisation as outlined in Table \ref{tab:params}. For a given MCMC and parameterisation pair, 5000 SBC iterations are run using simulated data sets of size T=1000. 5000 rank statistics are obtained per univariate parameter from this process. 
+    
+    Rank statistic histograms are constructed with 20 bins for the static parameters and the 1st, 500th and 1000th latent state variables. The black horizontal line represents a uniform distribution at 250 which is the ratio of  5000 SBC iterations and 20 bins. The $\chi^2$ statistic is used to summarise the deviations from uniformity for all state variables since it is unrealistic to visually inspect all the histograms. The SBC algorithm is summarised in Algorithm \ref{alg:sbc}.
 
     \begin{algorithm}
         \caption{SBC}\label{alg:sbc}
@@ -395,43 +397,21 @@ right  = 1.0in]{geometry}
         \end{algorithm}
         
     \subsection{Hamiltonian Monte Carlo}
-    Figure \ref{fig:cphmc1k} and Figure \ref{fig:ncphmc1k} show the SBC results for the centered and re-parameterised model for HMC respectively. Both sets of results display relatively noisy rank statistic estimates with variation around the discrete uniform distribution.
+    SBC results for the centered model using HMC are displayed in Figure \ref{fig:cphmc5k}. The centered parameterisation displays a lack of uniformity in rank statistics for $\sigma^2$ and $\phi$. The $\sigma^2$ parameter displays a U-shaped histogram with large peaks on both ends while $\phi$ exhibits a U-shape with smaller peaks. This indicates the MCMC algorithm is not returning calibrated estimates for these parameters. The average posterior samples of $\sigma^2$ and $\phi$ over the SBC iterations are \textit{under-dispersed}, or \textit{overconfident}, relative to the prior distribution. This implies the posterior geometry of these parameters may be difficult to sample for the HMC algorithm.
 
-    The centered parameterisation in particular displays a lack of uniformity for $\phi$ and $\sigma^2$ which indicates the MCMC algorithm is not returning calibrated estimates for these parameters. Rank statistics for $\sigma^2$ and $\phi$ show two peaks of either end of the histogram. The posterior estimates of $\sigma^2$ and $\phi$ are \textit{under-dispersed} relative to the prior distribution. This implies the posterior geometry of these parameters may be difficult to sample for the HMC algorithm.
+    Figure \ref{fig:ncphmc5k} show the SBC results for the reparameterised model using HMC. The re-parameterised model produces approximately uniform rank statistics across all reported parameters. The distributions of $\sigma^2$ and $\phi$ now exhibit a more uniform shape, implying greater calibration and correct posterior estimates returned on average. These results suggests that HMC struggles to sample some parameters from the centered parameterisation of the stochastic volatility model. The re-parameterised model possess stronger evidence of calibration for the parameters examined, producing more reliable and consistent inference.
 
-    \begin{figure}[H]
-        \centering
-        \includegraphics[scale=0.09]{results/hmc_cp_1k.png}
-        \caption{1000 SBC iterations for centered model using Hamiltonian Monte Carlo. Histograms show noisy estimates around uniform distribution. In particular, $\sigma^2$ displays peaks on both ends of the histogram and $\phi$ shows a major on the left hand side. This suggests that the posterior samples of $\sigma^2$ are under-dispersed relative to the prior distribution and posterior samples of $\phi$ are over estimating the true parameter.}
-        \label{fig:cphmc1k}
-    \end{figure} 
-
-    Estimates of $\sigma^2$ and $\phi$ are more uniform under the re-parameterised model. Instead, we observe a peak on the left side for the 500th state variable $h_{500}$, although the estimates are noisy. Overall the estimates for non centered parameterisation are more favourable. 
-
-    \begin{figure}[H]
-        \centering
-        \includegraphics[scale=0.09]{results/hmc_ncp_1k.png}
-        \caption{1000 SBC iterations for non centered model using Hamiltonian Monte Carlo. The rank statistic distributions for $\sigma^2$ and $\phi$ have improved. There is some evidence that the posterior of the 500th state variable is overestimating the distribution of its true value.}
-        \label{fig:ncphmc1k}
-    \end{figure}
-
-    The noisy histogram estimates can be improved by increasing the number of SBC iterations. Figure \ref{fig:cphmc5k} and Figure \ref{fig:ncphmc5k} show the results of the same parameters with 5000 SBC iterations. There is an improvement to the re-parameterised model with all histograms looking approximately uniform with much smaller variation around the uniform distribution. 
-    
-    Centered parameterisation posses similar improvement for $\mu$ and the state variables. However, there are still major peaks at both ends of $\sigma^2$ and $\phi$ suggesting under-dispersion of the posterior estimates relative to the prior distribution.
-
-    These results suggests that HMC struggles to sample some parameters from the centered parameterisation of the stochastic volatility model. The re-parameterised model possess stronger evidence of calibration for the parameters examined, implying more reliable and consistent inference.
-
-    \begin{figure}[H]
+        \begin{figure}[H]
         \centering
         \includegraphics[scale=0.09]{results/hmc_cp_5k.png}
-        \caption{5000 SBC iterations for centered model using Hamiltonian Monte Carlo. $\mu$ and the state parameters look approximately uniform. $\sigma^2$ still has major peaks on both the left and right hand side indicating under-dispersion relative to the prior distribution. $\phi$ exhibits a similar shape to $\sigma^2$ although the peaks are much smaller.}
+        \caption{\textbf{5000 SBC iterations for centered model using Hamiltonian Monte Carlo}. $\mu$ and the state parameters look approximately uniform. $\sigma^2$ still has major peaks on both the left and right hand side indicating under-dispersion relative to the prior distribution. $\phi$ exhibits a similar U-shape to $\sigma^2$ although the peaks are much smaller.}
         \label{fig:cphmc5k}
     \end{figure}
 
     \begin{figure}[H]
         \centering
         \includegraphics[scale=0.09]{results/hmc_ncp_5k.png}
-        \caption{5000 SBC iterations for re-parameterised model using Hamiltonian Monte Carlo. Parameters display uniformity with less noise around the true uniform value. This suggests that the HMC algorithm is returning the correct posterior estimates for the selected parameters.}
+        \caption{\textbf{5000 SBC iterations for re-parameterised model using Hamiltonian Monte Carlo}. The rank statistic distributions for $\sigma^2$ and $\phi$ appear to follow a uniform distribution. This suggests that the HMC algorithm is returning the correct posterior estimates for the displayed parameters.}
         \label{fig:ncphmc5k}
     \end{figure}
 
@@ -440,7 +420,7 @@ right  = 1.0in]{geometry}
     \begin{figure}[H]
         \centering
         \includegraphics[scale=0.09]{results/hmc_ess.png}
-        \caption{Effective sample sizes for static parameters after 5000 iterations of SBC and 1000 post warm-up samples for Hamiltonian Monte Carlo. The centered parameterisation struggles to generate independent samples for $\sigma^2$ and $\phi$. Non parameterisation demonstrates much more efficient sampling behaviour.}
+        \caption{\textbf{Effective sample sizes for static parameters after 5000 SBC iterations}. The centered parameterisation struggles to generate independent samples for $\sigma^2$ and $\phi$. Non parameterisation demonstrates much more efficient sampling behaviour.}
         \label{fig:hmcess}
     \end{figure}
 
@@ -580,7 +560,7 @@ right  = 1.0in]{geometry}
     \end{aligned}
     $$
 
-    The results from applying this re-weighting step to the rank statistics of the centered model are given on Figure \ref{fig:reweight1k}. There are no improvements in the distribution of rank statistics. Increasing the SBC iterations to 5000 as seen in Figure \ref{fig:reweight5k} also show no major improvements. The shape of both sets of histograms is consistent with the shape of the unweighted rank statistics. Overall the re-weighting of the posterior samples from the approximate model does not improve the calibration results. The re-weighted rank statistics for the re-parameterised model also did not improve and can be found in Appendix D.
+    The results from applying this re-weighting step to the rank statistics of the centered model are given on Figure \ref{fig:reweight1k}. There are no improvements in the distribution of rank statistics. Increasing the SBC iterations to 5000 as seen in Figure \ref{fig:reweight5k} also show no major improvements. The shape of both sets of histograms is consistent with the shape of the unweighted rank statistics. Overall the re-weighting of the posterior samples from the approximate model does not improve the calibration results. The re-weighted rank statistics for the re-parameterised model also did not improve and can be found in Appendix E.
 
     \begin{figure}[H]
         \centering
@@ -798,7 +778,25 @@ $$
 \end{cases}
 $$
 
-\section{Appendix D: Importance weighted rank statistics for re-parameterised model}
+\section{Appendix D: 1000 SBC iteration results}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.09]{results/hmc_cp_1k.png}
+        \caption{1000 SBC iterations for centered model using Hamiltonian Monte Carlo. Histograms show noisy estimates around uniform distribution. In particular, $\sigma^2$ displays peaks on both ends of the histogram and $\phi$ shows a major on the left hand side. This suggests that the posterior samples of $\sigma^2$ are under-dispersed relative to the prior distribution and posterior samples of $\phi$ are over estimating the true parameter.}
+        \label{fig:cphmc1k}
+    \end{figure} 
+
+        \begin{figure}[H]
+        \centering
+        \includegraphics[scale=0.09]{results/hmc_ncp_1k.png}
+        \caption{1000 SBC iterations for non centered model using Hamiltonian Monte Carlo. The rank statistic distributions for $\sigma^2$ and $\phi$ have improved. There is some evidence that the posterior of the 500th state variable is overestimating the distribution of its true value.}
+        \label{fig:ncphmc1k}
+    \end{figure}
+
+    Instead, we observe a peak on the left side for the 500th state variable $h_{500}$, although the estimates are noisy. Overall the estimates for non centered parameterisation are more favourable. 
+
+\section{Appendix E: Importance weighted rank statistics for re-parameterised model}
 
 \begin{figure}[H]
     \centering
