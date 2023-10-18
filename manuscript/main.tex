@@ -87,16 +87,14 @@ This section describes the stochastic volatility model to be analysed in this re
     Convergence diagnostics are useful for identifying when Bayesian computation fail on real data. However, confounding issues may arise when attempting to diagnose the cause of computational problems. Real data is generated from an unknown data generating process. That is, the true parameter and model are unobservable, and it is very likely that the model being fit is not the true model. Therefore, failed diagnostic checks could be the result of attempting to fit a misspecified model, issues with the MCMC algorithm, or both. Furthermore, different sampling strategies will result in different posterior estimates for the same model. Assuming no issues with the computation or the model specification, convergence diagnostics do not provide any guidance to the analyst regarding which posterior estimate is to be preferred since there is no ground truth.
 
     To illustrate the concerning issues, the posterior distribution associated with the stochastic volatility model in (1)-(5) and a set of real financial returns is estimated using two different MCMC algorithms. The data are demeaned daily (logarithmic) returns on the S\&P 500 Index over the period from 1 January 2023 - 10 September 2023 with sample size $T=171$. Figure \ref{fig:realdataex} displays the marginal posterior estimates for the static parameters $\mu$, $\phi$ and $\sigma^2$, with corresponding summary statistics in Table \ref{tab:realdata}. Overall the two methods are similar in skew and shape. However, closer inspections suggests that $\phi$ has a fatter left tail for the KSC sampler and $\sigma^2$ is also heavier in the right tails relative to HMC. This is evident in the quantiles with the 25th quantile for $\phi$ being smaller at 0.875 for KSC compared to 0.910 in HMC. Furthermore, HMC has taller peaks at their mode relative to KSC with a tighter spread. The uncertainty intervals created from each posterior sample would also be quite different and lead to different results. However, we can only conclude that there are differences between these methods, not which is correct.
-    
-    % Other methods for model selection in this context (for example, out of sample predictive performance), but for parameter estimation it is unclear which one should be selected. 
-
-    \begin{figure}[H]
+        \begin{figure}[H]
         \centering
-        \includegraphics[scale=0.105]{motivating_example/real_data_ex.png}
-        \caption{\textbf{Posterior distribution for static parameters fit on the S\&P 500 Index.} Posterior samples from the HMC (blue) and KSC (red) MCMC samplers.}
+        \includegraphics[scale=0.1]{motivating_example/real_data_ex.png}
+        \caption{\textbf{Posterior distribution for static parameters fit on the S\&P 500 Index.} Posterior samples from the HMC (blue) and KSC (red) MCMC samplers. Marginal posterior densities are presented for $\mu$, $\phi$ and $\sigma^2$. Note that each panel has their own scale for the x and y axis. The parameter $\phi$ falls}
         \label{fig:realdataex}
     \end{figure}
 
+    % Other methods for model selection in this context (for example, out of sample predictive performance), but for parameter estimation it is unclear which one should be selected. 
     \begin{table}[H]
         \centering
         \begin{tabular}{|c|c|c|c|c|c|c|c|} \hline 
@@ -124,7 +122,7 @@ This section describes the stochastic volatility model to be analysed in this re
     \begin{figure}[h]
         \centering
         \includegraphics[scale=0.1]{motivating_example/single_sim.png}
-        \caption{\textbf{Posterior samples from SV model fit on known data generating process}. Vertical solid line represents true parameter and dotted lines are 95\% credible intervals around the mean. The parameter $\phi$ falls outside the credible interval whereas $\mu$ and $\sigma^2$ stay inside.}
+        \caption{\textbf{HMC posterior samples from SV model fit on known data generating process}. Marginal posterior densities are presented for $\mu$, $\phi$ and $\sigma^2$. Vertical solid line represents true parameter and dotted lines are 95\% credible intervals around the mean. Note that each panel has their own scale for the x and y axis. The parameter $\phi$ falls outside the credible interval whereas $\mu$ and $\sigma^2$ stay inside.}
     \end{figure}
 
 \subsection{Research Goal}
@@ -189,9 +187,9 @@ The methodology section describes the simulation study used validate the posteri
 
             The shape of the distribution of rank statistics gives insight into how an MCMC may be miscalibrated. Specifically, it gives information about the average posterior deviates from the prior distribution of a given parameter. Figures \ref{fig:underestimation} and \ref{fig:underdispersed} are recreated from \citet{talts2020validating} for convenience. These display examples of posterior miscalibration and the corresponding non-uniform rank statistics.
 
-            Figure \ref{fig:underestimation} shows a distribution of rank statistics with a large right peak. This distribution is consistent with posterior samples that tend to underestimate the true parameter on average. The sum of indicator random variables (see equation (13)) is large since a large proportion of posterior draws are smaller than the true value, resulting in a large rank statistic and hence a larger relative frequency on the right side of the histogram. The converse is true if the peak of the histogram is on the left hand side (i.e the average posterior over the SBC iterations overestimates prior). 
+            Figure \ref{fig:underestimation} shows a distribution of rank statistics with inflated frequency on the right side of the histogram. This distribution is consistent with posterior samples that tend to underestimate the true parameter on average. The sum of indicator random variables (see equation (13)) is large since a large proportion of posterior draws are smaller than the true value, resulting in a large rank statistic and hence a larger relative frequency on the right side of the histogram. The converse is true if the inflated frequency of the histogram is on the left hand side (i.e the average posterior over the SBC iterations overestimates prior). 
 
-            Figure \ref{fig:underdispersed} has large peaks on both ends of the histogram resulting in a `U-shape'. \citet{talts2020validating} describe this bias as under-dispersion of the posterior relative to the prior distribution on average. The average posterior is too narrow (or overconfident) relative to the spread of the prior resulting in inflated frequency on both ends of the rank statistic distribution. 
+            Figure \ref{fig:underdispersed} has large inflated frequencies on both ends of the histogram resulting in a `U-shape'. \citet{talts2020validating} describe this bias as under-dispersion of the posterior relative to the prior distribution on average. The average posterior is too narrow (or overconfident) relative to the spread of the prior resulting in inflated frequency on both ends of the rank statistic distribution. 
 
             % \begin{figure}[H]
             %     \centering
@@ -203,14 +201,14 @@ The methodology section describes the simulation study used validate the posteri
             \begin{figure}[H]
                 \centering
                 \includegraphics[scale=0.07]{methodology/rhs.png}
-                \caption{Left: Non uniform rank statistics with peak on the right side. Right: Posterior distribution is biased to the left side of the prior distribution. Bias in rank statistics distribution comes from posterior samples underestimating the true parameter on average. Note that the two plots are independently produced for illustration only.}
+                \caption{Left: Non uniform rank statistics with inflated frequency on the right side. Right: Average posterior distribution is biased to the left side of the prior distribution. Bias in rank statistics distribution comes from posterior samples underestimating the true parameter on average. Note that the two plots are independently produced for illustration only.}
                 \label{fig:underestimation}
             \end{figure}        
 
             \begin{figure}[H]
                 \centering
                 \includegraphics[scale=0.07]{methodology/underdispersed.png}
-                \caption{Left: Non uniform rank statistics with peaks on both ends (`U-shape' distribution). Right: Overlayed posterior and prior distributions for the same arbitrary parameter. Non-Uniformity in ranks comes from under-dispersed posterior distribution relative to prior.}
+                \caption{Left: Non uniform rank statistics with inflated frequencies on both ends (`U-shape' distribution). Right: Overlayed posterior and prior distributions for the same arbitrary parameter. Non-Uniformity in ranks comes from under-dispersed posterior distribution relative to prior.}
                 \label{fig:underdispersed}
             \end{figure}
 
@@ -402,13 +400,13 @@ This section defines and compares the two MCMC algorithms used to estimate the S
         \end{algorithm}
         
     \subsection{Hamiltonian Monte Carlo (No-U-Turn Sampler)}
-    SBC results for the centered model using HMC are displayed in Figure \ref{fig:cphmc5k}. The centered parameterisation displays a lack of uniformity in rank statistics for $\sigma^2$ and $\phi$. The $\sigma^2$ parameter displays a U-shaped histogram with large peaks on both ends while $\phi$ exhibits a U-shape with smaller peaks. This indicates the MCMC algorithm is not returning calibrated estimates for these parameters. The average posterior samples of $\sigma^2$ and $\phi$ over the SBC iterations are \textit{under-dispersed}, or \textit{overconfident}, relative to the prior distribution. This implies the posterior geometry of these parameters may be difficult to sample for the HMC algorithm.
+    SBC results for the centered model using HMC are displayed in Figure \ref{fig:cphmc5k}. The centered parameterisation displays a lack of uniformity in rank statistics for $\sigma^2$ and $\phi$. The $\sigma^2$ parameter displays a U-shaped histogram with inflated frequencies on both ends while $\phi$ exhibits a U-shape with relatively smaller inflated frequencies. This indicates the MCMC algorithm is not returning calibrated estimates for these parameters. The average posterior samples of $\sigma^2$ and $\phi$ over the SBC iterations are \textit{under-dispersed}, or \textit{overconfident}, relative to the prior distribution. This implies the posterior geometry of these parameters may be difficult to sample for the HMC algorithm.
 
     Figure \ref{fig:ncphmc5k} show the SBC results for the reparameterised model using HMC. The re-parameterised model produces approximately uniform rank statistics across all reported parameters. The distributions of $\sigma^2$ and $\phi$ now exhibit a more uniform shape, implying greater calibration and correct posterior estimates returned on average. These results suggests that HMC struggles to sample some parameters from the centered parameterisation of the stochastic volatility model. The re-parameterised model possess stronger evidence of calibration for the parameters examined, producing more reliable and consistent inference.
         \begin{figure}[H]
         \centering
         \includegraphics[scale=0.09]{results/hmc_cp_5k.png}
-        \caption{\textbf{5000 SBC iterations for centered model using Hamiltonian Monte Carlo}. $\mu$ and the state parameters look approximately uniform. $\sigma^2$ still has major peaks on both the left and right hand side indicating under-dispersion relative to the prior distribution. $\phi$ exhibits a similar U-shape to $\sigma^2$ although the peaks are much smaller.}
+        \caption{\textbf{5000 SBC iterations for centered model using Hamiltonian Monte Carlo}. $\mu$ and the state parameters look approximately uniform. $\sigma^2$ still has inflated frequencies on both the left and right hand side indicating under-dispersion relative to the prior distribution. $\phi$ exhibits a similar U-shape to $\sigma^2$ although the U-shape is much smaller.}
         \label{fig:cphmc5k}
     \end{figure}
     \begin{figure}[H]
@@ -446,13 +444,13 @@ This section defines and compares the two MCMC algorithms used to estimate the S
     \subsection{Mixture off-set MCMC}
     The Gaussian off-set mixture approximation is run with the first 10,000 samples discarded as burn-in (following the method of \citet{kim1998stochastic}). However, unlike KSC who take 750,000 posterior draws from the model, the number of post burn-in posterior samples taken as part of the SBC procedure is 9,999. Taking 750,000 draws from the Gaussian off-set mixture would lead to issues due to disk space limitations and computational resources required to run SBC. Furthermore, the number of posterior samples is larger than the 999 taken for the SBC experiment run for Hamiltonian Monte Carlo. Earlier experiments attempted 999 post-burn in draws for the off-set mixture model, however there are concerns that such a short chain would not have converged onto the target posterior distribution. Therefore 9,999 draws was chosen as a compromise under both constraints. 
 
-    Both the centered and the non-centered Gaussian off-set mixture model contains issues with calibration. Figure \ref{fig:cpksc5k} presents the results from the centered model. There is a lack of uniformity across all parameters. In particular, there is a large peak on the left hand side for $\mu$ and the latent state variables, indicating that the posterior samples on average are overestimating the prior distribution. There is also a bias on the right hand hand side of $\phi$, implying underestimation of the prior by the average posterior over the SBC iterations. 
+    Both the centered and the non-centered Gaussian off-set mixture model contains issues with calibration. Figure \ref{fig:cpksc5k} presents the results from the centered model. There is a lack of uniformity across all parameters. In particular, there is an inflated frequency on the left hand side for $\mu$ and the latent state variables, indicating that the posterior samples on average are overestimating the prior distribution. There is also an inflated frequency on the right hand hand side of $\phi$, implying underestimation of the prior by the average posterior over the SBC iterations. 
 
-    The non-centered model in location exhibits larger issues in calibration as shown in Figure \ref{fig:ncpksc5k}. Each histogram exhibits large relative frequencies at one or both ends, suggesting major issues in the sampler returning correct posterior estimates. The KSC MCMC algorithm applied to this parameterisation of the model is uncalibrated looking at these parameters. Based on the results of both parameterisations, applying this MCMC algorithm on real data will on balance produce incorrect and unreliable posterior samples on average (conditional on the model and the number of post burn-in draws).
+    The non-centered model in location exhibits larger issues in calibration as shown in Figure \ref{fig:ncpksc5k}. Each histogram exhibits large inflated frequencies at one or both ends, suggesting major issues in the sampler returning correct posterior estimates. The KSC MCMC algorithm applied to this parameterisation of the model is uncalibrated looking at these parameters. Based on the results of both parameterisations, applying this MCMC algorithm on real data will on balance produce incorrect and unreliable posterior samples on average (conditional on the model and the number of post burn-in draws).
     \begin{figure}[H]
         \centering
         \includegraphics[scale=0.09]{results/ksc_cp_5k.png}
-        \caption{\textbf{5000 SBC iterations for centered Gaussian mixture approximation model}. The rank statistics for all the selected parameters display deviations from uniformity. Large relative frequencies (or peaks) exist on the left-hand side for $\mu$ and the latent state variables and there is a peak on the right-hand side for $\phi$.}
+        \caption{\textbf{5000 SBC iterations for centered Gaussian mixture approximation model}. The rank statistics for all the selected parameters display deviations from uniformity. Large inflated frequencies exist on the left-hand side for $\mu$ and the latent state variables and there is an inflated frequency on the right-hand side for $\phi$.}
         \label{fig:cpksc5k}
     \end{figure}
 
@@ -549,7 +547,7 @@ This section defines and compares the two MCMC algorithms used to estimate the S
     \begin{figure}[H]
         \centering
         \includegraphics[scale=0.1]{results/dist_chisq_all.png}
-        \caption{Distribution of chi squared statistics for latent state variables. Results from 5000 SBC iterations are used. Values closer to 0 are more consistent with a discrete uniform distribution. Both HMC simulations are much closer to zero than KSC. This suggests that the HMC algorithm overall produces more calibrated posterior estimates for the state variables.}
+        \caption{\textbf{Distribution of chi squared statistics for latent state variables}. Results from 5000 SBC iterations are used. Values closer to 0 are more consistent with a discrete uniform distribution. Both HMC simulations are much closer to zero than KSC. This suggests that the HMC algorithm overall produces more calibrated posterior estimates for the state variables.}
         \label{fig:allchisq}
     \end{figure}
 
