@@ -55,7 +55,7 @@ right  = 1.0in]{geometry}
 
     One particular challenge to comparing models is the parameterisation. Different parameterisations of a model, whilst mathematically the same, can be very different in terms of sampling difficulty \citep{neal2003slice}. In this work two different parameterisations of the stochastic volatility model are compared for each sampling method. An algorithm may be sensitive to different parameterisations of the same model which may impact MCMC performance as described in \citet{strickland2008parameterisation}.
     
-    The key findings of this research are HMC produces more calibrated and efficient posterior estimates relative to KSC's MCMC algorithm on the approximate off-set mixture model. Additionally, MCMC algorithms may perform better or worse based on calibration and efficiency depending on the parameterisation of the model. HMC applied on a re-parameterised SV model produces the most calibrated and efficient posterior estimates across all SBC experiments.
+    The key findings of this research are HMC produces more calibrated and efficient posterior estimates relative to KSC's MCMC algorithm on the approximate off-set mixture model. Additionally, MCMC algorithms may perform better or worse based on calibration and efficiency depending on the parameterisation of the model. HMC applied on a reparameterised SV model produces the most calibrated and efficient posterior estimates across all SBC experiments.
 
     This paper is structured as follows. Section 2 provides the context around this research through the introduction of the stochastic volatility model and a discussion of the limitations of using ad-hoc simulations and MCMC convergence diagnostics to determine posterior calibration (or validity). Section 3 describes the SBC methodology, along with the simulation design and diagnostic metrics used for the SV model. Section 4 details key aspects of the two MCMC sampling approaches under consideration, while Section 5 provides the simulation results. Finally, Section 6 discusses findings, limitations and suggests areas for further research.
 
@@ -71,7 +71,7 @@ This section describes the stochastic volatility model and discusses two example
     \varepsilon_t \sim& \space \,\mathrm{N}(0,1) \\
     \eta_t \sim& \space \,\mathrm{N}(0,1).
     \end{align}
-    The measurement equation (1) describes the conditional distribution of $y_t$ given $h_t$, where $h_t$ is the conditional log variance of $y_t$. $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the auto-regressive parameter $\phi$ such that $|\phi|<1$. This auto-regressive parameter represents the persistence or stickiness of log volatility and the dispersion parameter $\sigma_{\eta}$ is the constant variance of the states. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks and are uncorrelated with each other.
+    The measurement equation (1) describes the conditional distribution of $y_t$ given $h_t$, where $h_t$ is the conditional log variance of $y_t$. $h_1$ is a draw from a stationary distribution and the state equation $h_{t+1}$ follows a stationary process governed by the auto-regressive parameter $\phi$ such that $|\phi|<1$. This auto-regressive parameter represents the persistence or stickiness of the log variance and the dispersion parameter $\sigma_{\eta}$ is the constant variance of the states. $\epsilon_t$ and $\eta_t$ are standard normal white noise shocks and are uncorrelated with each other.
 
     KSC assign certain independent prior distributions and hyperparameters to the static parameters, with conjugate priors for $\mu$ and $\sigma^2$, given by
     \begin{align}
@@ -129,7 +129,7 @@ This section describes the stochastic volatility model and discusses two example
     \end{figure}
 
 \subsection{Research Goal}
-    The objective of this research is to design a simulation study to evaluate the calibration of the HMC and KSC offset-mixture algorithms used to estimate SV models. As discussed, there are limitations to evaluating MCMC algorithms based on fits to real data and single simulations. To check the calibration of an algorithm, repeated independent simulations are required. This methodology is discussed in the next section. 
+    The objective of this research is to design a simulation study to evaluate the calibration of the HMC and KSC off-set mixture algorithms used to estimate SV models. As discussed, there are limitations to evaluating MCMC algorithms based on fits to real data and single simulations. To check the calibration of an algorithm, repeated independent simulations are required. This methodology is discussed in the next section. 
 
     Two parameterisations of the SV model for each sampler will be implemented using this simulation design. Results from the study will also be used to compare both sampling strategies to determine which MCMC approach is most suitable for estimating this model. 
 
@@ -176,7 +176,7 @@ This section introduces the simulation design used to evaluate whether a MCMC al
         \begin{enumerate}
             \item Rank statistics to measure calibration for a given parameter and algorithm.
             
-            \item Chi squared statistics calculated over the $K$ rank statistics to summarise the shape of the distribution and deviation from uniformity.
+            \item Chi-squared statistics calculated over the $K$ rank statistics to summarise the shape of the distribution and deviation from uniformity.
 
             \item Effective sample size (ESS) to measure MCMC efficiency.
         \end{enumerate}
@@ -216,13 +216,13 @@ This section introduces the simulation design used to evaluate whether a MCMC al
                 \label{fig:underdispersed}
             \end{figure}
 
-            \subsubsection{Chi squared statistics}
-            One difficulty of relying on the visualisation of rank statistic distributions for SV models is there are a very large number of unknowns in the model to consider. An alternative to visually checking for uniformity of a given parameter is to calculate a Chi-squared statistic based on the counts in each histogram bin. Suppose the histogram has $J$ bins, where for each $j^{th}$ bin, $b_j$ is the number of counts and $e_j$ the expected count in bin $j$. The expected count is the ratio of $K$ rank statistics and $J$ bins, $e_j=\frac{K}{J}$. The corresponding Chi-squared statistic is denoted by
+            \subsubsection{Chi-squared statistics}
+            One difficulty of relying on the visualisation of rank statistic distributions for SV models is there are a very large number of unknowns in the model to consider. An alternative to visually checking for uniformity of a given parameter is to calculate a chi-squared statistic based on the counts in each histogram bin. Suppose the histogram has $J$ bins, where for each $j^{th}$ bin, $b_j$ is the number of counts and $e_j$ the expected count in bin $j$. The expected count is the ratio of $K$ rank statistics and $J$ bins, $e_j=\frac{K}{J}$. The corresponding chi-squared statistic is denoted by
             \begin{align}
             \chi^2 = \sum_{j=1}^J \frac{(b_{j} - e_{j})^2}{e_j}.
             \end{align}
             
-            A discrete empirical distribution with the same number of realisations in each of $J$ bins will return a chi squared statistic of zero, since the number of realisations in each bin is equal to the expected count under the relevant  uniform distribution. The distribution of chi squared statistics is visualised to compare results across multiple simulations. Thus, the distribution of chi-squared statistics produced from the histograms of SBC rank statistics for a large number of univariate model parameters will give a high level summary of the overall model calibration, and hence for the overall performance of the algorithm. By comparing the distributions of Chi-squared statistics produced by competing algorithms, one algorithm's degree of calibration, relative to that of the other algorithm, may be assessed. 
+            A discrete empirical distribution with the same number of realisations in each of $J$ bins will return a chi-squared statistic of zero, since the number of realisations in each bin is equal to the expected count under the relevant  uniform distribution. The distribution of chi-squared statistics is visualised to compare results across multiple simulations. Thus, the distribution of chi-squared statistics produced from the histograms of SBC rank statistics for a large number of univariate model parameters will give a high level summary of the overall model calibration, and hence for the overall performance of the algorithm. By comparing the distributions of chi-squared statistics produced by competing algorithms, one algorithm's degree of calibration, relative to that of the other algorithm, may be assessed. 
 
             \subsubsection{Effective sample size}
             Another univariate summary of a marginal posterior distribution is its effective sample size (ESS), which provides a measure of efficiency of the MCMC sampler. ESS estimates the number of effectively independent draws generated by a MCMC to estimate a target parameter. A poor ESS generally arises from high auto-correlation in the Markov chain, and thus is an indication of a highly dependent posterior sample. A more efficient MCMC algorithm will take a relatively lower level of resources (for example, time and number of draws) to get a sample from the target distribution when compared to a less efficient algorithm. If a MCMC algorithm possesses higher ESS for the majority of its parameters (relative to another strategy), this is seen as evidence of greater efficiency.
@@ -234,7 +234,7 @@ This section introduces the simulation design used to evaluate whether a MCMC al
             When more than one chain is generated from the target posterior, then the ESS quantity is a function of the number of chains $M$, the number of samples per chain $N$ and the auto-correlation at lag $l$ $\rho_l$ \citep{vehtari2021rank}. $L$ is a truncation lag chosen such that the sum of any two consecutive auto-correlation lags is negative \citep{geyer1992practical}. This truncation (or some kind of down-weighting) is required because a large number of lags leads to noisier auto-correlation estimates. Note that other approaches to estimating the true auto-correlation of the Markov chain and the ESS can be found in the literature. Details about this ESS formula, the calculation of the auto-correlation and other ESS calculations can be found in \citet{vehtari2021rank} and \citet{geyer1992practical}.
 
 \section{MCMC Strategies}
-This section defines and compares the two MCMC algorithms used to estimate the SV model. Section 4.1 and Section 4.2 describes Stan's No-U-Turn sampler and KSC's mixture offset MCMC respectively. Section 4.3 compares the similarities and differences between both methods. Section 4.4 describes model reparameterisation in the context of each MCMC algorithm. 
+This section defines and compares the two MCMC algorithms used to estimate the SV model. Section 4.1 and Section 4.2 describes Stan's No-U-Turn sampler and KSC's off-set mixture MCMC respectively. Section 4.3 compares the similarities and differences between both methods. Section 4.4 describes model reparameterisation in the context of each MCMC algorithm. 
     \subsection{Sampling method 1: Stan's Hamiltonian Monte Carlo with No-U-Turn Sampler}
         Hamiltonian Monte Carlo (HMC) is a general MCMC algorithm used to efficiently sample posterior draws associated with high-dimensional and complex stochastic models. Hamiltonian Monte Carlo, originally called Hybrid Monte Carlo, was developed in the physics literature \citep{duane1987hybrid} before being applied in the statistics literature by Radford Neal through his works in Bayesian Neural Networks \citep{neal1995bayesian} and statistical computing \citep{neal2011mcmc}. Versions of this algorithm have since become widely available through open source development projects, including Stan \citep{stan} and PyMC \citep{pymc2023}.
 
@@ -251,11 +251,11 @@ This section defines and compares the two MCMC algorithms used to estimate the S
 
     
     \subsection{Sampling method 2: Off-set Mixture MCMC}
-        \citet{kim1998stochastic} sample the conditional posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings \citep{metropolis1953equation, hastings1970monte} within Gibbs \citep{geman1984stochastic} algorithms and an implementation of the Kalman Filter \citep{kalman1960new} and smoother used to sample from the conditional posterior distribution of the latent states \citep{dejong1995}.\footnote{In this research the exact software to apply the simulation smoother is unavailable. So a more recent simulation smoother is used from the statsmodels Python package by \citet{seabold2010statsmodels}. The simulation smoother software within the statsmodels package is based on \citet{durbin2012time}. Koopman who co-authored \citet{durbin2012time} also co-authored the software used by \citet{kim1998stochastic} which can be found at \citet{koopman1996ssfpack}.} Note that for the simulation smoother to produce an appropriate posterior sample draw from the latent state vector, the state and measurement equations are required to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring, adding an offset, and taking the log of $y_t$, resulting in
+        \citet{kim1998stochastic} sample the conditional posteriors of the stochastic volatility model using a mix of conjugate posterior distributions, Metropolis Hastings \citep{metropolis1953equation, hastings1970monte} within Gibbs \citep{geman1984stochastic} algorithms and an implementation of the Kalman Filter \citep{kalman1960new} and smoother used to sample from the conditional posterior distribution of the latent states \citep{dejong1995}.\footnote{In this research the exact software to apply the simulation smoother is unavailable. So a more recent simulation smoother is used from the statsmodels Python package by \citet{seabold2010statsmodels}. The simulation smoother software within the statsmodels package is based on \citet{durbin2012time}. Koopman who co-authored \citet{durbin2012time} also co-authored the software used by \citet{kim1998stochastic} which can be found at \citet{koopman1996ssfpack}.} Note that for the simulation smoother to produce an appropriate posterior sample draw from the latent state vector, the state and measurement equations are required to be linear and conditionally Gaussian. Since the relationship between $y_t$ and $h_t$ in the measurement equation is not linear, a transformation is applied by squaring, adding an off-set, and taking the log of $y_t$, resulting in
         \begin{align}
-        y_t^{*} &= log(y_t^2 + c) = h_t + z_t, \label{eqn:transform}
+        y_t^{*} &= \log(y_t^2 + c) = h_t + z_t, \label{eqn:transform}
         \end{align}
-        where $z_t = log(\epsilon_t^2)$ has a distribution that is like that of the logarithm of a chi-squared random variable. It is known that the error $z_t$ has mean -1.2704 and variance 4.93. The offset $c$ is set to $c=0.001$ to ensure the model is robust to small $y_t^2$ values \citep{fuller1996introduction}. By transforming the entire measurement equation, as in (\ref{eqn:transform}), the relationship between $y_t^{*}$ and $h_t$ is now linear; however, the error is not Gaussian. Since it is not simple to sample from this parameterisation of the model, KSC use a mixture of seven Gaussian distributions to approximate the distribution of $z_t$, with the mixture selected to match the first 4 moments of the log chi squared distribution. The mixture distribution is defined by
+        where $z_t = \log(\epsilon_t^2)$ has a distribution that is like that of the logarithm of a chi-squared random variable. It is known that the error $z_t$ has mean -1.2704 and variance 4.93. The off-set $c$ is set to $c=0.001$ to ensure the model is robust to small $y_t^2$ values \citep{fuller1996introduction}. By transforming the entire measurement equation, as in (\ref{eqn:transform}), the relationship between $y_t^{*}$ and $h_t$ is now linear; however, the error is not Gaussian. Since it is not simple to sample from this parameterisation of the model, KSC use a mixture of seven Gaussian distributions to approximate the distribution of $z_t$, with the mixture selected to match the first 4 moments of the log chi-squared distribution. The mixture distribution is defined by
         \begin{align}
         f(z_t) = \sum_{i=1}^{I} q_if_N(z_t|m_i-1.2704, \nu_i^2),
         \end{align}
@@ -300,7 +300,7 @@ This section defines and compares the two MCMC algorithms used to estimate the S
         The reparameterisation for Hamiltonian Monte Carlo changes how the latent states are sampled. Specifically, the states are first sampled from a standard normal distribution and are transformed to be samples from the state equation. There are two steps to this:
         \begin{enumerate}
             
-        \item Sample from a standard normal distribution and multiply by the variance of the log volatility. The state vector is sampled with mean centered on zero and variance equal to $\sigma_{\eta}^2$ as given by
+        \item Sample from a standard normal distribution and multiply by the variance of the states. The state vector is sampled with mean centered on zero and variance equal to $\sigma_{\eta}^2$ as given by
         \begin{align}
         h_{std} \sim&\space \,\mathrm{N}(0,1) \\
         h =& \space \, h_{std} \times \sigma_{\eta}.
@@ -314,9 +314,9 @@ This section defines and compares the two MCMC algorithms used to estimate the S
         This returns the log variance as desired.
         
         \subsubsection{Non-centered Gaussian mixture off-set model}
-        The re-parameterised model for the Gaussian mixture off-set is expressed differently due to the Kalman Filter. Re-parameterised HMC samples from the joint posterior directly with state vectors centered at zero and transformed to return the correct log volatility estimates. Applying the Kalman Filter requires the state equation to be a function of the state variable with the average log volatility parameter $\mu$ entering the measurement equation.
+        The reparameterised model for the Gaussian mixture off-set is expressed differently due to the Kalman Filter. Reparameterised HMC samples from the joint posterior directly with state vectors centered at zero and transformed to return the correct log volatility estimates. Applying the Kalman Filter requires the state equation to be a function of the state variable with the average log volatility parameter $\mu$ entering the measurement equation.
 
-        The following parameterisation is described as non centered in location. This follows the methodology outlined in \citet{strickland2008parameterisation}. Starting with the log chi squared model
+        The following parameterisation is described as non centered in location. This follows the methodology outlined in \citet{strickland2008parameterisation}. Starting with the log chi-squared model
         \begin{align}
         y^{\ast}_t =& \space \, h_t + z_t \\
         h_{t+1} =& \space \, \mu +\phi(h_t - \mu) + \sigma_{\eta} \eta_t.
@@ -338,7 +338,7 @@ This section defines and compares the two MCMC algorithms used to estimate the S
     
     \subsubsection{Prior predictive check}
         % Different parameteristions express the same mathematical models in ways that make it easier or harder for a given algorithm to sample. 
-        A prior predictive simulation of the second state parameter is performed for both a centered and re-parameterised model using the approach described in Section 4.4.1. This is to demonstrate that different parameterisations express the same underlying mathematical model. This is similar to the first two steps of SBC, except instead of generating a data set, it generates the state variable implied by the prior draw. Let $\boldsymbol{\theta}$ be a vector of static parameters. Simulate a draw from the joint prior
+        A prior predictive simulation of the second state parameter is performed for both a centered and reparameterised model using the approach described in Section 4.4.1. This is to demonstrate that different parameterisations express the same underlying mathematical model. This is similar to the first two steps of SBC, except instead of generating a data set, it generates the state variable implied by the prior draw. Let $\boldsymbol{\theta}$ be a vector of static parameters. Simulate a draw from the joint prior
         \begin{align}
         \boldsymbol{\theta}^{sim} \sim \pi(\boldsymbol{\theta}).
         \end{align}
@@ -354,7 +354,7 @@ This section defines and compares the two MCMC algorithms used to estimate the S
         \begin{figure}[h]
             \centering
             \includegraphics[scale=0.1]{figures/ppc_h2.png}
-            \caption{\textbf{Prior predictive simulation of second state variable from both centered and re-parameterised stochastic volatility model}. Both models are mathematically equivalent and generate samples from the same data generating process.}
+            \caption{\textbf{Prior predictive simulation of second state variable from both centered and reparameterised stochastic volatility model}. Both models are mathematically equivalent and generate samples from the same data generating process.}
             \label{fig:priorpred}
         \end{figure}
         
@@ -367,7 +367,7 @@ This section defines and compares the two MCMC algorithms used to estimate the S
 \section{Results}
     SBC is conducted for each MCMC sampling method and corresponding parameterisation as outlined in Table \ref{tab:params}. The SV model in Section 2.1 is used for all simulations including the same priors. For a given MCMC and parameterisation pair, 5000 SBC iterations\footnote{Results for 1000 SBC iterations returned noisy estimates and can be found in Appendix D.} are run using simulated data sets of size $T=1000$. 5000 rank statistics are obtained per univariate parameter from this process. 
     
-    Rank statistic histograms are constructed with 20 bins for the static parameters and the 1st, 500th and 1000th latent state variables. The black horizontal line represents the expected counts in each bin if the algorithm is returning calibrated estimates and can be viewed as the uniform distribution. This is calculated to be 250 which is the ratio of  5000 SBC iterations and 20 bins. The Chi-squared statistic is used to summarise the deviations from uniformity for all state variables since it is unrealistic to visually inspect all the histograms. The SBC algorithm is summarised in Algorithm \ref{alg:sbc}.
+    Rank statistic histograms are constructed with 20 bins for the static parameters and the 1st, 500th and 1000th latent state variables. The black horizontal line represents the expected counts in each bin if the algorithm is returning calibrated estimates and can be viewed as the uniform distribution. This is calculated to be 250 which is the ratio of  5000 SBC iterations and 20 bins. The chi-squared statistic is used to summarise the deviations from uniformity for all state variables since it is unrealistic to visually inspect all the histograms. The SBC algorithm is summarised in Algorithm \ref{alg:sbc}.
 
     Section 5.1 and Section 5.2 interpret the SBC results for HMC and KSC's MCMC method respectively. Section 5.3 describes the importance weights used to correct for approximation error when applying the off-set mixture model and applying these weights to rank statistics. Section 5.4 presents a summary of rank statistic distributions for all latent state variables using chi-squared statistics. 
     
@@ -386,7 +386,7 @@ This section defines and compares the two MCMC algorithms used to estimate the S
     \subsection{Hamiltonian Monte Carlo (No-U-Turn Sampler)}
     SBC results for the centered model using HMC are displayed in Figure \ref{fig:cphmc5k}. The centered parameterisation displays a lack of uniformity in rank statistics for $\sigma^2$ and $\phi$. The $\sigma^2$ parameter displays a U-shaped histogram with inflated frequencies on both ends while $\phi$ exhibits a U-shape with relatively smaller inflated frequencies. This indicates the MCMC algorithm is not returning calibrated estimates for these parameters. The average posterior samples of $\sigma^2$ and $\phi$ over the SBC iterations are \textit{under-dispersed}, or \textit{overconfident}, relative to the prior distribution. This implies the posterior geometry of these parameters may be difficult to sample for the HMC algorithm.
 
-    Figure \ref{fig:ncphmc5k} show the SBC results for the reparameterised model using HMC. The re-parameterised model produces approximately uniform rank statistics across all reported parameters. The distributions of $\sigma^2$ and $\phi$ now exhibit a more uniform shape, implying greater calibration and correct posterior estimates returned on average. These results suggest that HMC struggles to sample some parameters from the centered parameterisation of the stochastic volatility model. The re-parameterised model possess stronger evidence of calibration for the parameters examined, producing more reliable and consistent inference.
+    Figure \ref{fig:ncphmc5k} show the SBC results for the reparameterised model using HMC. The reparameterised model produces approximately uniform rank statistics across all reported parameters. The distributions of $\sigma^2$ and $\phi$ now exhibit a more uniform shape, implying greater calibration and correct posterior estimates returned on average. These results suggest that HMC struggles to sample some parameters from the centered parameterisation of the stochastic volatility model. The reparameterised model possess stronger evidence of calibration for the parameters examined, producing more reliable and consistent inference.
         \begin{figure}[H]
         \centering
         \includegraphics[scale=0.09]{results/hmc_cp_5k.png}
@@ -396,11 +396,11 @@ This section defines and compares the two MCMC algorithms used to estimate the S
     \begin{figure}[H]
         \centering
         \includegraphics[scale=0.09]{results/hmc_ncp_5k.png}
-        \caption{\textbf{Distribution of rank statistics with 5000 SBC iterations for re-parameterised model using Hamiltonian Monte Carlo}. The rank statistic distributions for $\sigma^2$ and $\phi$ appear to follow a uniform distribution. This suggests that the HMC algorithm is returning the correct posterior estimates on average for the displayed parameters.}
+        \caption{\textbf{Distribution of rank statistics with 5000 SBC iterations for reparameterised model using Hamiltonian Monte Carlo}. The rank statistic distributions for $\sigma^2$ and $\phi$ appear to follow a uniform distribution. This suggests that the HMC algorithm is returning the correct posterior estimates on average for the displayed parameters.}
         \label{fig:ncphmc5k}
     \end{figure}
 
-    This computational difficulty in the centered parameterisation is reflected in the effective sample sizes. Figure \ref{fig:hmcess} and Table \ref{tab:hmcess} summarises the distribution of ESS for the static parameters after 5000 SBC iterations. The reparameterised model generates independent samples much more efficiently than the centered model, reflected in the larger ESS values across every summary statistic.  This is consistent with HMC struggling to sample overall from the posteriors of $\sigma^2$ and $\phi$ in the centered model. 
+    Computational difficulty in the centered parameterisation is reflected in the effective sample sizes. Figure \ref{fig:hmcess} and Table \ref{tab:hmcess} summarise the ESS distributions for the static parameters in both parameterisations after 5000 SBC iterations. The reparameterised model generates independent samples much more efficiently than the centered model, reflected in the larger ESS values across every summary statistic. The median ESS for $\mu$, $\phi$ and $\sigma^2$ in the centered parameterisation is much smaller as a proportion of the posterior draws. This is consistent with HMC struggling to sample from the posteriors of the static parameters overall in the centered model. 
 
     \begin{figure}[H]
         \centering
@@ -420,7 +420,7 @@ This section defines and compares the two MCMC algorithms used to estimate the S
      $\sigma^2$&  Centered& 1.17 & 2.99 & 7.04 & 8.05 & 11.3 & 90.7 \\ 
      $\sigma^2$&  Reparam&46.1 & 403. & 553. & 585. & 734. & 1486. \\ \hline
         \end{tabular}
-        \caption{\textbf{ESS for centered and re-parameterised SV model across 5000 SBC iterations for HMC}. The reparameterised model has higher ESS counts for each summary statistic relative to the centered parameterisation.}
+        \caption{\textbf{ESS for centered and reparameterised SV model across 5000 SBC iterations for HMC}. The reparameterised model has higher ESS counts for each summary statistic relative to the centered parameterisation.}
         \label{tab:hmcess}
     \end{table}
 
@@ -445,7 +445,9 @@ This section defines and compares the two MCMC algorithms used to estimate the S
         \label{fig:ncpksc5k}
     \end{figure}
 
-    The ESS estimates for this model indicate a high degree of auto-correlation and difficulty in generating independent samples from both parameterisations. The numerical results are summarised in Figure \ref{fig:kscess} and Table \ref{tab:kscess}. The estimate for $\mu$ in the re-parameterised model exhibits a long right tail (longer than the 9,999 post burn-in posterior draws suggesting the presence of negatively auto-correlated draws). There is some improvement in efficiency from the re-parameterised model with higher ESS values across most of the static parameter quantiles. Overall, the off-set mixture MCMC is inefficient at sampling the static parameters. Note that we cannot directly compare the effect of the reparameterisation on the ESS between Figure \ref{fig:kscess} and Figure \ref{fig:hmcess} due to the difference in post burn-in posterior draws.
+    The ESS estimates for this model indicate a high degree of auto-correlation and difficulty in generating independent samples from both parameterisations. The numerical results are summarised in Figure \ref{fig:kscess} and Table \ref{tab:kscess}. The estimate for $\mu$ in the reparameterised model exhibits a long right tail, with values larger than the 9,999 post burn-in posterior draws suggesting the presence of negatively auto-correlated draws. The median ESS for each static parameter relative to the number of posterior draws is very small. There is some improvement from the reparameterised model with higher ESS values across some of the static parameter quantiles, but these improvements are negligible. Overall, the off-set mixture MCMC is inefficient at sampling the static parameters. Note, Figure \ref{fig:hmcess} and Figure \ref{fig:kscess} are not directly compared due to scale difference from varying post burn-in posterior draws.
+    
+    % that we cannot directly compare the effect of the reparameterisation on the ESS between Figure \ref{fig:kscess} and Figure \ref{fig:hmcess} due to the difference in post burn-in posterior draws.
     
     % The median ESS for $\mu$, $\phi$ and $\sigma^2$ are 559, 103, 39.5 respectively for 10,000 post burn in draws. Despite having 10 times the number of draws, the number of effectively independent samples is much smaller relative to HMC, suggesting that this bespoke sampling strategy is highly inefficient. 
 
@@ -486,9 +488,9 @@ This section defines and compares the two MCMC algorithms used to estimate the S
     These weights can be applied in an additional sampling step using Metropolis Hastings or Importance Re-sampling (also known as sampling-importance re-sampling or SIR \citep{gelman2013bayesian}) to produce samples from the target posterior. However, the rank statistic can also be written as a function of the weighted expectation of the indicator random variable. This re-weighting step is applied to the calculation of the rank statistics to see if the correction improves the calibration of the MCMC sampler.\footnote{Efficiency estimates of the re-weighted posterior samples are omitted. It was unclear at the time of writing whether the ESS could be written as a function of the expectation or whether the ESS from re-sampled posterior samples using the importance weights are valid.}
 
     \subsubsection{Re-weighting rank statistics of the Gaussian off-set mixture model}
-    Let $v(\theta, h)$ be the log weights defined as the log difference between the posterior densities of the true model with log chi squared errors $log\: c(\theta, h | y^{\ast})$ and the mixture off-set model $log\:  d(\theta, h | y^{\ast})$. The is given in the following expression
+    Let $v(\theta, h)$ be the log weights defined as the log difference between the posterior densities of the true model with log chi-squared errors $\log c(\theta, h | y^{\ast})$ and the mixture off-set model $\log d(\theta, h | y^{\ast})$. The is given in the following expression
     \begin{align}
-        v(\theta, h) = log\: c(\theta, h | y^{\ast}) - log\:  d(\theta, h | y^{\ast}) = \text{const} + log\: c(y|h) - log\: d(y^{\ast} | h).
+        v(\theta, h) = \log c(\theta, h | y^{\ast}) - \log  d(\theta, h | y^{\ast}) = \text{const} + \log c(y|h) - \log d(y^{\ast} | h).
     \end{align}
 
     Taking the exponential and normalising the weights for the $b^{th}$ posterior draw (note the constants cancel out) returns
@@ -512,7 +514,7 @@ This section defines and compares the two MCMC algorithms used to estimate the S
     r = \sum_{b=1}^{B}1[f(\theta_{b}) < f(\theta^{sim})] \approx  B\times E[S(\hat{\theta})] = B\times \sum_b^B S(\hat{\theta}_b)w_b.
     \end{align}
 
-    The results from applying this re-weighting step to the rank statistics of the centered model are given on Figure \ref{fig:reweight5k}. There are no improvements in the distribution of rank statistics. The shape of the histograms is consistent with the shape of the unweighted rank statistics. Overall re-weighting the posterior samples from the approximate model does not improve the calibration results. The re-weighted rank statistics for the re-parameterised model also did not improve and can be found in Appendix E.
+    The results from applying this re-weighting step to the rank statistics of the centered model are given on Figure \ref{fig:reweight5k}. There are no improvements in the distribution of rank statistics. The shape of the histograms is consistent with the shape of the unweighted rank statistics. Overall re-weighting the posterior samples from the approximate model does not improve the calibration results. The re-weighted rank statistics for the reparameterised model also did not improve and can be found in Appendix E.
 
     \begin{figure}[H]
         \centering
@@ -522,23 +524,23 @@ This section defines and compares the two MCMC algorithms used to estimate the S
     \end{figure}
 
     \subsection{Evaluating SBC for state variables}
-    It is not practical to inspect the histograms of all parameters and states in the stochastic volatility model. Instead, the Chi-squared statistic is used to summarise the shape of the rank statistic distribution. This will be used to summarise the state variables only since the static parameters can be compared across simulations individually. 
+    It is not practical to inspect the histograms of all parameters and states in the stochastic volatility model. Instead, the chi-squared statistic is used to summarise the shape of the rank statistic distribution. This will be used to summarise the state variables only since the static parameters can be compared across simulations individually. 
 
-    The Chi-squared statistics for centered and re-parameterised HMC, centered KSC and centered importance weighted KSC are reported as histograms in Figure \ref{fig:allchisq} using results from 5000 SBC iterations. Re-parameterised KSC is omitted as its poor SBC performance skews the scale of the plot which makes it difficult to analyse results. A chi squared statistic of 0 means the rank statistics for a given parameter is exactly uniformly distributed and any value away from 0 captures deviations from uniformity. The chi squared statistics for the latent state variable ranks are expected to be some non-zero value since they are calculated from finite samples and subject to sampling variation even if the draws come from a uniform distribution. The purpose of this plot is to provide a high level summary of the latent state variable calibration for each simulation - how close their rank statistics are to being uniformly distributed and their distance relative to the other algorithms and parameterisations. 
+    The chi-squared statistics for centered and reparameterised HMC, centered KSC and centered importance weighted KSC are reported as histograms in Figure \ref{fig:allchisq} using results from 5000 SBC iterations. Reparameterised KSC is omitted as its poor SBC performance skews the scale of the plot which makes it difficult to analyse results. A chi-squared statistic of 0 means the rank statistics for a given parameter is exactly uniformly distributed and any value away from 0 captures deviations from uniformity. The chi-squared statistics for the latent state variable ranks are expected to be some non-zero value since they are calculated from finite samples and subject to sampling variation even if the draws come from a uniform distribution. The purpose of this plot is to provide a high level summary of the latent state variable calibration for each simulation - how close their rank statistics are to being uniformly distributed and their distance relative to the other algorithms and parameterisations. 
     
-    The HMC results are relatively close to zero. Both KSC and the importance weighted ranks on the other hand are far from zero suggesting larger deviations from uniformity. There is a wide gap between the HMC and KSC chi squared statistics implying the distribution of latent state ranks are much more  uniform for HMC relative to KSC. Combined with the results in the previous section, there is a strong evidence that the HMC algorithm outperforms the KSC algorithm where it comes to calibration across all parameters and latent state variables.
+    The HMC results are relatively close to zero. Both KSC and the importance weighted ranks on the other hand are far from zero suggesting larger deviations from uniformity. There is a wide gap between the HMC and KSC chi-squared statistics implying the distribution of latent state ranks are much more  uniform for HMC relative to KSC. Combined with the results in the previous section, there is a strong evidence that the HMC algorithm outperforms the KSC algorithm where it comes to calibration across all parameters and latent state variables.
 
     \begin{figure}[H]
         \centering
         \includegraphics[scale=0.1]{results/dist_chisq_all.png}
-        \caption{\textbf{Distribution of chi squared statistics for latent state variables from 5000 SBC iterations}. Values closer to 0 are more consistent with a discrete uniform distribution. Both HMC simulations are much closer to zero than KSC. This suggests that the HMC algorithm overall produces more calibrated posterior estimates for the latent state variables.}
+        \caption{\textbf{Distribution of chi-squared statistics for latent state variables from 5000 SBC iterations}. Values closer to 0 are more consistent with a discrete uniform distribution. Both HMC simulations are much closer to zero than KSC. This suggests that the HMC algorithm overall produces more calibrated posterior estimates for the latent state variables.}
         \label{fig:allchisq}
     \end{figure}
 
 \section{Discussion}
 This research applied a simulation study to evaluate the calibration and efficiency of different MCMC algorithms in the context of the stochastic volatility model. Simulation based calibration was used to determine whether these algorithms were returning the correct posterior estimates on average under different SV model parameterisations. 
 
-Hamiltonian Monte Carlo applied on the re-parameterised model performs best based on calibration and efficiency results. Centered parameterisation using HMC performed moderately well but struggled to produce calibrated posterior estimates for $\sigma^2$ and $\phi$ as well as generate independent samples for these parameters. The Gaussian off-set mixture approximation struggled to return calibrated posterior estimates and efficient samples for both parameterisations. However, the centered parameterisation results for the Gaussian mixture model may improve if we increased the length of the Markov chain. This is discussed later in the limitations section. 
+Hamiltonian Monte Carlo applied on the reparameterised model performs best based on calibration and efficiency results. Centered parameterisation using HMC performed moderately well but struggled to produce calibrated posterior estimates for $\sigma^2$ and $\phi$ as well as generate independent samples for these parameters. The Gaussian off-set mixture approximation struggled to return calibrated posterior estimates and efficient samples for both parameterisations. However, the centered parameterisation results for the Gaussian mixture model may improve if we increased the length of the Markov chain. This is discussed later in the limitations section. 
 
 These results demonstrate that the performance of a MCMC algorithm is sensitive to the parameterisation of the model in the context of calibration and efficiency. Furthermore, the parameterisation of a model is conditional on the choice of MCMC algorithm. Evaluating the effectiveness of a modelling strategy (i.e choice of model, parameterisation and sampler) on simulated data gives a lot of a priori information about how the model will perform before it is fit on real data. Performing SBC may help isolate confounding factors in computation if any problems occur. 
 
@@ -553,14 +555,14 @@ It is worth noting that there are many ways of comparing MCMC approaches. Other 
 \subsection{Limitations}
 A limitation to applying SBC in all modelling contexts is that it is computationally intensive. SBC requires fitting multiple models to get reliable estimates. In some cases, fitting just one model can take a long time, let alone multiple. Producing results for this research within a reasonable time-frame required use of a high performance cluster. Computing infrastructure may limit the opportunity for SBC to be performed. The choice of SBC iterations for this research was arbitrary and a more principled approach to picking the number of SBC iterations could be explored in other research.
 
-Diagnostic tools for evaluating SBC results and models with many parameters is an area for improvement. As discussed, inspecting many histograms for highly parameterised models is unrealistic. Other summary statistics and visualisations can be applied for a high level comparison, such as the Chi-squared statistics applied in this research or formal hypothesis tests of uniformity such as the Chi-squared test. Furthermore, it is not always straightforward to understand why any one parameter may produce poor calibration results, for example, an arbitrary latent state variable. SBC may tell us some information about the miscalibration based on the histogram shape (e.g. average posteriors underestimating or overestimating the prior distribution, underdispersed or overdispersed average posteriors relative to the prior distribution), but understanding why this occurs may not be immediately clear. Although, diagnosing sampling problems with complicated posterior geometries speaks more generally to the difficulty of understanding complex models in the first place as opposed to a limitation of SBC.
+Diagnostic tools for evaluating SBC results and models with many parameters is an area for improvement. As discussed, inspecting many histograms for highly parameterised models is unrealistic. Other summary statistics and visualisations can be applied for a high level comparison, such as the chi-squared statistics applied in this research or formal hypothesis tests of uniformity such as the chi-squared test. Furthermore, it is not always straightforward to understand why any one parameter may produce poor calibration results, for example, an arbitrary latent state variable. SBC may tell us some information about the miscalibration based on the histogram shape (e.g. average posteriors underestimating or overestimating the prior distribution, underdispersed or overdispersed average posteriors relative to the prior distribution), but understanding why this occurs may not be immediately clear. Although, diagnosing sampling problems with complicated posterior geometries speaks more generally to the difficulty of understanding complex models in the first place as opposed to a limitation of SBC.
 
-Lastly, it is unclear what constitutes a fair comparison between algorithms when comparing SBC results. In particular, the number of post burn-in or warm-up samples differed between algorithms (999 post burn-in for HMC, 9999 for the KSC algorithm). An argument could be made that the poor results for the KSC algorithm may be due to the chain not converging onto the target distribution. Indeed, the authors of this approach extended their Markov chain to 750,000 posterior draws (discarding the first 10,000 draws as burn-in). A fairer comparison may be to have roughly similar number of ESS for most of the estimated parameters, although this is difficult to get right with a large number of parameters to estimate. Given how well Hamiltonian Monte Carlo performed with the re-parameterised model, any improvement to the Gaussian off-set mixture model by increasing the length of the Markov chain would make calibration just as good, but not better due to the inefficiency of the sampler. 
+Lastly, it is unclear what constitutes a fair comparison between algorithms when comparing SBC results. In particular, the number of post burn-in or warm-up samples differed between algorithms (999 post burn-in for HMC, 9999 for the KSC algorithm). An argument could be made that the poor results for the KSC algorithm may be due to the chain not converging onto the target distribution. Indeed, the authors of this approach extended their Markov chain to 750,000 posterior draws (discarding the first 10,000 draws as burn-in). A fairer comparison may be to have roughly similar number of ESS for most of the estimated parameters, although this is difficult to get right with a large number of parameters to estimate. Given how well Hamiltonian Monte Carlo performed with the reparameterised model, any improvement to the Gaussian off-set mixture model by increasing the length of the Markov chain would make calibration just as good, but not better due to the inefficiency of the sampler. 
 
 \subsection{Conclusion}
 This research evaluated and compared different MCMC algorithms for fitting stochastic volatility models. Principled ways of checking that our algorithms are returning correct posterior estimates are important, especially as our models and algorithms become more complicated. SBC provides a general simulation design to check whether a modelling strategy is producing calibrated results for generative models.
 
-In the context of stochastic volatility, applying Hamiltonian Monte Carlo on a re-parameterised stochastic volatility model provided the most calibrated and efficient estimates when compared with KSC's algorithm applied to the approximate off-set mixture model. This also outperformed the KSC model using importance sampling weights to correct for approximation error as well as the model with non-centered parameterisation. Other parameterisations of the stochastic volatility model can be considered to see if it improves sampling performance based on these diagnostics. 
+In the context of stochastic volatility, applying Hamiltonian Monte Carlo on a reparameterised stochastic volatility model provided the most calibrated and efficient estimates when compared with KSC's algorithm applied to the approximate off-set mixture model. This also outperformed the KSC model using importance sampling weights to correct for approximation error as well as the model with non-centered parameterisation. Other parameterisations of the stochastic volatility model can be considered to see if it improves sampling performance based on these diagnostics. 
 
 This study only considered a handful of potential algorithms, sampling strategies and parameterisations for stochastic volatility. Future research could use the same SBC design to compare and evaluate more complicated volatility models and MCMC algorithms. Overall, SBC is a valuable tool in model development and is a key part of a statistical workflow. 
  
@@ -638,7 +640,7 @@ Metropolis Hastings accept/reject procedure:
 
 1) Generate proposal $\phi^\ast$ from $N(\hat{\phi}, V_{\phi})$ where $\hat{\phi} = \frac{\sum_{t=1}^{n-1} (h_{t+1} - \mu)(h_t - \mu)}{\sum_{t=1}^{n-1} (h_t - \mu)^2}$ and $V_{\phi} = \sigma^2_{\eta} \{\sum_{t=1}^{n-1} (h_t - \mu)^2\}^{-1}$
 
-2) Accept proposal as $\phi^{(i)}$ with probability $e^{\{g(\phi^\ast) - g(\phi^{(i-1)}\}}$ such that $g(\phi) = log (\pi (\phi)) - \frac {(h_t - \mu)^2 (1-\phi^2)}{2 \sigma_{\eta}^2} + \frac{1}{2} log (1-\phi^2)$
+2) Accept proposal as $\phi^{(i)}$ with probability $e^{\{g(\phi^\ast) - g(\phi^{(i-1)}\}}$ such that $g(\phi) = \log (\pi (\phi)) - \frac {(h_t - \mu)^2 (1-\phi^2)}{2 \sigma_{\eta}^2} + \frac{1}{2} \log (1-\phi^2)$
 
 
         \begin{algorithm}[H]
@@ -658,72 +660,56 @@ Metropolis Hastings accept/reject procedure:
 \newpage
 
 \section{Appendix C: Hamiltonian Monte Carlo algorithm description}
-Let $\theta$ be a target parameter and $\alpha$ be the auxiliary momentum variable. The Hamiltonian is defined as:
+Let $\theta$ be a target parameter and $\alpha$ be the auxiliary momentum variable. The Hamiltonian is defined as
+\begin{align}
+H(\theta, \alpha) \equiv - \log \pi(\theta, \alpha).
+\end{align}
 
-$$
-\begin{aligned}
-H(\theta, \alpha) \equiv - log \: \pi(\theta, \alpha)
-\end{aligned}
-$$
+This can be broken down into kinetic energy $K(\theta, \alpha)$, the density over the auxiliary momentum, and potential energy $V(\theta)$, the density of the target posterior distribution
+\begin{align}
+H(\theta, \alpha) &= - \log \pi(\alpha | \theta) - \log \pi(\theta) \\ 
+&\equiv  K(\theta, \alpha) + V(\theta).
+\end{align}
 
-This can be broken down into kinetic energy $K(\theta, \alpha)$, the density over the auxiliary momentum, and potential energy $V(\theta)$, the density of the target posterior distribution.
-
-$$
-\begin{aligned}
-H(\theta, \alpha) &= - log \: \pi(\alpha | \theta) - log \: \pi(\theta) \\ 
-&\equiv  K(\theta, \alpha) + V(\theta)
-\end{aligned}
-$$
-
- Starting with an initial draw of $\theta$ (user defined or randomly generated), the HMC iteration or proposal is determined by 3 steps.
+Starting with an initial draw of $\theta$ (user defined or randomly generated), the HMC iteration or proposal is determined by 3 steps.
 
 \textbf{1) Randomly sample a momentum value}
 
-$$
-\begin{aligned}
-\alpha\sim Multinormal(0, M)
-\end{aligned}
-$$
+\begin{align}
+\alpha\sim \mathrm{Multinormal}(0, M),
+\end{align}
 
-Where M is some diagonal mass matrix (assuming independence between momentum variables).
+where M is some diagonal mass matrix (assuming independence between momentum variables).
 
-\textbf{2) Solve the set of Hamiltonian (differential) equations which generates a proposal} $(\theta^{\ast}, \alpha^{\ast})$
-
-$$
-\begin{aligned}
+\textbf{2) Solve the set of Hamiltonian (differential) equations which generates a proposal} $(\theta^{\ast}, \alpha^{\ast})$ given by
+\begin{align}
 \frac{\partial \theta}{\partial t} &= \frac{\partial H}{\partial \alpha} = \frac{\partial K}{\partial \alpha} \\
-\frac{\partial \alpha}{\partial t} &= \frac{\partial H}{\partial \theta} = - \frac{\partial K}{\partial \theta} - \frac{\partial V}        {\partial \theta}
-\end{aligned}
-$$
+\frac{\partial \alpha}{\partial t} &= \frac{\partial H}{\partial \theta} = - \frac{\partial K}{\partial \theta} - \frac{\partial V}        {\partial \theta},
+\end{align}
 
-Where $\frac{\partial V}{\partial \theta}$ is the gradient of the target posterior density. The solution to these differential equations is approximated using a Leapfrog integrator which gives a discrete approximate solution. The parameters which are tuned in this process are the number of steps $G$ and the size of the steps $\epsilon$. The Leapfrog algorithm performs a half step of $\alpha$ and then a full step of the parameter $\theta$, and another half step of the momentum variable $\alpha$ and repeats this $G$ times. The final step is the proposal $(\theta^{\ast}, \alpha^{\ast})$.
-
-$$
-\begin{aligned}
+where $\frac{\partial V}{\partial \theta}$ is the gradient of the target posterior density. The solution to these differential equations is approximated using a Leapfrog integrator which gives a discrete approximate solution. The parameters which are tuned in this process are the number of steps $G$ and the size of the steps $\epsilon$. The Leapfrog algorithm performs a half step of $\alpha$ and then a full step of the parameter $\theta$, and another half step of the momentum variable $\alpha$ and repeats this $G$ times where
+\begin{align}
 \alpha &\leftarrow \alpha - \frac{\epsilon}{2} \frac{\partial V}{\partial \theta} \\
 \theta &\leftarrow \theta + \epsilon M^{-1} \alpha \\
-\alpha &\leftarrow \alpha - \frac{\epsilon}{2} \frac{\partial V}{\partial \theta}
-\end{aligned}
-$$
+\alpha &\leftarrow \alpha - \frac{\epsilon}{2} \frac{\partial V}{\partial \theta}.
+\end{align}
+
+The final step is the proposal $(\theta^{\ast}, \alpha^{\ast})$.
 
 \textbf{3) Metropolis Hastings Accept/Reject}
 
-Let $(\theta^{n-1}, \alpha^{n-1})$ be the values before the Leapfrog integrator.
+Let $(\theta^{n-1}, \alpha^{n-1})$ be the values before the Leapfrog integrator, then
+\begin{align}
+a = \frac{\pi(\theta^{\ast} | y) \pi(\alpha^{\ast})}{\pi(\theta^{n-1} | y) \pi(\alpha^{n-1})},
+\end{align}
 
-$$
-\begin{aligned}
-a = \frac{\pi(\theta^{\ast} | y) \pi(\alpha^{\ast})}{\pi(\theta^{n-1} | y) \pi(\alpha^{n-1})}
-\end{aligned}
-$$
-
-With sampled value
-
-$$
+with sampled value
+\begin{align}
 \theta^n = \begin{cases}
     \theta^{\ast},& \text{with probability } min(a,1)\\
-    \theta^{n-1}, & \text{otherwise}
-\end{cases}
-$$
+    \theta^{n-1}, & \text{otherwise}.
+    \end{cases}
+\end{align}
 
 \section{Appendix D: 1000 SBC iteration results}
 
@@ -755,7 +741,7 @@ $$
         \label{fig:ncpksc1k}
     \end{figure}
     
-\section{Appendix E: Importance weighted rank statistics for re-parameterised model}
+\section{Appendix E: Importance weighted rank statistics for reparameterised model}
 
 \begin{figure}[H]
         \centering
@@ -767,14 +753,14 @@ $$
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.09]{results/weighted_ksc_ncp_1k.png}
-    \caption{\textbf{1000 SBC iterations for re-weighted rank statistics from the re-parameterised Gaussian mixture approximation model}. The shape of the histogram is consistent with the unweighted rank statistics.}
+    \caption{\textbf{1000 SBC iterations for re-weighted rank statistics from the reparameterised Gaussian mixture approximation model}. The shape of the histogram is consistent with the unweighted rank statistics.}
     \label{fig:ncpreweight1k}
 \end{figure}
 
 \begin{figure}[H]
     \centering
     \includegraphics[scale=0.09]{results/weighted_ksc_ncp_5k.png}
-    \caption{\textbf{5000 SBC iterations for re-weighted rank statistics from the re-parameterised Gaussian mixture approximation model.}}
+    \caption{\textbf{5000 SBC iterations for re-weighted rank statistics from the reparameterised Gaussian mixture approximation model.}}
     \label{fig:ncpreweight5k}
 \end{figure}
 
