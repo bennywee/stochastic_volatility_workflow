@@ -64,10 +64,11 @@ hmc_ncp_fivek_bin_long <- static_rank_bins(data = hmc_ncp_fivek_bins,
                                           type = "NonCentered")
 
 # hmc_5k = rbind(hmc_cp_fivek_bin_long, hmc_ncp_fivek_bin_long)
-rank_hist(hmc_cp_fivek_bin_long) # HMC NCP 1k
+rank_hist(hmc_cp_fivek_bin_long)  # HMC NCP 1k
 ggsave("manuscript/results/hmc_cp_5k.png", bg = "white", width = 14, height = 9.42)
 
-rank_hist(hmc_ncp_fivek_bin_long) + ylim(0, 600) # HMC NCP 5k
+rank_hist(hmc_ncp_fivek_bin_long) + 
+    ylim(0, 600) # HMC NCP 5k
 ggsave("manuscript/results/hmc_ncp_5k.png", bg = "white", width = 14, height = 9.42)
 
 # KSC 1k
@@ -95,7 +96,7 @@ ksc_ncp_onek_bins_long <- static_rank_bins(data = ksc_ncp_onek_bins,
                                          variables = parameters, 
                                          type = "Centered")
 
-rank_hist(ksc_cp_onek_bins_long) # KSC CP 1k
+rank_hist(ksc_cp_onek_bins_long)  # KSC CP 1k
 ggsave("manuscript/results/ksc_cp_1k.png", bg = "white", width = 14, height = 9.42)
 
 rank_hist(ksc_ncp_onek_bins_long) # KSC NCP 1k
@@ -125,10 +126,10 @@ ksc_ncp_fivek_bins_long <- static_rank_bins(data = ksc_ncp_fivek_bins,
                                          variables = parameters, 
                                          type = "Centered")
 
-rank_hist(ksc_cp_fivek_bins_long) # KSC CP 5k
+rank_hist(ksc_cp_fivek_bins_long)  # KSC CP 5k
 ggsave("manuscript/results/ksc_cp_5k.png", bg = "white", width = 14, height = 9.42)
 
-rank_hist(ksc_ncp_fivek_bins_long) # KSC NCP 5k
+rank_hist(ksc_ncp_fivek_bins_long)  # KSC NCP 5k
 ggsave("manuscript/results/ksc_ncp_5k.png", bg = "white", width = 14, height = 9.42)
 
 # REWEIGHTED KSC 1k

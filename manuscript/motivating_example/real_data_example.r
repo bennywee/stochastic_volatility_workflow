@@ -24,15 +24,15 @@ means <- df %>% group_by(model, name) %>% summarise(avg = mean(value))
 medians <- df %>% group_by(model, name) %>% summarise(med = median(value))
 
 ggplot(df, aes(x = value)) +
-    geom_histogram(position="identity", aes(fill = model), alpha =0.3) +
+    geom_histogram(position="identity", aes(y= after_stat(density), fill = model), alpha =0.3) +
     facet_wrap(~name, scale="free", labeller = label_parsed) +
     # geom_vline(data =means, aes(xintercept=avg, colour=model), size = 1.2) +
-    theme_minimal(base_size = 20) +
+    theme_bw(base_size = 20) +
     scale_fill_discrete(labels = c("KSC", "HMC")) +
-    labs(title = "Posterior distribution - S&P 500",
+    labs(title = "",
          fill = "MCMC\nSamplers",
          x = "Parameter value", 
-         y= "Count") + 
+         y= "Density") + 
        theme(strip.text.x = element_text(size = 22))
 
 ggsave("manuscript/motivating_example/real_data_ex.png", bg = "white", width = 14, height = 9.42)
@@ -41,7 +41,7 @@ ggsave("manuscript/motivating_example/real_data_ex.png", bg = "white", width = 1
 
 df %>% group_by(model, name) %>% 
   summarise(as_tibble(rbind(summary(value)))) %>% 
-  ungroup() %>% arrange(model, name)
+  ungroup() %>% arrange(name)
 
 ggplot(df, aes(x = value)) +
     geom_histogram(aes(fill = model), alpha =0.4) +

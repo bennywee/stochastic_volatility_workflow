@@ -1,3 +1,5 @@
+library(ggplot2)
+
 gen_ncp_sv_dataset <- function(iter, seed_list, T) {
     set.seed(seed_list[iter])
 
@@ -53,9 +55,12 @@ ncp <- as.data.frame(do.call("rbind", ncp_list))
 cp <- as.data.frame(do.call("rbind", cp_list))
 
 
-ggplot(ncp) +
+hist <- ggplot(ncp) +
     geom_histogram(aes(V1), fill = 'blue', alpha = 0.2) +
     geom_histogram(data = cp, aes(V1), fill = 'red', alpha = 0.2) +
     theme_minimal() +
     labs(title = "Prior simulations of CP (red) and NCP (blue) h[2] parameters",
         x = "h[2]")
+
+ggsave(paste(here::here(), "/analysis/prior_predictive_checks/ppc_h2.png", sep = ""), hist, bg = "white", width = 11)
+

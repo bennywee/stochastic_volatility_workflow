@@ -50,7 +50,7 @@ class TVLLDT(sm.tsa.statespace.MLEModel):
         if parameterisation == "centered":
             self['obs_intercept', 0] = ksc_params[indicators, 1] - 1.27036
         elif parameterisation == "noncentered":
-            self['obs_intercept', 0] = ksc_params[indicators, 1] - 1.27036 + params[0] * (1 - params[1])
+            self['obs_intercept', 0] = ksc_params[indicators, 1] - 1.27036 + params[0]
         else:
             raise ValueError("Incorrect parameterisation")
 
@@ -62,7 +62,7 @@ class TVLLDT(sm.tsa.statespace.MLEModel):
         if parameterisation == "centered":
             self['state_intercept', 0, 0] = params[0] * (1 - params[1])
         elif parameterisation == "noncentered":
-            self['state_intercept', 0, 0] = 0
+            self['state_intercept', 0, 0] = params[0] * (-params[1])
         else:
             raise ValueError("Incorrect parameterisation")
         

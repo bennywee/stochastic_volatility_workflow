@@ -196,3 +196,54 @@ clean_variable_names <- function(dataframe){
 
     return(result)
 }
+
+
+rank_bins_f <- function(path, rank_type, posterior_samples, n_bins){
+    rds_list <- list.files(path = paste(path, "output", sep = "/"), pattern = "*.RDS")
+    rds_path <- paste("output", rds_list, sep = "/")
+
+    n_iterations <- length(rds_path)
+    posterior_samples <- posterior_samples # Posterior samples. m+1 possible ranks. So want (m+1)/J = expected samples for uniform dist.
+    n_bins <- n_bins # Bins
+    expected_count <- n_iterations / n_bins # Chi sqd stat
+
+    results <- lapply(rds_path, get_ranks, model_path = path, rank_type = rank_type)
+
+    if (rank_type == "agg_ranks"){
+        df <- as.data.frame(do.call("rbind", results))
+        rank_bins <- as.data.frame(lapply(df, binning, posterior_draws = posterior_samples, bins = n_bins))
+    } else if(rank_type == "weighted_ranks"){
+        df <- as.data.frame(do.call("rbind", results)) * (posterior_samples+1)
+        rank_bins <- as.data.frame(lapply(df, binning, posterior_draws = posterior_samples+1, bins = n_bins))
+    } else {
+        print("error")
+    }
+
+    names(df) <- clean_variable_names(df)
+    names(rank_bins) <- clean_variable_names(rank_bins)
+
+    rank_bins <- rank_bins[!(names(rank_bins) %in% c("y_sim", "sigma"))]
+
+    return(rank_bins)
+}
+
+static_rank_bins <- function(data, variables, type){
+    result <- data %>%
+        select(all_of(variables)) %>%
+        tidyr::pivot_longer(everything(), names_to = "variable", values_to = "rank") %>% 
+        mutate(type = type)
+
+    return(result)
+}
+
+rank_hist <- function(dataframe){
+        ggplot(dataframe) +
+        geom_histogram(aes(rank), bins = 20, fill = "light blue", alpha = 0.7) +
+        scale_x_continuous(labels = function(x) x * (posterior_samples+1)/n_bins) +
+        facet_wrap(~factor(variable, levels = parameters), labeller = label_parsed) +
+        theme_minimal(base_size = 20) +
+        theme(strip.text.x = element_text(size = 22)) +
+        geom_hline(yintercept = expected_count, linewidth = 1, alpha = 0.6) +
+        labs(y = "Count",
+             x = "Ranks")
+}

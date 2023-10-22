@@ -29,7 +29,7 @@ dens_both <- ggplot(df, aes(x = x)) +
     annotate("text", x = 4.5, y = 0.05, label = "Prior", colour = "red", size = 8) +
     annotate("text", x = 2.5, y = 0.3, label = "Posterior", colour = "blue", size = 8)
 
-plot_grid(hist_lhs_rhs, dens_both)
+plot_grid(hist_unif, dens_both)
 
 ggsave("manuscript/methodology/underdispersed.png", bg = "white", width = 12, height = 8.42)
 
@@ -46,7 +46,7 @@ dens_lhs<- ggplot(df, aes(x = x)) +
     geom_line(aes(y = post_draws), colour = "blue") + 
     geom_line(aes(y = prior_draws), colour = 'red') +
     theme_void() +
-    annotate("text", x = 0, y = 0.15, label = "Posterior", colour = "red", size = 8) +
+    annotate("text", x = 0, y = 0.15, label = "Average\nPosterior", colour = "red", size = 8) +
     annotate("text", x = -5, y = 0.15, label = "Prior", colour = "blue", size = 8)
 
 
@@ -55,8 +55,12 @@ hist_lhs <- ggplot(hist_df, aes(x=v1)) +
     geom_histogram(fill = "red", bins=20, alpha = 0.4) +
     theme_void()
 
+plot_grid(hist_lhs, ggplot(df) + theme_void())
+ggsave("manuscript/methodology/half_lhs.png", bg = "white", width = 14, height = 8.42)
+
 plot_grid(hist_lhs, dens_lhs)
 ggsave("manuscript/methodology/lhs.png", bg = "white", width = 14, height = 8.42)
+
 
 # RHS
 x <- seq(-8,4, 0.01)
@@ -71,7 +75,7 @@ dens_rhs <- ggplot(df, aes(x = x)) +
     geom_line(aes(y = prior_draws), colour = 'red') +
     theme_void() +
     annotate("text", x = 0, y = 0.15, label = "Prior", colour = "red", size = 8) +
-    annotate("text", x = -5, y = 0.15, label = "Posterior", colour = "blue", size = 8)
+    annotate("text", x = -5, y = 0.15, label = "Average\nPosterior", colour = "blue", size = 8)
 
 hist_df = as.data.frame(list(v1 = c(rep(20,500), runif(3000, 1,19))))
 hist_rhs <- ggplot(hist_df, aes(x=v1)) +
@@ -100,7 +104,7 @@ dens_both <- ggplot(df, aes(x = x)) +
     geom_line(aes(y = prior_draws), colour = 'red') +
     theme_void() +
     annotate("text", x = 4.5, y = 0.05, label = "Prior", colour = "red", size = 8) +
-    annotate("text", x = 2.5, y = 0.3, label = "Posterior", colour = "blue", size = 8)
+    annotate("text", x = 2.5, y = 0.3, label = "Average\nPosterior", colour = "blue", size = 8)
 
 plot_grid(hist_lhs_rhs, dens_both)
 
