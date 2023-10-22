@@ -91,12 +91,9 @@ manuscript/main (1).aux
 .gitignore
 manuscript/main (1).log
 manuscript/main.toc
-.gitignore
 writeups/new_ncp/
 .luarc.json
 manuscript/main (1).fdb_latexmk
-.gitignore
-.gitignore
 *.csv
 main*
 *.js
@@ -104,3 +101,15 @@ main*
 *.parquet
 *.woff
 /.luarc.json
+manuscript/feedback/feedback.qmd
+manuscript/feedback/final_meeting.qmd
+manuscript/final_presentation/presentation_notes.qmd
+manuscript/final_presentation/presentation.qmd
+manuscript/final_presentation/prompts.qmd
+models/sv_user_guide_reparameterised_ksc_priors
+writeups/research_proposal/propsal.aux
+writeups/research_proposal/propsal.fdb_latexmk
+writeups/research_proposal/propsal.log
+writeups/research_proposal/propsal.fls
+writeups/research_proposal/propsal.synctex.gz
+.gitignore
