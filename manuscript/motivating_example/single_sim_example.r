@@ -2,7 +2,7 @@ library(tidyr)
 library(dplyr)
 library(cmdstanr)
 library(ggplot2)
-set.seed(630)
+# set.seed(630)
 set.seed(634)
 
 n_time_points <- 1000
@@ -11,10 +11,13 @@ gen_ncp_sv_dataset <- function(T){
     sim_results <- list()
     # Priors
     mu <- rnorm(1, 0, sqrt(10))
+    print(mu)
     sigma_sqd <- 1 / rgamma(1, 5/2, (0.01*5)/2)
+    print(sigma_sqd)
     sigma <- sqrt(sigma_sqd)
     p <- rbeta(1, 20, 1.5)
     phi <- 2*p - 1
+    print(phi)
 
     # Sample from standardised normal dist and multiply by sigma
     h_std <- rnorm(T, mean = 0, sd = sigma)
@@ -82,15 +85,15 @@ quantiles <- latex_variables(quantiles)
 means <- latex_variables(means)
 
 ggplot(draws, aes(x = value)) +
-  geom_histogram(aes(fill = name), alpha = 0.3) +
-  theme_minimal(base_size = 20) +
+  geom_histogram(aes(y= after_stat(density), fill = name), alpha = 0.3) +
+  theme_bw(base_size = 20) +
   geom_vline(data = means, aes(xintercept=value, color=name), size = 1.5) +
   geom_vline(data = quantiles, aes(xintercept=value), linetype="dotted", size = 1) +
     facet_wrap(~name, scale = "free", labeller = label_parsed) +
     theme(legend.position="none") +
-    labs(title = "Posterior distribution - simulated dataset",
+    labs(title = "",
          x = "Parameter value", 
-         y= "Count") + 
+         y= "Density") + 
        theme(strip.text.x = element_text(size = 22))
 
 ggsave("manuscript/motivating_example/single_sim.png", bg = "white", width = 14, height = 9.42)
