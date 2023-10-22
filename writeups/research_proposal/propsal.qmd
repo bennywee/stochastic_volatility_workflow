@@ -41,7 +41,7 @@ How do we validate the computation and implementation of our sampling strategies
 
 The original BUGs software implemented Gibbs and Metropolis Hastings MCMC algorithms for estimating this model. 
 
-In particular, the implementation of Hamiltonian Monte Carlo, a variant of the Metropolis Hastings algorithm, represents a recent advancement MCMC. 
+In particular, the availability of Hamiltonian Monte Carlo, a variant of the Metropolis Hastings algorithm, represents a recent advancement MCMC. 
 
 - The development of HMC is another advancement in estimating complicated, high dimensional models. 
 - Development of diagnostics for different types of HMC and tools for evaluating the convergence and efficiency of the MCMC sampler.  
